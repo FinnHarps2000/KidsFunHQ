@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Learning HQ</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── THEME VARIABLES ── */
+    :root {
+      --primary:   #C084FC;
+      --secondary: #F472B6;
+      --bg:        #1E1B4B;
+      --surface:   #312E81;
+      --surface2:  #3730A3;
+      --text:      #FAF5FF;
+      --subtext:   rgba(250,245,255,0.65);
+      --correct:   #4ADE80;
+      --wrong:     #F87171;
+      --border:    rgba(250,245,255,0.12);
+    }
+    body.kwasii {
+      --primary:   #34D399;
+      --secondary: #60A5FA;
+      --bg:        #0D1B2A;
+      --surface:   #1E293B;
+      --surface2:  #1E3A5F;
+      --text:      #F0FDF4;
+      --subtext:   rgba(240,253,244,0.65);
+      --border:    rgba(240,253,244,0.12);
+    }
+
+    /* ── BASE ── */
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 500px;
+      animation: slideUp 0.3s ease;
+    }
+    .screen.active { display: block; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── TYPOGRAPHY ── */
+    h1 { font-size: clamp(22px, 5vw, 28px); font-weight: 800; }
+    h2 { font-size: clamp(18px, 4vw, 22px); font-weight: 700; }
+    .subtitle { color: var(--subtext); font-size: 15px; margin-top: 4px; }
+
+    /* ── PROFILE SCREEN ── */
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-icon { font-size: 52px; display: block; margin-bottom: 8px; }
+
+    .profile-card {
+      background: var(--surface);
+      border: 3px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 20px;
+      cursor: pointer;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    }
+    .profile-card:hover, .profile-card:active {
+      border-color: var(--primary);
+      background: var(--surface2);
+      transform: translateY(-2px);
+    }
+    .profile-emoji { font-size: 52px; flex-shrink: 0; }
+    .profile-name  { font-size: 22px; font-weight: 800; }
+    .profile-desc  { font-size: 13px; color: var(--subtext); margin-top: 3px; }
+
+    /* ── SUBJECT SCREEN ── */
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--subtext);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 0 18px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    .subject-btn {
+      background: var(--surface);
+      border: 3px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      width: 100%;
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      text-align: left;
+    }
+    .subject-btn:hover, .subject-btn:active {
+      border-color: var(--primary);
+      background: var(--surface2);
+      transform: translateX(4px);
+    }
+    .subject-icon { font-size: 34px; flex-shrink: 0; }
+    .subject-desc { font-size: 12px; color: var(--subtext); font-weight: 400; margin-top: 2px; }
+
+    /* Progress stats under subject list */
+    .profile-stats {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+    .pstat { flex: 1; text-align: center; }
+    .pstat-num { font-size: 22px; font-weight: 800; color: var(--primary); }
+    .pstat-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* ── GAME SCREEN ── */
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .game-title { font-size: 13px; color: var(--subtext); font-weight: 600; letter-spacing: 0.5px; }
+    .score-badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* Progress dots */
+    .progress-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .progress-dot {
+      flex: 1;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .progress-dot.done { background: var(--primary); }
+    .progress-dot.current { background: var(--secondary); }
+
+    /* Question card */
+    .question-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 24px 20px;
+      margin-bottom: 14px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .question-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+    .question-text {
+      font-size: clamp(22px, 6vw, 34px);
+      font-weight: 800;
+      line-height: 1.25;
+      white-space: pre-wrap;
+    }
+    .question-flavor {
+      font-size: 13px;
+      color: var(--subtext);
+      margin-top: 10px;
+      font-style: italic;
+    }
+    .big-word {
+      font-size: clamp(48px, 14vw, 72px);
+      font-weight: 900;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .count-display {
+      font-size: clamp(24px, 7vw, 36px);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    /* Reading passage */
+    .reading-passage {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 18px;
+      font-size: 15px;
+      line-height: 1.75;
+      text-align: left;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      display: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .reading-passage.show { display: block; }
+
+    /* Options */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .options-grid.single-col {
+      grid-template-columns: 1fr;
+    }
+
+    .option-btn {
+      background: var(--surface);
+      border: 3px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 10px;
+      color: var(--text);
+      font-size: clamp(15px, 4vw, 19px);
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      text-align: center;
+      min-height: 60px;
+      word-break: break-word;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: var(--surface2);
+      transform: scale(1.02);
+    }
+    .option-btn:active:not(:disabled) { transform: scale(0.98); }
+    .option-btn.correct {
+      background: rgba(74,222,128,0.15);
+      border-color: var(--correct);
+      color: var(--correct);
+    }
+    .option-btn.wrong {
+      background: rgba(248,113,113,0.15);
+      border-color: var(--wrong);
+      color: var(--wrong);
+    }
+
+    /* Feedback */
+    .feedback {
+      display: none;
+      text-align: center;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 12px;
+      animation: slideUp 0.2s ease;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct { background: rgba(74,222,128,0.12); color: var(--correct); }
+    .feedback.wrong   { background: rgba(248,113,113,0.12); color: var(--wrong); }
+
+    /* Next button */
+    #btn-next {
+      display: none;
+      width: 100%;
+      margin-top: 12px;
+    }
+    #btn-next.show { display: block; }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 14px;
+      padding: 16px 24px;
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .btn-primary:hover  { transform: scale(1.02); }
+    .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 24px;
+      color: var(--subtext);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── COMPLETE SCREEN ── */
+    .complete-card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 36px 24px 28px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .complete-icon { font-size: 60px; display: block; margin-bottom: 8px; }
+    .complete-title { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+    .complete-sub { color: var(--subtext); font-size: 15px; margin-bottom: 20px; }
+    .score-big {
+      font-size: clamp(60px, 18vw, 90px);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .score-label { color: var(--subtext); font-size: 14px; margin-bottom: 24px; }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 24px;
+    }
+    .stat { text-align: center; }
+    .stat-num   { font-size: 28px; font-weight: 800; color: var(--primary); }
+    .stat-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* ── FULLSCREEN GAME OVERLAY ── */
+    #screen-iframe {
+      position: fixed;
+      inset: 0;
+      max-width: none;
+      padding: 0;
+      flex-direction: column;
+      z-index: 200;
+      background: #fff;
+    }
+    #screen-iframe.active { display: flex; }
+
+    .iframe-bar {
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      flex-shrink: 0;
+      border-bottom: 2px solid rgba(255,255,255,0.08);
+    }
+    .iframe-back {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 7px 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .iframe-back:hover { background: rgba(255,255,255,0.2); }
+    .iframe-game-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .game-frame {
+      flex: 1;
+      width: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── HUB SECTIONS ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--subtext);
+      margin: 22px 0 10px 4px;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* External game cards */
+    .ext-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .ext-card:hover { transform: translateY(-2px); }
+    .ext-card-emoji { font-size: 44px; flex-shrink: 0; }
+    .ext-card-name  { font-size: 18px; font-weight: 800; }
+    .ext-card-desc  { font-size: 12px; margin-top: 3px; font-weight: 500; }
+    .ext-card-arrow {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      opacity: 0.45;
+    }
+
+    /* Times Tables card — bright blue/yellow */
+    .times-card {
+      background: #eff6ff;
+      border: 3px solid #93c5fd;
+      color: #1e3a5f;
+      box-shadow: 0 4px 16px rgba(30,58,95,0.08);
+    }
+    .times-card:hover { border-color: #3b82f6; box-shadow: 0 6px 20px rgba(59,130,246,0.2); }
+    .times-card .ext-card-desc { color: #5a7fa8; }
+    .times-card-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #3b82f6;
+      color: #fff;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-top: 5px;
+    }
+
+    /* Milo card — dark steel/orange matching Milo's Workshop */
+    .milo-card {
+      background: #1c1c2e;
+      border: 3px solid #4a5568;
+      color: #fff8ed;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .milo-card:hover { border-color: #FF6B2B; box-shadow: 0 6px 20px rgba(255,107,43,0.25); }
+    .milo-card .ext-card-desc { color: rgba(255,248,237,0.6); }
+    .milo-card-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #FF6B2B;
+      color: #fff;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-top: 5px;
+    }
+
+    /* Wordle card — warm cream/orange matching the Wordle game */
+    .wordle-card {
+      background: #fff8ee;
+      border: 3px solid #e8d5b0;
+      color: #3a2e22;
+      box-shadow: 0 4px 16px rgba(60,40,10,0.08);
+    }
+    .wordle-card:hover { border-color: #e86a3a; box-shadow: 0 6px 20px rgba(232,106,58,0.18); }
+    .wordle-card .ext-card-desc { color: #8a7060; }
+
+    /* Maya card — warm stone/amber/teal matching Maya game */
+    .maya-card {
+      background: #fffdf8;
+      border: 3px solid #c4a882;
+      color: #2c1810;
+      box-shadow: 0 4px 16px rgba(60,40,10,0.08);
+    }
+    .maya-card:hover { border-color: #d4860a; box-shadow: 0 6px 20px rgba(212,134,10,0.18); }
+    .maya-card .ext-card-desc { color: #8a7060; }
+    .maya-card-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #1a6b5a;
+      color: #fff;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════
+       SCREEN 1: HUB
+  ══════════════════════════════════ -->
+  <div id="screen-hub" class="screen active">
+    <div class="brand">
+      <span class="brand-icon">🎓</span>
+      <h1>Learning HQ</h1>
+      <p class="subtitle">What are we doing today?</p>
+    </div>
+
+    <!-- ── Maths ── -->
+    <div class="section-label">🔢 Maths</div>
+
+    <div class="ext-card times-card" onclick="openGame('times-tables-flashcards_4.html','Times Tables Flashcards')">
+      <span class="ext-card-emoji">⭐</span>
+      <div>
+        <div class="ext-card-name">Times Tables Flashcards</div>
+        <div class="ext-card-desc">Practise your multiplication tables</div>
+        <span class="times-card-badge">Flashcards</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <!-- ── Spelling ── -->
+    <div class="section-label">🔤 Spelling</div>
+
+    <a class="ext-card wordle-card" href="Downloads/spelling_wordle%20(4).html" target="_blank">
+      <span class="ext-card-emoji">🔤</span>
+      <div>
+        <div class="ext-card-name">Spelling Wordle</div>
+        <div class="ext-card-desc">Guess the word, one letter at a time</div>
+      </div>
+      <span class="ext-card-arrow">↗</span>
+    </a>
+
+    <div class="ext-card wordle-card" onclick="openGame('magic100words (5).html','Magic 100 Words')">
+      <span class="ext-card-emoji">✨</span>
+      <div>
+        <div class="ext-card-name">Magic 100 Words</div>
+        <div class="ext-card-desc">Sight word practice — read and recognise</div>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <!-- ── Adventures ── -->
+    <div class="section-label">🕵️ Detective Maya</div>
+
+    <div class="ext-card maya-card" onclick="openGame('detective-maya-dino-eggs.html','Detective Maya: The Case of the Disappearing Dino Eggs')">
+      <span class="ext-card-emoji">🦕</span>
+      <div>
+        <div class="ext-card-name">The Disappearing Dino Eggs</div>
+        <div class="ext-card-desc">Multiplication &amp; division at the museum</div>
+        <span class="maya-card-badge">Maths Adventure</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <div class="ext-card maya-card" onclick="openGame('detective-maya-stolen-sunshine.html','Detective Maya: The Case of the Stolen Sunshine')">
+      <span class="ext-card-emoji">☀️</span>
+      <div>
+        <div class="ext-card-name">The Stolen Sunshine</div>
+        <div class="ext-card-desc">A bright mystery to crack</div>
+        <span class="maya-card-badge">Maths Adventure</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <div class="ext-card maya-card" onclick="openGame('detective-maya-runaway-robot.html','Detective Maya: The Case of the Runaway Robot')">
+      <span class="ext-card-emoji">🤖</span>
+      <div>
+        <div class="ext-card-name">The Runaway Robot</div>
+        <div class="ext-card-desc">Can Maya catch the rogue machine?</div>
+        <span class="maya-card-badge">Maths Adventure</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <div class="ext-card maya-card" onclick="openGame('detective-maya-volcano-cake.html','Detective Maya: The Case of the Vanishing Volcano Cake')">
+      <span class="ext-card-emoji">🌋</span>
+      <div>
+        <div class="ext-card-name">The Vanishing Volcano Cake</div>
+        <div class="ext-card-desc">A delicious mystery in the kitchen</div>
+        <span class="maya-card-badge">Maths Adventure</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <div class="ext-card maya-card" onclick="openGame('detective-maya-manta-ray.html','Detective Maya: The Case of the Missing Manta Ray')">
+      <span class="ext-card-emoji">🐟</span>
+      <div>
+        <div class="ext-card-name">The Missing Manta Ray</div>
+        <div class="ext-card-desc">Dive deep into an ocean mystery</div>
+        <span class="maya-card-badge">Maths Adventure</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <div class="ext-card maya-card" onclick="openGame('detective-maya-missing-medicine.html','Detective Maya: The Case of the Missing Medicine')">
+      <span class="ext-card-emoji">🏥</span>
+      <div>
+        <div class="ext-card-name">The Missing Medicine</div>
+        <div class="ext-card-desc">Vet mystery — times tables ×2 to ×6</div>
+        <span class="maya-card-badge">Maths Adventure</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <div class="ext-card maya-card" onclick="openGame('detective-maya-broken-trophy.html','Detective Maya: The Case of the Broken Trophy')">
+      <span class="ext-card-emoji">🏆</span>
+      <div>
+        <div class="ext-card-name">The Broken Trophy</div>
+        <div class="ext-card-desc">A school mystery with a smashed clue</div>
+        <span class="maya-card-badge">Maths Adventure</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <!-- ── Milo ── -->
+    <div class="section-label">🔧 Workshop</div>
+
+    <div class="ext-card milo-card" onclick="openGame('milos_workshop.html','Milo\'s Mechanic Workshop')">
+      <span class="ext-card-emoji">🔧</span>
+      <div>
+        <div class="ext-card-name">Milo's Mechanic Workshop</div>
+        <div class="ext-card-desc">Fix machines, solve puzzles</div>
+        <span class="milo-card-badge">Workshop Game</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+
+    <div class="ext-card milo-card" onclick="openGame('milos_mini_workshop.html','Milo\'s Mini Workshop')">
+      <span class="ext-card-emoji">🚀</span>
+      <div>
+        <div class="ext-card-name">Milo's Mini Workshop</div>
+        <div class="ext-card-desc">Build a rocket — counting, shapes, colours, patterns</div>
+        <span class="milo-card-badge">Workshop Game</span>
+      </div>
+      <span class="ext-card-arrow">▶</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SCREEN 2: SUBJECTS
+  ══════════════════════════════════ -->
+  <div id="screen-subjects" class="screen">
+    <button class="back-btn" onclick="goTo('hub')">← Home</button>
+    <h2 id="sub-heading"></h2>
+    <p class="subtitle" id="sub-subheading" style="margin-bottom:20px;"></p>
+    <div id="subject-list"></div>
+    <div class="profile-stats" id="profile-stats">
+      <div class="pstat">
+        <div class="pstat-num" id="pstat-sessions">0</div>
+        <div class="pstat-label">Sessions</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-num" id="pstat-correct">0</div>
+        <div class="pstat-label">Correct</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-num" id="pstat-pct">—</div>
+        <div class="pstat-label">Accuracy</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SCREEN 3: GAME
+  ══════════════════════════════════ -->
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <button class="back-btn" style="padding:0;" onclick="quitSession()">← Quit</button>
+      <span class="game-title" id="game-title">CASE #1</span>
+      <span class="score-badge" id="score-badge">0 / 10</span>
+    </div>
+
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <div class="question-card">
+      <span class="question-tag" id="question-tag">CLUE</span>
+      <div class="question-text" id="question-text"></div>
+      <div class="question-flavor" id="question-flavor"></div>
+    </div>
+
+    <div class="reading-passage" id="reading-passage"></div>
+
+    <div class="options-grid" id="options-grid"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="btn-primary" id="btn-next" onclick="nextQuestion()">Next →</button>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SCREEN 4: SESSION COMPLETE
+  ══════════════════════════════════ -->
+  <div id="screen-complete" class="screen">
+    <div class="complete-card">
+      <span class="complete-icon" id="complete-icon">🏆</span>
+      <div class="complete-title" id="complete-title">Case Closed!</div>
+      <div class="complete-sub" id="complete-sub"></div>
+      <div class="score-big" id="score-big">10</div>
+      <div class="score-label">out of 10</div>
+      <div class="divider"></div>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-num" id="stat-sessions">0</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-label">Total Correct</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-pct">0%</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="playAgain()">Play Again</button>
+      <button class="btn-outline" onclick="goTo('subjects')">Choose Subject</button>
+      <button class="btn-outline" onclick="goTo('hub')">Switch Profile</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SCREEN 5: FULLSCREEN GAME IFRAME
+  ══════════════════════════════════ -->
+  <div id="screen-iframe" class="screen">
+    <div class="iframe-bar">
+      <button class="iframe-back" onclick="closeGame()">← Back to HQ</button>
+      <span class="iframe-game-title" id="iframe-title"></span>
+    </div>
+    <iframe class="game-frame" id="game-frame" src="" allowfullscreen></iframe>
+  </div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════
+
+const INDINA_MYSTERIES = [
+  'The Mystery of the Missing Crown', 'The Case of the Stolen Cake',
+  'The Vanishing Puppy Mystery', 'The Secret of the Old Library',
+  'The Case of the Purple Footprints', 'The Puzzle of the Missing Keys',
+  'The Invisible Thief', 'Operation: Puzzling Portrait',
+  'The Clock Tower Caper', 'The Diamond Disappearance'
+];
+
+const KWASII_MISSIONS = [
+  'The Super Smoothie Maker', 'The Bubble Generator 3000',
+  'The Rainbow Engine', 'The Giggle Machine',
+  'The Cookie Rocket', 'The Cloud Builder',
+  'The Star Launcher', 'The Colour Mixer 5000',
+  'The Underwater Adventurer', 'The Jungle Explorer Bot'
+];
+
+const PROFILES = {
+  indina: {
+    id: 'indina',
+    name: 'Indina',
+    emoji: '🔍',
+    themeClass: '',
+    missions: INDINA_MYSTERIES,
+    missionWord: 'Case',
+    clueWord: 'Clue',
+    clueLabels: ['CLUE', 'EVIDENCE', 'CIPHER', 'PUZZLE', 'RIDDLE'],
+    correctLines: [
+      'Brilliant deduction, Detective! 🔍',
+      'The case is cracking open! 🕵️',
+      'You\'re on the trail! ✨',
+      'Sharp thinking, Detective! 🎯',
+      'Excellent! The mystery unfolds! 🗝️',
+      'That\'s the evidence we needed! 📋',
+    ],
+    wrongLines: [
+      'Not quite... the culprit is still at large.',
+      'Hmm, back to the drawing board.',
+      'Every great detective keeps trying!',
+    ],
+    subjects: [
+      { id: 'math',     label: 'Maths',    emoji: '🔢', desc: 'Crack number clues to solve the case' },
+      { id: 'spelling', label: 'Spelling', emoji: '📝', desc: 'Decode secret messages and ciphers' },
+      { id: 'reading',  label: 'Reading',  emoji: '📖', desc: 'Analyse witness statements' },
+    ],
+  },
+  kwasii: {
+    id: 'kwasii',
+    name: 'Kwasii',
+    emoji: '⚙️',
+    themeClass: 'kwasii',
+    missions: KWASII_MISSIONS,
+    missionWord: 'Mission',
+    clueWord: 'Part',
+    clueLabels: ['PART', 'COMPONENT', 'MODULE', 'GEAR', 'PIECE'],
+    correctLines: [
+      'Part installed! Great work! ⚙️',
+      'The machine is humming! 🔧',
+      'Clicking into place! ✅',
+      'Nice fix, Engineer Kwasii! 🛠️',
+      'Bolted on tight! 💚',
+      'The machine loves it! 🌟',
+    ],
+    wrongLines: [
+      'That part doesn\'t fit... keep trying! 🔩',
+      'Hmm, wrong piece... nearly there!',
+      'Every engineer keeps building! 🔧',
+    ],
+    subjects: [
+      { id: 'sightwords', label: 'Magic Words', emoji: '✨', desc: 'Power up the word engine' },
+      { id: 'numbers',    label: 'Numbers',     emoji: '🔢', desc: 'Count the machine parts' },
+    ],
+  },
+};
+
+// ────────────────────────────────────────
+// SPELLING WORDS (with handcrafted wrong options)
+// ────────────────────────────────────────
+const SPELLING_WORDS = [
+  { word: 'because',   hint: 'The reason something happened',          wrong: ['becaus','becuase','becasue'] },
+  { word: 'people',    hint: 'Humans — more than one person',           wrong: ['peaple','peopel','pepole'] },
+  { word: 'friend',    hint: 'Someone you love to play with',           wrong: ['freind','frend','friand'] },
+  { word: 'different', hint: 'Not the same as something else',          wrong: ['diferent','diffrent','differant'] },
+  { word: 'through',   hint: 'Going from one side to the other',        wrong: ['throught','thru','threw'] },
+  { word: 'together',  hint: 'As a group, not alone',                   wrong: ['togather','togetha','togther'] },
+  { word: 'beautiful', hint: 'Very pretty or lovely to look at',        wrong: ['beautifull','beautful','beutiful'] },
+  { word: 'important', hint: 'Something that really matters a lot',     wrong: ['importent','importint','importand'] },
+  { word: 'adventure', hint: 'An exciting journey or experience',       wrong: ['adventur','adventcher','adventture'] },
+  { word: 'calendar',  hint: 'Shows all the days and months of the year', wrong: ['calender','calander','calandar'] },
+  { word: 'science',   hint: 'Learning about the natural world',        wrong: ['sience','sciance','sceince'] },
+  { word: 'library',   hint: 'A place full of books to borrow',         wrong: ['libary','liberry','librery'] },
+  { word: 'surprise',  hint: 'Something unexpected and exciting',       wrong: ['suprise','surprize','surpris'] },
+  { word: 'favourite', hint: 'The one you like the very best',          wrong: ['favorit','favourite','favrite'] },
+  { word: 'message',   hint: 'Words sent to someone else',              wrong: ['messige','mesage','masage'] },
+  { word: 'February',  hint: 'The shortest month of the year',          wrong: ['Febuary','Feburary','Febrary'] },
+  { word: 'chocolate', hint: 'A sweet brown treat everyone loves',      wrong: ['choclate','chocolat','chocklate'] },
+  { word: 'yesterday', hint: 'The day before today',                    wrong: ['yestarday','yesturday','yesterdey'] },
+  { word: 'tomorrow',  hint: 'The day after today',                     wrong: ['tomoro','tomorow','tomrrow'] },
+  { word: 'Wednesday', hint: 'The middle day of the school week',       wrong: ['Wednsday','Wensday','Wendesday'] },
+  { word: 'question',  hint: 'Something you ask to find out more',      wrong: ['queshton','questoin','quesion'] },
+  { word: 'multiply',  hint: 'Making a number bigger by a set amount',  wrong: ['multiplie','multply','multyply'] },
+  { word: 'subtract',  hint: 'Taking one number away from another',     wrong: ['subtrack','subtrackt','subtrakt'] },
+  { word: 'mystery',   hint: 'Something puzzling to be solved',         wrong: ['mistery','mystary','mystrey'] },
+  { word: 'elephant',  hint: 'A very large grey animal with a trunk',   wrong: ['elefant','elifant','elaphant'] },
+  { word: 'whisper',   hint: 'To speak very quietly to someone',        wrong: ['wisper','whispor','wispir'] },
+  { word: 'mountain',  hint: 'A very tall hill made of rock',           wrong: ['mountian','mounten','mountan'] },
+  { word: 'station',   hint: 'A place where trains stop, or police work', wrong: ['stasion','stashun','stacion'] },
+  { word: 'clue',      hint: 'A hint that helps solve a mystery',       wrong: ['clew','cluw','clou'] },
+  { word: 'island',    hint: 'Land surrounded completely by water',     wrong: ['iland','ilsand','isalnd'] },
+];
+
+// ────────────────────────────────────────
+// READING PASSAGES
+// ────────────────────────────────────────
+const READING_PASSAGES = [
+  {
+    passage: 'Max the dog loved going to the park. Every morning, he would run around the big oak tree three times. One day, he found a shiny red ball near the fountain. He picked it up and brought it to his owner, Sarah.',
+    question: 'What did Max find near the fountain?',
+    answer:   'A shiny red ball',
+    options:  ['A stick', 'A shiny red ball', 'A bone', 'A blue hat'],
+  },
+  {
+    passage: 'Lily loved cooking with her grandmother. They made chocolate chip cookies every Sunday. First, they mixed butter and sugar together. Then they added eggs, flour, and chocolate chips. The kitchen always smelled amazing!',
+    question: 'When did Lily and her grandmother make cookies?',
+    answer:   'Every Sunday',
+    options:  ['Every Saturday', 'Every Sunday', 'Every Friday', 'Every Monday'],
+  },
+  {
+    passage: 'The rainforest is full of amazing animals. Toucans have bright colourful beaks that help them reach fruit on branches. Jaguars have spotted fur that helps them hide in the shadows. Sloths hang upside down and move very slowly.',
+    question: 'What do toucans use their colourful beaks for?',
+    answer:   'To reach fruit on branches',
+    options:  ['To sing songs', 'To build nests', 'To reach fruit on branches', 'To catch fish'],
+  },
+  {
+    passage: 'Sam was nervous about the school play. She had to remember lots of words. Every night before bed, she practised with her dad. On the big night, the lights were bright and the audience was quiet. Sam took a deep breath — and remembered every single word!',
+    question: 'Who helped Sam practise for the play?',
+    answer:   'Her dad',
+    options:  ['Her mum', 'Her teacher', 'Her dad', 'Her friend'],
+  },
+  {
+    passage: 'Australia is home to many unique animals. The kangaroo carries its baby, called a joey, in its pouch. The platypus has a bill like a duck and lays eggs. The koala sleeps up to 22 hours a day because eucalyptus leaves take a long time to digest.',
+    question: 'What is a baby kangaroo called?',
+    answer:   'A joey',
+    options:  ['A cub', 'A joey', 'A pup', 'A foal'],
+  },
+  {
+    passage: 'The ocean is divided into zones. The sunlight zone near the surface is warm and full of life — fish, dolphins, and sea turtles live here. Much deeper is the midnight zone, where it is completely dark and very cold. Strange glowing creatures live there.',
+    question: 'Which zone is warm and full of life?',
+    answer:   'The sunlight zone',
+    options:  ['The midnight zone', 'The deep zone', 'The sunlight zone', 'The cold zone'],
+  },
+  {
+    passage: 'Ben and his sister Mia built a sandcastle at the beach. They worked together for one whole hour. First they made the base, then four tall towers. Just as they finished, a big wave came and washed part of it away. They laughed and started building again.',
+    question: 'How long did Ben and Mia work on the sandcastle?',
+    answer:   'One whole hour',
+    options:  ['Ten minutes', 'One whole hour', 'All day', 'Half an hour'],
+  },
+  {
+    passage: 'A butterfly starts life as a tiny egg on a leaf. The egg hatches into a caterpillar that eats and grows. Then the caterpillar wraps itself in a cocoon called a chrysalis. Inside the chrysalis it slowly changes, and finally a beautiful butterfly emerges.',
+    question: 'What does the caterpillar wrap itself in?',
+    answer:   'A chrysalis',
+    options:  ['A web', 'A nest', 'A chrysalis', 'A shell'],
+  },
+];
+
+// ────────────────────────────────────────
+// SIGHT WORDS
+// ────────────────────────────────────────
+const SIGHT_WORDS = [
+  'the','a','and','is','it','in','I','to','was','he',
+  'she','for','on','are','at','his','they','be','this','from',
+  'you','we','my','up','go','can','me','see','no','look',
+  'big','little','come','here','said','play','like','help','make',
+  'day','cat','dog','mum','dad','yes','one','two','red','blue',
+  'sun','run','fun','got','put','sit','had','him','did','not',
+  'get','let','old','new','had','her','its','off','out','so',
+];
+
+// Fill-in-the-blank sentences for Kwasii
+const FILL_BLANKS = [
+  { text: '___ dog is big.',      answer: 'The',  options: ['The','And','Is','Up'] },
+  { text: 'I can ___ fast.',      answer: 'run',  options: ['run','big','in','the'] },
+  { text: 'She is ___ school.',   answer: 'at',   options: ['at','up','no','in'] },
+  { text: 'Look ___ me!',         answer: 'at',   options: ['at','to','is','and'] },
+  { text: '___ can play here.',   answer: 'We',   options: ['We','The','A','On'] },
+  { text: 'I ___ a dog!',         answer: 'see',  options: ['see','big','at','run'] },
+  { text: 'Come ___ with me.',    answer: 'and',  options: ['and','the','is','no'] },
+  { text: 'My ___ is big.',       answer: 'dad',  options: ['dad','the','run','at'] },
+  { text: 'I like ___ cat.',      answer: 'my',   options: ['my','a','in','and'] },
+  { text: 'The sun is ___.',      answer: 'big',  options: ['big','and','up','in'] },
+  { text: 'We ___ go home.',      answer: 'can',  options: ['can','see','at','in'] },
+  { text: 'She said ___.',        answer: 'yes',  options: ['yes','no','the','up'] },
+  { text: 'He ___ on the mat.',   answer: 'sat',  options: ['sat','big','look','can'] },
+  { text: 'I ___ the red ball.',  answer: 'got',  options: ['got','is','and','he'] },
+  { text: 'Mum ___ help me.',     answer: 'can',  options: ['can','at','the','big'] },
+];
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let currentProfileId = null;
+let currentSubjectId  = null;
+let currentMission    = '';
+let questions         = [];
+let qIndex            = 0;
+let sessionScore      = 0;
+let answered          = false;
+
+// ════════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════════
+function loadStore() {
+  const defaults = {
+    indina: { totalCorrect: 0, totalQuestions: 0, sessionsCompleted: 0 },
+    kwasii: { totalCorrect: 0, totalQuestions: 0, sessionsCompleted: 0 },
+  };
+  try {
+    return JSON.parse(localStorage.getItem('learninghq_v1') || 'null') || defaults;
+  } catch { return defaults; }
+}
+function saveStore(data) {
+  localStorage.setItem('learninghq_v1', JSON.stringify(data));
+}
+
+// ════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════
+function rand(min, max)  { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr)       { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr)    { return [...arr].sort(() => Math.random() - 0.5); }
+
+function nearbyNums(n, count, lo, hi) {
+  const offsets = shuffle([-3,-2,-1,1,2,3,-5,5,-10,10,-4,4]);
+  const set = new Set();
+  for (const off of offsets) {
+    const v = n + off;
+    if (v >= lo && v <= hi && v !== n) set.add(String(v));
+    if (set.size >= count) break;
+  }
+  return [...set];
+}
+
+function mcq(text, answer, wrongOpts, extras) {
+  const options = shuffle([String(answer), ...wrongOpts.slice(0, 3).map(String)]);
+  return { type: 'mcq', text, answer: String(answer), options, ...extras };
+}
+
+// ════════════════════════════════════════════════════════
+// QUESTION GENERATORS
+// ════════════════════════════════════════════════════════
+
+// ── INDINA MATHS ──────────────────────────────────
+function genMath() {
+  const type = pick(['add','add','sub','sub','mul','mul','div','shapes','shapes']);
+  switch (type) {
+    case 'add': {
+      const a = rand(10, 85), b = rand(10, 85);
+      return mcq(`${a} + ${b} = ?`, a+b, nearbyNums(a+b, 3, 2, 200), { tag:'ADDITION', flavor:'Find the total clue value...' });
+    }
+    case 'sub': {
+      const a = rand(20, 100), b = rand(5, a - 5);
+      return mcq(`${a} − ${b} = ?`, a-b, nearbyNums(a-b, 3, 0, 100), { tag:'SUBTRACTION', flavor:'How much is left at the scene...' });
+    }
+    case 'mul': {
+      const tables = [2,3,4,5,6,10];
+      const t = pick(tables), n = rand(2, 12);
+      return mcq(`${t} × ${n} = ?`, t*n, nearbyNums(t*n, 3, 1, 144), { tag:'MULTIPLICATION', flavor:'Multiply the evidence...' });
+    }
+    case 'div': {
+      const tables = [2,3,4,5,10];
+      const t = pick(tables), n = rand(2, 10);
+      return mcq(`${t*n} ÷ ${t} = ?`, n, nearbyNums(n, 3, 1, 20), { tag:'DIVISION', flavor:'Share the clues equally...' });
+    }
+    case 'shapes': {
+      const shapes = [
+        { name:'Triangle',  sides:3, sym:'▲' },
+        { name:'Square',    sides:4, sym:'■' },
+        { name:'Circle',    sides:0, sym:'●' },
+        { name:'Rectangle', sides:4, sym:'▬' },
+        { name:'Pentagon',  sides:5, sym:'⬠' },
+        { name:'Hexagon',   sides:6, sym:'⬡' },
+        { name:'Oval',      sides:0, sym:'⬭' },
+        { name:'Diamond',   sides:4, sym:'◆' },
+      ];
+      const s = pick(shapes);
+      const others = shuffle(shapes.filter(x => x.name !== s.name));
+      const useNameQ = Math.random() > 0.5;
+      if (useNameQ) {
+        // "What shape is this?"
+        const wrongNames = others.slice(0, 3).map(x => x.name);
+        return mcq(`What shape is this?\n${s.sym}`, s.name, wrongNames, { tag:'SHAPES', flavor:'Identify the shape clue...' });
+      } else if (s.sides > 0) {
+        // "How many sides?"
+        const wrongSides = shuffle(['3','4','5','6','8'].filter(n => n !== String(s.sides)));
+        return mcq(`How many sides does a ${s.name.toLowerCase()} have?`, s.sides, wrongSides.slice(0,3), { tag:'SHAPES', flavor:'Count the edges carefully...' });
+      } else {
+        // Fallback for circle/oval: ask the name
+        const wrongNames = others.slice(0, 3).map(x => x.name);
+        return mcq(`What shape is this?\n${s.sym}`, s.name, wrongNames, { tag:'SHAPES', flavor:'Identify the shape clue...' });
+      }
+    }
+  }
+}
+
+// ── INDINA SPELLING ───────────────────────────────
+function genSpelling() {
+  const item = pick(SPELLING_WORDS);
+  const options = shuffle([item.word, ...item.wrong.slice(0, 3)]);
+  return {
+    type: 'mcq',
+    tag: 'CIPHER',
+    text: `Which spelling is correct?\n"${item.hint}"`,
+    answer: item.word,
+    options,
+    flavor: 'Decode the message — find the correct word...',
+  };
+}
+
+// ── INDINA READING ────────────────────────────────
+function genReading() {
+  const item = pick(READING_PASSAGES);
+  return {
+    type: 'reading',
+    tag: 'EVIDENCE',
+    passage: item.passage,
+    text: item.question,
+    answer: item.answer,
+    options: shuffle(item.options),
+    flavor: 'Read the witness statement carefully...',
+  };
+}
+
+// ── KWASII SIGHT WORDS ────────────────────────────
+function genSightWords() {
+  if (Math.random() < 0.5) {
+    // Show word → tap matching word
+    const word = pick(SIGHT_WORDS);
+    const wrong = shuffle(SIGHT_WORDS.filter(w => w !== word)).slice(0, 3);
+    return {
+      type: 'bigword',
+      tag: 'WORD POWER',
+      text: word,
+      answer: word,
+      options: shuffle([word, ...wrong]),
+      flavor: 'Tap the matching word!',
+    };
+  } else {
+    // Fill in the blank
+    const item = pick(FILL_BLANKS);
+    return {
+      type: 'mcq',
+      tag: 'FILL THE GAP',
+      text: item.text,
+      answer: item.answer,
+      options: shuffle(item.options),
+      flavor: 'Find the missing word for the machine!',
+    };
+  }
+}
+
+// ── KWASII NUMBERS ────────────────────────────────
+function genNumbers() {
+  const type = pick(['count','count','next','bigger','add']);
+  switch (type) {
+    case 'count': {
+      const n = rand(1, 12);
+      const emojis = pick(['⭐','🔵','🟢','🔴','⚙️','💚','🌟','🔷']);
+      const wrong = shuffle([n-1, n+1, n+2].filter(x => x > 0 && x !== n)).slice(0,3);
+      return {
+        type: 'count',
+        tag: 'COUNT',
+        n,
+        emoji: emojis,
+        text: `How many?`,
+        answer: String(n),
+        options: shuffle([String(n), ...wrong.map(String)]),
+        flavor: 'Count all the machine parts!',
+      };
+    }
+    case 'next': {
+      const n = rand(1, 19);
+      const wrong = shuffle([n-1, n+2, n+3].filter(x => x > 0 && x !== n+1)).slice(0,3);
+      return mcq(`What comes after ${n}?`, n+1, wrong.slice(0,3), { tag:'NEXT NUMBER', flavor:'Keep the number sequence going!' });
+    }
+    case 'bigger': {
+      let a = rand(1, 20), b = rand(1, 20);
+      while (a === b) b = rand(1, 20);
+      const bigger = Math.max(a, b);
+      return {
+        type: 'mcq',
+        tag: 'BIGGER NUMBER',
+        text: `Which is bigger?\n${a}  or  ${b}`,
+        answer: String(bigger),
+        options: shuffle([String(a), String(b)]),
+        flavor: 'The machine needs the biggest number!',
+      };
+    }
+    case 'add': {
+      const a = rand(1, 9), b = rand(1, 9);
+      const wrong = shuffle([a+b-1, a+b+1, a+b+2].filter(x => x > 0 && x !== a+b)).slice(0,3);
+      return mcq(`${a} + ${b} = ?`, a+b, wrong, { tag:'ADDITION', flavor:'Add the machine parts together!' });
+    }
+  }
+}
+
+function generateQuestion(profileId, subjectId) {
+  if (profileId === 'indina') {
+    if (subjectId === 'math')     return genMath();
+    if (subjectId === 'spelling') return genSpelling();
+    if (subjectId === 'reading')  return genReading();
+  } else {
+    if (subjectId === 'sightwords') return genSightWords();
+    if (subjectId === 'numbers')    return genNumbers();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════
+function goTo(screenId) {
+  if (screenId === 'hub') document.body.className = '';
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screenId).classList.add('active');
+}
+
+function openGame(filename, title) {
+  document.getElementById('iframe-title').textContent = title;
+  document.getElementById('game-frame').src = 'Downloads/' + filename;
+  goTo('iframe');
+}
+
+function closeGame() {
+  // Clear src to stop the game (halts audio, timers, etc.)
+  document.getElementById('game-frame').src = '';
+  goTo('hub');
+}
+
+function selectProfile(profileId) {
+  currentProfileId = profileId;
+  const p = PROFILES[profileId];
+
+  // Apply theme
+  document.body.className = p.themeClass;
+
+  // Build subject screen
+  document.getElementById('sub-heading').textContent = `Hi ${p.name}! 👋`;
+  document.getElementById('sub-subheading').textContent = 'Pick your mission:';
+
+  const list = document.getElementById('subject-list');
+  list.innerHTML = '';
+  p.subjects.forEach(sub => {
+    const btn = document.createElement('button');
+    btn.className = 'subject-btn';
+    btn.innerHTML = `
+      <span class="subject-icon">${sub.emoji}</span>
+      <div>
+        <div>${sub.label}</div>
+        <div class="subject-desc">${sub.desc}</div>
+      </div>`;
+    btn.onclick = () => startSession(sub.id);
+    list.appendChild(btn);
+  });
+
+  // Show profile stats
+  const store = loadStore();
+  const d = store[profileId];
+  document.getElementById('pstat-sessions').textContent = d.sessionsCompleted;
+  document.getElementById('pstat-correct').textContent  = d.totalCorrect;
+  const pct = d.totalQuestions > 0 ? Math.round(d.totalCorrect / d.totalQuestions * 100) + '%' : '—';
+  document.getElementById('pstat-pct').textContent = pct;
+
+  goTo('subjects');
+}
+
+// ════════════════════════════════════════════════════════
+// SESSION
+// ════════════════════════════════════════════════════════
+function startSession(subjectId) {
+  currentSubjectId = subjectId;
+  sessionScore = 0;
+  qIndex = 0;
+  answered = false;
+  currentMission = pick(PROFILES[currentProfileId].missions);
+
+  // Generate 10 questions
+  questions = [];
+  for (let i = 0; i < 10; i++) {
+    questions.push(generateQuestion(currentProfileId, subjectId));
+  }
+
+  const p = PROFILES[currentProfileId];
+  document.getElementById('game-title').textContent =
+    `${p.missionWord.toUpperCase()}: ${currentMission.toUpperCase()}`;
+
+  goTo('game');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q  = questions[qIndex];
+  const p  = PROFILES[currentProfileId];
+  answered = false;
+
+  // Progress dots
+  const dotsEl = document.getElementById('progress-dots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot' + (i < qIndex ? ' done' : i === qIndex ? ' current' : '');
+    dotsEl.appendChild(dot);
+  }
+
+  // Score badge
+  document.getElementById('score-badge').textContent = `${sessionScore} / ${qIndex}`;
+
+  // Tag
+  document.getElementById('question-tag').textContent = q.tag || pick(p.clueLabels);
+
+  // Question text
+  const textEl = document.getElementById('question-text');
+  if (q.type === 'bigword') {
+    textEl.innerHTML = `<div class="big-word">${q.text}</div>`;
+  } else if (q.type === 'count') {
+    // Show emoji grid
+    const row1 = q.emoji.repeat(Math.min(q.n, 6));
+    const row2 = q.n > 6 ? q.emoji.repeat(q.n - 6) : '';
+    textEl.innerHTML = `<div style="font-size:13px;opacity:0.7;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">How many?</div><div class="count-display">${row1}${row2 ? '<br>' + row2 : ''}</div>`;
+  } else {
+    textEl.textContent = q.text;
+  }
+
+  // Flavor
+  document.getElementById('question-flavor').textContent = q.flavor || '';
+
+  // Reading passage
+  const passageEl = document.getElementById('reading-passage');
+  if (q.type === 'reading') {
+    passageEl.textContent = q.passage;
+    passageEl.classList.add('show');
+  } else {
+    passageEl.classList.remove('show');
+  }
+
+  // Options
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  // Single column for long text options
+  const hasLongOpts = q.options.some(o => o.length > 12);
+  grid.className = 'options-grid' + (hasLongOpts ? ' single-col' : '');
+
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => handleAnswer(opt, btn, q));
+    grid.appendChild(btn);
+  });
+
+  // Reset feedback & next button
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.className = 'btn-primary';
+  nextBtn.textContent = qIndex < 9 ? `Next ${p.clueWord} →` : 'Finish! ✓';
+}
+
+function handleAnswer(chosen, btn, q) {
+  if (answered) return;
+  answered = true;
+
+  const correct = chosen === q.answer;
+  if (correct) sessionScore++;
+
+  // Style all buttons
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.answer) {
+      b.classList.add('correct');
+    } else if (b === btn && !correct) {
+      b.classList.add('wrong');
+    }
+  });
+
+  // Feedback message
+  const p  = PROFILES[currentProfileId];
+  const fb = document.getElementById('feedback');
+  if (correct) {
+    fb.className = 'feedback correct show';
+    fb.textContent = pick(p.correctLines);
+  } else {
+    fb.className = 'feedback wrong show';
+    fb.textContent = pick(p.wrongLines) + `  ✓ ${q.answer}`;
+  }
+
+  // Show next
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function nextQuestion() {
+  qIndex++;
+  if (qIndex >= 10) {
+    finishSession();
+  } else {
+    renderQuestion();
+  }
+}
+
+function quitSession() {
+  if (confirm('Quit this session?')) goTo('subjects');
+}
+
+// ════════════════════════════════════════════════════════
+// COMPLETE
+// ════════════════════════════════════════════════════════
+function finishSession() {
+  const store = loadStore();
+  const d = store[currentProfileId];
+  d.totalCorrect    += sessionScore;
+  d.totalQuestions  += 10;
+  d.sessionsCompleted += 1;
+  saveStore(store);
+
+  const p = PROFILES[currentProfileId];
+  const isIndina = currentProfileId === 'indina';
+
+  // Icon and title
+  if (sessionScore === 10) {
+    document.getElementById('complete-icon').textContent  = isIndina ? '🏆' : '🌟';
+    document.getElementById('complete-title').textContent = isIndina ? 'Case Closed! Perfect!' : 'Machine Fixed! Brilliant!';
+  } else if (sessionScore >= 7) {
+    document.getElementById('complete-icon').textContent  = isIndina ? '🔍' : '⚙️';
+    document.getElementById('complete-title').textContent = isIndina ? 'Case Closed!' : 'Machine Fixed!';
+  } else {
+    document.getElementById('complete-icon').textContent  = isIndina ? '📋' : '🔧';
+    document.getElementById('complete-title').textContent = isIndina ? 'Keep Investigating!' : 'Keep Building!';
+  }
+
+  // Sub message
+  const subs = [
+    { min:10, text: isIndina ? 'Flawless detective work! The case is completely solved!' : 'Every part fits perfectly! You\'re a master engineer!' },
+    { min:8,  text: isIndina ? 'Great detective work! You cracked this case!' : 'Great engineering! The machine is running great!' },
+    { min:6,  text: isIndina ? 'Good work, Detective! Keep practising your skills.' : 'Good job, Kwasii! Keep on building!' },
+    { min:0,  text: isIndina ? 'Every great detective keeps trying. Have another go!' : 'Every engineer keeps learning. Have another go!' },
+  ];
+  document.getElementById('complete-sub').textContent = subs.find(s => sessionScore >= s.min).text;
+
+  document.getElementById('score-big').textContent = sessionScore;
+
+  // Stats
+  document.getElementById('stat-sessions').textContent = d.sessionsCompleted;
+  document.getElementById('stat-total').textContent    = d.totalCorrect;
+  const pct = Math.round(d.totalCorrect / d.totalQuestions * 100);
+  document.getElementById('stat-pct').textContent      = pct + '%';
+
+  goTo('complete');
+}
+
+function playAgain() {
+  startSession(currentSubjectId);
+}
+</script>
+</body>
+</html>
