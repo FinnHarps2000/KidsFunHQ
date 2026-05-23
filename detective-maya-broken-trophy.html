@@ -1,27 +1,1088 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detective Maya: The Case of the Broken Trophy</title>
-  <style>
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f5f2ed; color:#333; margin:0; padding:24px; }
-    .wrapper { max-width:760px; margin:0 auto; padding:24px; background:#fff; border-radius:18px; box-shadow:0 16px 40px rgba(0,0,0,.08); }
-    h1 { margin-top:0; color:#2f3b52; }
-    p { line-height:1.65; }
-    .note { margin-top:24px; padding:16px; background:#fffbeb; border:1px solid #f5e2a1; border-radius:12px; }
-    .button { margin-top:24px; display:inline-flex; align-items:center; justify-content:center; padding:12px 20px; background:#4d7cfe; color:#fff; border:none; border-radius:12px; cursor:pointer; text-decoration:none; font-weight:600; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detective Maya – The Case of the Broken Trophy</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   CHALK ON BLACKBOARD AESTHETIC
+   Deep charcoal · Chalk white · Golden yellow · Coral red
+   Hand-drawn feeling, warm, school-room character
+═══════════════════════════════════════════════ */
+:root {
+  --board:   #1e2a1e;
+  --board2:  #253225;
+  --chalk:   #f0ece0;
+  --chalk2:  #d4cfc0;
+  --gold:    #f5c842;
+  --gold2:   #e8b020;
+  --coral:   #e8614a;
+  --teal:    #4ecdc4;
+  --green:   #6bcb77;
+  --purple:  #c084fc;
+  --muted:   #8fa88f;
+  --panel:   rgba(255,255,255,.06);
+  --panelbright: rgba(255,255,255,.1);
+  --r:       14px;
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--board);
+  color: var(--chalk);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* chalk dust texture */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:.6;
+}
+
+/* PROGRESS */
+.prog-rail { position:fixed;top:0;left:0;width:100%;height:6px;background:rgba(255,255,255,.08);z-index:200; }
+.prog-fill { height:100%;background:linear-gradient(90deg,var(--teal),var(--gold),var(--coral));transition:width .6s ease; }
+
+/* SCREENS */
+.screen { display:none;position:relative;z-index:1;min-height:100vh;padding:22px 14px 50px;flex-direction:column;align-items:center;justify-content:center;gap:16px; }
+.screen.active { display:flex; }
+
+/* ── TITLE ──────────────────────────────────── */
+#s-title { text-align:center; gap:20px; }
+
+.trophy-anim {
+  font-size:72px; display:block;
+  animation: trophyTilt 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(245,200,66,.3));
+}
+@keyframes trophyTilt {
+  0%,100% { transform:rotate(-6deg) translateY(0); }
+  40%     { transform:rotate(4deg) translateY(-8px); }
+}
+
+h1.tt {
+  font-family:'Caveat',cursive;
+  font-size:clamp(2.8rem,7vw,5rem);
+  color:var(--gold);
+  line-height:1;
+  text-shadow: 2px 2px 0 rgba(0,0,0,.4), 0 0 40px rgba(245,200,66,.2);
+  letter-spacing:1px;
+}
+h2.ts { font-family:'Caveat',cursive;font-size:clamp(1.3rem,4vw,2rem);color:var(--chalk2); }
+
+.chalk-box {
+  max-width:540px;
+  border:2px dashed rgba(240,236,224,.25);
+  border-radius:var(--r);
+  padding:18px 22px;
+  background:var(--panel);
+  font-size:1rem;line-height:1.8;font-weight:700;
+  position:relative;
+}
+.chalk-box strong { color:var(--gold); }
+
+/* GROWTH MINDSET MOTTO */
+.motto {
+  display:inline-block;
+  background:var(--gold);
+  color:var(--board);
+  font-family:'Caveat',cursive;
+  font-size:1.3rem;
+  padding:8px 22px;
+  border-radius:50px;
+  font-weight:700;
+  letter-spacing:.5px;
+  box-shadow:0 4px 16px rgba(245,200,66,.3);
+  animation:mottoPulse 3s ease-in-out infinite;
+}
+@keyframes mottoPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+
+/* TRAIL */
+.trail { display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center; }
+.tdot { width:44px;height:44px;border-radius:50%;border:2px dashed rgba(240,236,224,.3);background:transparent;display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:all .3s; }
+.tdot.done   { border-style:solid;border-color:var(--teal);background:rgba(78,205,196,.15); }
+.tdot.active { border-style:solid;border-color:var(--gold);background:rgba(245,200,66,.15);animation:tdPulse 1s ease-in-out infinite; }
+@keyframes tdPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.14)} }
+
+/* ── BUTTONS ─────────────────────────────────── */
+.btn { font-family:'Nunito',sans-serif;font-weight:800;font-size:1.2rem;padding:11px 28px;border:2px solid transparent;border-radius:50px;cursor:pointer;transition:all .14s;letter-spacing:.3px; }
+.btn:hover  { transform:translateY(-2px);filter:brightness(1.1); }
+.btn:active { transform:translateY(1px);filter:brightness(.95); }
+.btn-gold   { background:var(--gold);color:var(--board);border-color:var(--gold2); }
+.btn-teal   { background:var(--teal);color:var(--board);border-color:#3ab8af; }
+.btn-coral  { background:var(--coral);color:#fff;border-color:#c94a35; }
+.btn-ghost  { background:transparent;color:var(--chalk2);border-color:rgba(240,236,224,.25); }
+.btn-sm     { font-size:.92rem;padding:7px 16px; }
+.btn-next   { display:inline-block;margin-top:14px; }
+
+/* ── CLUE CARD ───────────────────────────────── */
+.ccard {
+  background:var(--board2);
+  border:1px solid rgba(240,236,224,.12);
+  border-radius:var(--r);
+  padding:22px 18px;max-width:720px;width:100%;
+  animation:cardIn .4s cubic-bezier(.34,1.56,.64,1);
+  text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05);
+}
+@keyframes cardIn { from{opacity:0;transform:translateY(20px) scale(.97)} to{opacity:1;transform:none} }
+
+.loc-tag { display:inline-block;background:rgba(78,205,196,.2);border:1px solid var(--teal);color:var(--teal);font-size:.78rem;letter-spacing:2px;padding:4px 14px;border-radius:6px;margin-bottom:10px;text-transform:uppercase;font-weight:800; }
+.cicon   { font-size:3rem;display:block;margin:6px 0;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4)); }
+.ctitle  { font-family:'Caveat',cursive;font-size:2rem;color:var(--gold);margin-bottom:6px;letter-spacing:.5px; }
+
+/* ── MAYA SPEECH ─────────────────────────────── */
+.maya-say {
+  display:flex;gap:12px;align-items:flex-start;
+  background:var(--panel);border:1px solid rgba(240,236,224,.1);border-radius:var(--r);
+  padding:12px 14px;margin:8px 0;text-align:left;position:relative;
+}
+.maya-say.right { flex-direction:row-reverse;text-align:right; }
+.maya-face { font-size:2.1rem;flex-shrink:0; }
+.maya-txt  { font-size:.93rem;line-height:1.75;font-weight:700;color:var(--chalk); }
+.maya-txt em     { color:var(--teal);font-style:normal; }
+.maya-txt .joke  { color:var(--gold);font-style:italic; }
+.maya-txt .hl    { color:var(--coral);font-weight:900; }
+.maya-txt .good  { color:var(--green);font-weight:900; }
+
+.maya-say::before { content:'';position:absolute;left:-14px;top:14px;border:7px solid transparent;border-right-color:rgba(240,236,224,.1); }
+.maya-say.right::before { left:auto;right:-14px;border-right-color:transparent;border-left-color:rgba(240,236,224,.1); }
+
+.maya-think {
+  background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.3);
+  border-radius:20px;padding:10px 16px;margin:8px 0;
+  font-size:.9rem;font-weight:700;color:var(--purple);
+  text-align:center;font-style:italic;
+}
+.maya-think::before { content:'💭  ';font-style:normal; }
+
+/* GROWTH MINDSET CALLOUT */
+.growth-box {
+  background:linear-gradient(135deg,rgba(107,203,119,.12),rgba(78,205,196,.08));
+  border:1px solid rgba(107,203,119,.4);
+  border-radius:var(--r);padding:12px 16px;margin:10px 0;
+  font-size:.92rem;font-weight:700;color:var(--green);text-align:left;
+}
+.growth-box::before { content:'🌱  '; }
+
+/* WRONG ANSWER GROWTH MESSAGE */
+.growth-wrong {
+  background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.3);
+  border-radius:var(--r);padding:10px 14px;margin:6px 0;
+  font-size:.88rem;font-weight:700;color:var(--gold);text-align:center;
+  display:none;animation:cardIn .3s ease;
+}
+.growth-wrong::before { content:'🧠  '; }
+
+/* COMEBACK MESSAGE */
+.comeback-msg {
+  background:rgba(78,205,196,.12);border:1px solid rgba(78,205,196,.4);
+  border-radius:var(--r);padding:8px 14px;margin:6px 0;
+  font-size:.88rem;font-weight:700;color:var(--teal);text-align:center;
+  display:none;animation:cardIn .3s ease;
+}
+.comeback-msg::before { content:'⭐  '; }
+
+/* Q PANEL */
+.qpanel { background:var(--panel);border:1px solid rgba(240,236,224,.1);border-radius:var(--r);padding:14px 16px;margin:12px 0;text-align:left; }
+.qlabel { font-weight:900;font-size:1rem;color:var(--chalk);margin-bottom:10px; }
+
+/* FEEDBACK */
+.fb { font-family:'Caveat',cursive;font-size:1.3rem;min-height:26px;margin-top:8px; }
+.fb.ok  { color:var(--green); animation:fbPop .4s ease; }
+.fb.bad { color:var(--coral); animation:fbShake .4s ease; }
+@keyframes fbPop   { 0%{transform:scale(.7)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+@keyframes fbShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+
+/* OPTIONS */
+.opts { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0; }
+.opt { font-family:'Nunito',sans-serif;font-weight:800;font-size:1.1rem;padding:10px 20px;border:1px solid rgba(240,236,224,.2);border-radius:var(--r);background:var(--panel);color:var(--chalk);cursor:pointer;transition:all .14s; }
+.opt:hover  { background:var(--panelbright);border-color:var(--gold);transform:translateY(-2px); }
+.opt.ok  { background:rgba(107,203,119,.2);border-color:var(--green);color:var(--green);pointer-events:none;transform:none; }
+.opt.bad { background:rgba(232,97,74,.15);border-color:var(--coral);color:var(--coral);animation:fbShake .4s; }
+
+/* ANS INPUT */
+.ansin { font-family:'Caveat',cursive;font-size:2rem;width:110px;padding:6px 12px;text-align:center;border:2px solid rgba(240,236,224,.25);border-radius:var(--r);background:var(--panel);color:var(--gold);outline:none;letter-spacing:2px;transition:border .2s; }
+.ansin:focus { border-color:var(--gold); }
+.ansin:disabled { opacity:.5; }
+
+/* TEACH PANEL */
+.teach-tog { display:flex;align-items:center;justify-content:space-between;background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3);border-radius:var(--r);color:var(--teal);padding:9px 14px;cursor:pointer;font-weight:800;font-size:.92rem;width:100%;margin-bottom:4px;transition:all .14s; }
+.teach-tog:hover { background:rgba(78,205,196,.18); }
+.teach-tog .arr { transition:transform .3s; }
+.teach-tog.open .arr { transform:rotate(180deg); }
+.teach-panel { display:none;background:rgba(0,0,0,.2);border:1px solid rgba(78,205,196,.15);border-radius:var(--r);padding:14px;margin-bottom:10px;text-align:left;animation:cardIn .3s ease; }
+.teach-panel.show { display:block; }
+.teach-hd { font-weight:900;font-size:.95rem;color:var(--teal);margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+.tstep    { display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;padding:8px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06); }
+.tstep-n  { width:24px;height:24px;border-radius:50%;background:var(--teal);color:var(--board);font-size:.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900; }
+.tstep-t  { font-size:.88rem;font-weight:700;line-height:1.55;color:var(--chalk); }
+.tstep-t .em { color:var(--teal); }
+
+/* HIDDEN PANEL - removed */
+
+/* HINT */
+.hint-tog { font-size:.84rem;font-weight:800;border:1px dashed rgba(240,236,224,.25);border-radius:20px;background:transparent;color:var(--muted);padding:5px 14px;cursor:pointer;margin-top:6px;transition:all .15s; }
+.hint-tog:hover { border-color:var(--gold);color:var(--gold); }
+.hint-box { display:none;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.25);border-radius:var(--r);padding:10px 14px;font-size:.88rem;font-weight:700;color:var(--gold);margin-top:8px;text-align:left;animation:cardIn .3s ease; }
+
+/* ── NUMBER GRID PUZZLE (CLUE 1) ─────────────── */
+.grid-puzzle { margin:14px auto;display:flex;flex-direction:column;align-items:center;gap:4px; }
+.grid-row    { display:flex;gap:4px; }
+.grid-cell {
+  width:52px;height:52px;border-radius:8px;
+  border:2px solid rgba(240,236,224,.2);
+  background:var(--panel);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Caveat',cursive;font-size:1.3rem;color:var(--chalk2);
+  cursor:pointer;transition:all .18s;user-select:none;
+  font-weight:700;
+}
+.grid-cell:hover { border-color:var(--gold);background:rgba(245,200,66,.1); }
+.grid-cell.selected {
+  background:rgba(245,200,66,.25);border-color:var(--gold);
+  color:var(--gold);font-weight:900;
+  box-shadow:0 0 10px rgba(245,200,66,.2);
+}
+.grid-cell.correct-cell { background:rgba(107,203,119,.25);border-color:var(--green);color:var(--green); }
+.grid-cell.wrong-cell   { background:rgba(232,97,74,.2);border-color:var(--coral);color:var(--coral); }
+.grid-cell.header       { background:transparent;border-color:transparent;color:var(--teal);font-size:1rem;cursor:default; }
+.grid-target { font-family:'Caveat',cursive;font-size:1.2rem;color:var(--chalk2);margin-bottom:6px; }
+.grid-target span { color:var(--gold);font-size:1.5rem;font-weight:700; }
+.grid-instructions { font-size:.82rem;color:var(--muted);margin-bottom:8px;text-align:center; }
+
+/* ── LOGIC PUZZLE (CLUE 3) ───────────────────── */
+.logic-scene { display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0; }
+.suspect-card {
+  background:var(--panel);border:1px solid rgba(240,236,224,.15);
+  border-radius:var(--r);padding:14px 12px;width:180px;text-align:center;
+  transition:all .2s;
+}
+.suspect-card.eliminated { opacity:.4;border-color:var(--coral);background:rgba(232,97,74,.05); }
+.suspect-card.confirmed  { border-color:var(--green);background:rgba(107,203,119,.08);box-shadow:0 0 14px rgba(107,203,119,.15); }
+.suspect-face { font-size:2.6rem;display:block;margin-bottom:6px; }
+.suspect-name { font-family:'Caveat',cursive;font-size:1.2rem;color:var(--gold);margin-bottom:4px; }
+.suspect-claim { font-size:.78rem;color:var(--chalk2);line-height:1.5;font-style:italic; }
+.suspect-card.eliminated .suspect-claim::after { content:' ❌';color:var(--coral); }
+.suspect-card.confirmed  .suspect-claim::after { content:' ✓';color:var(--green); }
+
+.clue-strip {
+  background:var(--panel);border:1px solid rgba(240,236,224,.1);
+  border-radius:var(--r);padding:10px 14px;margin:8px 0;
+  font-size:.88rem;font-weight:700;color:var(--chalk);text-align:left;
+}
+.clue-strip .clue-num { font-family:'Caveat',cursive;color:var(--teal);font-size:1.1rem;margin-right:6px; }
+.elim-btn {
+  font-size:.78rem;font-weight:800;border:1px solid rgba(232,97,74,.4);
+  border-radius:8px;background:transparent;color:var(--coral);
+  padding:3px 10px;cursor:pointer;margin-top:6px;transition:all .14s;
+}
+.elim-btn:hover { background:rgba(232,97,74,.15); }
+.elim-btn:disabled { opacity:.3;cursor:default; }
+.confirm-btn {
+  font-size:.78rem;font-weight:800;border:1px solid rgba(107,203,119,.4);
+  border-radius:8px;background:transparent;color:var(--green);
+  padding:3px 10px;cursor:pointer;margin-top:6px;transition:all .14s;
+}
+.confirm-btn:hover { background:rgba(107,203,119,.15); }
+
+/* FRACTION BUILDER (CLUE 4) */
+.frac-builder { margin:14px auto;text-align:center; }
+.frac-display {
+  font-family:'Caveat',cursive;font-size:2.5rem;color:var(--gold);
+  background:var(--panel);border:2px solid rgba(245,200,66,.3);
+  border-radius:var(--r);padding:8px 24px;display:inline-block;
+  margin-bottom:10px;min-width:120px;
+}
+.frac-tiles { display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.frac-tile {
+  width:48px;height:48px;border-radius:8px;
+  border:2px solid rgba(240,236,224,.2);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;cursor:pointer;transition:all .16s;
+  font-family:'Caveat',cursive;font-weight:700;color:var(--chalk2);
+}
+.frac-tile:hover { border-color:var(--gold);background:rgba(245,200,66,.1); }
+.frac-tile.shaded { background:rgba(245,200,66,.3);border-color:var(--gold);color:var(--gold); }
+.frac-tile.locked { cursor:default;opacity:.5; }
+.frac-controls { display:flex;gap:10px;justify-content:center;margin:10px 0;flex-wrap:wrap; }
+.frac-lbl { font-size:.8rem;color:var(--muted);margin-bottom:4px; }
+
+/* SHARE VIS */
+.share-row { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.sbucket { border:1px solid rgba(78,205,196,.4);border-radius:0 0 12px 12px;background:rgba(78,205,196,.06);min-width:64px;min-height:68px;display:flex;flex-direction:column;align-items:center;padding:6px;gap:3px;position:relative; }
+.sbucket::before { content:attr(data-n);position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-family:'Caveat',cursive;font-size:.78rem;background:var(--teal);color:var(--board);padding:1px 8px;border-radius:5px;white-space:nowrap;font-weight:700; }
+.sbi { font-size:1.2rem;opacity:0;transform:translateY(-6px);transition:all .25s; }
+.sbi.in { opacity:1;transform:none; }
+
+/* FF LIST */
+.ff-list { display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0; }
+.ffi { background:rgba(255,255,255,.05);border:1px solid rgba(240,236,224,.15);border-radius:8px;padding:5px 12px;font-family:'Caveat',cursive;font-size:1.1rem; }
+.ffi.m { color:var(--teal); }
+.ffi.d { color:var(--gold); }
+
+/* ── WIN SCREEN ───────────────────────────────── */
+#s-win { text-align:center;gap:20px; }
+.win-icon  { font-size:72px;display:block;animation:trophyTilt 2s ease-in-out infinite; }
+.win-title { font-family:'Caveat',cursive;font-size:clamp(2.2rem,5.5vw,4rem);color:var(--gold);text-shadow:0 0 30px rgba(245,200,66,.3); }
+.win-box   { max-width:540px;background:var(--panel);border:1px solid rgba(240,236,224,.1);border-radius:var(--r);padding:18px 22px;font-size:.97rem;line-height:1.8;font-weight:700; }
+.skill-row { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
+.spill     { font-family:'Caveat',cursive;font-size:1rem;background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3);border-radius:30px;padding:5px 14px; }
+
+/* CONFETTI */
+.conf { position:fixed;top:-18px;pointer-events:none;z-index:999;border-radius:3px;animation:cfall var(--cd,2s) var(--cdel,0s) ease-in forwards; }
+@keyframes cfall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+
+/* MISTAKE COUNTER */
+.mistake-tracker { display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);margin-top:6px;justify-content:center; }
+.mistake-dot { width:10px;height:10px;border-radius:50%;border:1.5px solid var(--muted);transition:all .3s; }
+.mistake-dot.used { background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px rgba(245,200,66,.4); }
+</style>
 </head>
 <body>
-  <div class="wrapper">
-    <h1>Detective Maya: The Case of the Broken Trophy</h1>
-    <p>This is a placeholder page for the Maya game. The actual game file was missing from the workspace, so the trophy adventure could not load yet.</p>
-    <div class="note">
-      <strong>Note:</strong> The launcher is configured to load `Downloads/detective-maya-broken-trophy.html`.
-      Add the real game content here when available.
-    </div>
-    <button class="button" onclick="if (parent && parent.closeGame) parent.closeGame();">Return to hub</button>
+<div class="prog-rail"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<!-- ═══════════ TITLE ═══════════ -->
+<div class="screen active" id="s-title">
+  <span class="trophy-anim">🏆</span>
+  <h1 class="tt">Detective Maya</h1>
+  <h2 class="ts">The Case of the Broken Trophy</h2>
+  <div class="motto">🌱 Mistakes are golden. That's how we grow.</div>
+  <div class="chalk-box">
+    The school athletics trophy — <strong>three gold stars tall, polished every Monday</strong> — is now in five pieces on the floor of the trophy cabinet hallway. Everyone nearby says they didn't do it. But everyone is also <strong>acting very suspicious</strong> and slightly guilty-looking. Maya has five clues to solve. The most important thing she'll discover isn't <strong>who broke the trophy — it's why everyone is so scared to admit a mistake.</strong>
   </div>
+  <div class="trail">
+    <div class="tdot active" id="td0">🏆</div>
+    <div style="color:var(--muted)">▶</div>
+    <div class="tdot" id="td1">🏋️</div>
+    <div style="color:var(--muted)">▶</div>
+    <div class="tdot" id="td2">🎨</div>
+    <div style="color:var(--muted)">▶</div>
+    <div class="tdot" id="td3">🚪</div>
+    <div style="color:var(--muted)">▶</div>
+    <div class="tdot" id="td4">📋</div>
+  </div>
+  <button class="btn btn-gold" onclick="goTo(1)">🔍 Start Investigating!</button>
+</div>
+
+<!-- ═══════════ CLUE 1 — TROPHY CABINET — NUMBER GRID PUZZLE ═══════════ -->
+<div class="screen" id="s-1">
+  <div class="ccard">
+    <div class="loc-tag">🏆 Trophy Cabinet — Clue 1 of 5</div>
+    <span class="cicon">🏆</span>
+    <div class="ctitle">The Number Grid!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">The trophy is in pieces. Next to it, a little notepad has fallen open — someone was doing maths homework right here. <span class="joke">Very committed student. Very suspicious timing.</span> A sticky note on the cabinet says: <em>"Find the numbers that multiply to make the target. Shade them in."</em></div>
+    </div>
+
+    <div class="growth-box">Maya's rule #1: "In this investigation, wrong answers are not failures. They're information. Every mistake tells you something useful."</div>
+
+    <div class="qpanel">
+      <div class="qlabel">🔢 Grid Puzzle — Shade every number that is a multiple of 4 (i.e. in the 4 times table). Then tap Check!</div>
+      <div class="grid-instructions">Tap a number to shade it. Multiples of 4 are the answers to 4×1, 4×2, 4×3... and so on up to 4×9.</div>
+      <div class="grid-target">Find all multiples of <span>4</span> up to 36</div>
+      <div class="grid-puzzle" id="gridPuzzle1"></div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-gold btn-sm" onclick="checkGrid1()">Check my shading!</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearGrid1()">Clear</button>
+      </div>
+      <div class="fb" id="fb1g"></div>
+      <div class="growth-wrong" id="gw1">Your brain just got stronger! Multiples of 4 are what you get when you count in 4s: 4, 8, 12... Try again!</div>
+    </div>
+
+    <div class="qpanel" id="q1b">
+      <div class="maya-say" style="margin-bottom:10px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">The homework page has one more clue: a multiplication question with the answer circled in red. <span class="joke">"Someone was checking their work. Smart."</span></div>
+      </div>
+      <div class="qlabel">🧮 The circled answer: 7 × 8 = ? Use the grid to help — count 7 rows of 8!</div>
+      <button class="teach-tog" onclick="togT('t1b')">
+        <span>📖 How to use the grid to multiply</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t1b">
+        <div class="teach-hd">🌟 The grid shows "groups of"!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">7 × 8 means <span class="em">7 groups of 8</span>. Imagine 7 rows in the grid, each with 8 squares.</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Split it: <span class="em">5 × 8 = 40</span> and <span class="em">2 × 8 = 16</span>. Add: 40 + 16 = <span class="em">56</span>!</div></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Multiplied = times = groups of. All the same thing!</div></div>
+      </div>
+      <div class="opts" id="o1b">
+        <button class="opt" onclick="chkOp(this,'48','56','fb1b','56! 7×8=56. The trail leads to the gym!',null,null,'nx1')">48</button>
+        <button class="opt" onclick="chkOp(this,'56','56','fb1b','56! 7×8=56. The trail leads to the gym!',null,null,'nx1')">56</button>
+        <button class="opt" onclick="chkOp(this,'54','56','fb1b','56! 7×8=56. The trail leads to the gym!',null,null,'nx1')">54</button>
+        <button class="opt" onclick="chkOp(this,'64','56','fb1b','56! 7×8=56. The trail leads to the gym!',null,null,'nx1')">64</button>
+      </div>
+      <div class="fb" id="fb1b"></div>
+      <div class="comeback-msg" id="cb1b">You came back and got it! That's exactly what good mathematicians do. 🌟</div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h1')">💡 Hint</button>
+    <div class="hint-box" id="h1">Multiples of 4: count in 4s — 4, 8, 12, 16, 20, 24, 28, 32, 36. Those are the ones to shade! For 7×8: split into 5×8=40 and 2×8=16, then add.</div>
+    <button class="btn btn-teal btn-next" id="nx1" onclick="goTo(2)">To the Gym! →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 2 — GYM — DIVISION + MAYA'S MISTAKE ═══════════ -->
+<div class="screen" id="s-2">
+  <div class="ccard">
+    <div class="loc-tag">🏋️ The Gym — Clue 2 of 5</div>
+    <span class="cicon">🏋️</span>
+    <div class="ctitle">Maya Gets One Wrong!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">In the gym, the PE teacher Mr Osei is stacking equipment. He looks flustered. <span class="joke">"I was nowhere near that trophy. I was in here. With the beanbags. All morning."</span> He gestures at a pile of 36 beanbags. <em>"Help me sort these and I'll tell you what I saw."</em></div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🏐 36 beanbags need to go into 9 equal bins. How many in each bin? (36 ÷ 9 = ?)</div>
+      <button class="teach-tog" onclick="togT('t2a')">
+        <span>📖 Division = sharing equally</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t2a">
+        <div class="teach-hd">🌟 Think of the multiplication family!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">36 ÷ 9 — ask: <span class="em">9 × ? = 36</span>? Count in 9s: 9, 18, 27, 36. That's 4 jumps!</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">So 36 ÷ 9 = <span class="em">4</span>. The fact family: 9×4=36, 4×9=36, 36÷9=4, 36÷4=9.</div></div>
+        <div class="ff-list">
+          <span class="ffi m">9 × 4 = 36</span>
+          <span class="ffi d">36 ÷ 9 = 4</span>
+          <span class="ffi d">36 ÷ 4 = 9</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Caveat',cursive;font-size:1.4rem;">36 ÷ 9 =</span>
+        <input class="ansin" id="a2a" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-gold btn-sm" onclick="chkIn2a()">Check!</button>
+      </div>
+      <div class="fb" id="fb2a"></div>
+      <div class="growth-wrong" id="gw2a">That's okay — a wrong answer means your brain is working! Try thinking: 9 × ? = 36. Count up in 9s.</div>
+      <div class="comeback-msg" id="cb2a">You stuck with it and got there! That's the whole game. 🌱</div>
+      <div class="share-row" id="sv2a"></div>
+    </div>
+
+    <!-- MAYA MODELS MAKING A MISTAKE -->
+    <div class="qpanel" id="q2b">
+      <div class="maya-say" style="margin-bottom:6px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Mr Osei hands Maya a second puzzle. Maya looks at it and immediately writes down an answer. Then stops. <span class="hl">Crosses it out.</span></div>
+      </div>
+      <div class="maya-think">"Wait. I rushed that. I added when I should have multiplied. That's okay — I see what I did. Let me try again."</div>
+      <div class="growth-box">Maya got it wrong first. She didn't panic. She just looked at what went wrong and had another go. That's exactly right.</div>
+
+      <div class="qlabel">🧮 Mr Osei has 48 cones split evenly across 6 storage bags. How many cones per bag? (48 ÷ 6 = ?)</div>
+      <div class="opts" id="o2b">
+        <button class="opt" onclick="chkOp(this,'6','8','fb2b','8 cones! 6 × 8 = 48, so 48 ÷ 6 = 8!',null,null,'nx2')">6</button>
+        <button class="opt" onclick="chkOp(this,'7','8','fb2b','8 cones! 6 × 8 = 48, so 48 ÷ 6 = 8!',null,null,'nx2')">7</button>
+        <button class="opt" onclick="chkOp(this,'8','8','fb2b','8 cones! 6 × 8 = 48, so 48 ÷ 6 = 8!',null,null,'nx2')">8</button>
+        <button class="opt" onclick="chkOp(this,'9','8','fb2b','8 cones! 6 × 8 = 48, so 48 ÷ 6 = 8!',null,null,'nx2')">9</button>
+      </div>
+      <div class="fb" id="fb2b"></div>
+      <div class="comeback-msg" id="cb2b">Came back stronger! Just like Maya did. 🌱</div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h2')">💡 Hint</button>
+    <div class="hint-box" id="h2">Division is the reverse of multiplication! For 36÷9: think 9×?=36. Count in 9s: 9,18,27,36 — that's 4 steps. For 48÷6: think 6×?=48.</div>
+    <button class="btn btn-teal btn-next" id="nx2" onclick="goTo(3)">To the Art Room! →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 3 — ART ROOM — LOGIC PUZZLE ═══════════ -->
+<div class="screen" id="s-3">
+  <div class="ccard">
+    <div class="loc-tag">🎨 The Art Room — Clue 3 of 5</div>
+    <span class="cicon">🎨</span>
+    <div class="ctitle">Only One is Telling the Truth!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Three students were near the trophy cabinet. They each say something different — but <em>the facts can only fit one story</em>. Read the facts below, then pick the suspect who could NOT be eliminated.</div>
+    </div>
+
+    <div class="growth-box">Logic puzzles are about elimination. You cannot fail one — every wrong guess just gives you more information!</div>
+
+    <div class="qpanel">
+      <div class="qlabel">🔍 Facts: (1) Whoever knocked it was running in the corridor. (2) Only one student had PE that morning. (3) Library and art room alibis both check out.</div>
+
+      <div class="logic-scene" id="logicScene">
+        <div class="suspect-card" id="sc-priya">
+          <span class="suspect-face">👧</span>
+          <div class="suspect-name">Priya</div>
+          <div class="suspect-claim">"I was in art class all morning."</div>
+        </div>
+        <div class="suspect-card" id="sc-theo">
+          <span class="suspect-face">👦</span>
+          <div class="suspect-name">Theo</div>
+          <div class="suspect-claim">"I had PE this morning. I ran past the cabinet on my way back."</div>
+        </div>
+        <div class="suspect-card" id="sc-clara">
+          <span class="suspect-face">👩</span>
+          <div class="suspect-name">Clara</div>
+          <div class="suspect-claim">"I was in the library all morning."</div>
+        </div>
+      </div>
+
+      <div class="qlabel" style="margin-top:12px;">Who is the lead suspect?</div>
+      <div class="opts">
+        <button class="opt" onclick="pick3('Priya')">Priya</button>
+        <button class="opt" onclick="pick3('Theo')">Theo</button>
+        <button class="opt" onclick="pick3('Clara')">Clara</button>
+      </div>
+      <div class="fb" id="fb3"></div>
+    </div>
+
+    <div class="qpanel">
+      <div class="maya-say" style="margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Maya finds Theo. He looks like he might cry. <span class="joke">"I knocked it. By accident. I was running and I bumped the cabinet and it fell and I didn't know what to do so I just... kept running."</span></div>
+      </div>
+      <div class="maya-say" style="margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt"><span class="hl">"Why didn't you say so?"</span> Theo: <span class="joke">"I thought everyone would think I was stupid."</span> Maya stares at him. <em>"Accidents aren't stupid. Hiding them makes everything ten times harder."</em></div>
+      </div>
+      <div class="growth-box">Theo thought admitting a mistake would make people think less of him. But hiding it made everything worse. Owning mistakes is a strength, not a weakness.</div>
+
+      <div class="qlabel">🧮 One last check: Theo ran 9 metres per second for 6 seconds. How far? (9 x 6 = ?)</div>
+      <div class="opts" id="o3b">
+        <button class="opt" onclick="pick3b(this,'48')">48</button>
+        <button class="opt" onclick="pick3b(this,'54')">54</button>
+        <button class="opt" onclick="pick3b(this,'56')">56</button>
+        <button class="opt" onclick="pick3b(this,'63')">63</button>
+      </div>
+      <div class="fb" id="fb3b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h3')">💡 Hint</button>
+    <div class="hint-box" id="h3">Who had PE and was running in the gym corridor? That matches all three facts. The library and art room are nowhere near the trophy cabinet.</div>
+    <button class="btn btn-teal btn-next" id="nx3" onclick="goTo(4)">To the Hallway! →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 4 — HALLWAY — FRACTION BUILDER ═══════════ -->
+<div class="screen" id="s-4">
+  <div class="ccard">
+    <div class="loc-tag">🚪 The Hallway — Clue 4 of 5</div>
+    <span class="cicon">🚪</span>
+    <div class="ctitle">Build the Fraction!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">In the hallway outside the trophy cabinet, Maya finds a repair notice from the caretaker. It describes how much of the trophy still needs fixing. <span class="joke">The caretaker, it seems, is also a fan of fractions. This school is something else.</span></div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🎨 The notice says: "2/5 of the trophy pieces have been found." Build that fraction by shading the correct number of tiles below! Then answer the question.</div>
+
+      <button class="teach-tog" onclick="togT('t4a')">
+        <span>📖 What does a fraction actually mean?</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t4a">
+        <div class="teach-hd">🌟 Fractions = parts of a whole!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">The <span class="em">bottom number</span> (denominator) = how many equal parts the whole is split into.</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">The <span class="em">top number</span> (numerator) = how many of those parts you're talking about.</div></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">2/5 means: split into <span class="em">5 equal parts</span>, and we have <span class="em">2 of them</span>. Shade exactly 2 out of 5 tiles!</div></div>
+      </div>
+
+      <div class="frac-builder">
+        <div class="grid-target">Shade <span>2</span> out of <span>5</span> tiles to show <span>2/5</span></div>
+        <div class="frac-tiles" id="fracTiles1"></div>
+        <div class="frac-display" id="fracDisplay1">0/5</div>
+        <button class="btn btn-gold btn-sm" onclick="checkFrac1()">Check fraction!</button>
+      </div>
+      <div class="fb" id="fb4a"></div>
+      <div class="growth-wrong" id="gw4">Almost! The bottom number tells you the total tiles. The top tells you how many to shade. For 2/5: shade exactly 2!</div>
+    </div>
+
+    <div class="qpanel" id="q4b">
+      <div class="maya-say" style="margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">The notice continues: <em>"Of the 20 trophy pieces total, we have found 3/4 of them."</em> Maya does a quick calculation. <span class="joke">"So... 15 pieces. Five are still missing. This is becoming a very expensive accident."</span></div>
+      </div>
+      <div class="qlabel">🧩 3/4 of 20 pieces have been found. How many is that? (Divide by the bottom, multiply by the top!)</div>
+      <button class="teach-tog" onclick="togT('t4b')">
+        <span>📖 Fraction of a number — the two-step trick</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t4b">
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">Divide by the bottom:</span> 20 ÷ 4 = 5. This gives you 1/4 (one quarter).</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t"><span class="em">Multiply by the top:</span> 5 × 3 = 15. This gives you 3/4 (three quarters).</div></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">So 3/4 of 20 = <span class="em">15</span>. Always: ÷ bottom, × top!</div></div>
+      </div>
+      <div class="opts" id="o4b">
+        <button class="opt" onclick="chkOp(this,'10','15','fb4b','15 pieces! 20÷4=5, then 5×3=15. Almost home!',null,null,'nx4')">10</button>
+        <button class="opt" onclick="chkOp(this,'12','15','fb4b','15 pieces! 20÷4=5, then 5×3=15. Almost home!',null,null,'nx4')">12</button>
+        <button class="opt" onclick="chkOp(this,'15','15','fb4b','15 pieces! 20÷4=5, then 5×3=15. Almost home!',null,null,'nx4')">15</button>
+        <button class="opt" onclick="chkOp(this,'16','15','fb4b','15 pieces! 20÷4=5, then 5×3=15. Almost home!',null,null,'nx4')">16</button>
+      </div>
+      <div class="fb" id="fb4b"></div>
+      <div class="comeback-msg" id="cb4b">Nailed it on the retry! Fraction master in progress. 🌱</div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h4')">💡 Hint</button>
+    <div class="hint-box" id="h4">For fractions of amounts: divide by the bottom first, then multiply by the top. 3/4 of 20: 20÷4=5 (one quarter), then 5×3=15 (three quarters)!</div>
+    <button class="btn btn-teal btn-next" id="nx4" onclick="goTo(5)">To the Principal's Office! →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 5 — PRINCIPAL'S OFFICE — FINAL ═══════════ -->
+<div class="screen" id="s-5">
+  <div class="ccard">
+    <div class="loc-tag">📋 Principal's Office — Clue 5 of 5</div>
+    <span class="cicon">📋</span>
+    <div class="ctitle">The Real Mystery.</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Theo has come to the principal's office himself. He didn't wait to be caught. He walked in, sat down, and said: <em>"I did it. By accident. I should have said straight away. I'm sorry."</em></div>
+    </div>
+    <div class="maya-say right">
+      <span class="maya-face">👩‍💼</span>
+      <div class="maya-txt" style="text-align:right;">The principal stares at him for a long moment. Then: <span class="joke">"Thank you for telling me, Theo. That took courage."</span></div>
+    </div>
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Maya watches from the doorway. <span class="joke">She had spent all morning solving maths clues to find something Theo could have just... said. But she's not annoyed.</span> Because watching him walk in there? <em>That was the hardest puzzle of the day.</em></div>
+    </div>
+
+    <div class="growth-box">The real case was never the trophy. It was the fear of being wrong. Theo thought admitting a mistake would make everything worse. It made everything better.</div>
+
+    <div class="qpanel">
+      <div class="qlabel">📋 Maya fills in her report. The principal's office has 8 chairs arranged in 4 equal rows. How many chairs per row? And how many total if they add 2 more rows of the same size?</div>
+      <button class="teach-tog" onclick="togT('t5a')">
+        <span>📖 Two steps — division then multiplication!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t5a">
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">Step 1:</span> 8 ÷ 4 = 2. Two chairs per row. (Think: 4 × ? = 8.)</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t"><span class="em">Step 2:</span> Now there are 4 + 2 = 6 rows, each with 2 chairs. 6 × 2 = 12 total.</div></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Division and multiplication working together — same family!</div></div>
+        <div class="ff-list">
+          <span class="ffi m">4 × 2 = 8</span>
+          <span class="ffi d">8 ÷ 4 = 2</span>
+          <span class="ffi m">6 × 2 = 12</span>
+        </div>
+      </div>
+      <div class="qlabel" style="margin-top:8px;">First: 8 ÷ 4 = ?</div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0;">
+        <input class="ansin" id="a5a" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-gold btn-sm" onclick="chkIn('a5a',2,'fb5a','2 chairs per row! Now for the second part...','Think: 4 × ? = 8.','q5b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb5a"></div>
+      <div class="growth-wrong" id="gw5a">That's a workout for your brain! Think: 4 × ? = 8. What times 4 makes 8?</div>
+      <div class="comeback-msg" id="cb5a">Bounced back! That's the growth mindset in action. 🌱</div>
+    </div>
+
+    <div class="qpanel" id="q5b">
+      <div class="maya-say" style="margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Theo leans over and looks at Maya's report. <span class="joke">"I'm not very good at maths,"</span> he says quietly. Maya looks up. <em>"You know what? I used to think that about myself too. Turns out I was just scared of getting it wrong. Once I stopped being scared of wrong answers, maths got a lot easier."</em> Theo thinks about this.</div>
+      </div>
+      <div class="growth-box">"I'm not good at maths" usually means "I haven't practised enough yet." Every wrong answer is a step closer to the right one. That's not failure — that's learning.</div>
+
+      <div class="qlabel">🏆 Final question — if they add 2 more rows (now 6 rows total, 2 chairs each), how many chairs altogether? (6 × 2 = ?)</div>
+      <div class="opts" id="o5b">
+        <button class="opt" onclick="chkOp(this,'10','12','fb5b','12 chairs! 6 × 2 = 12. Case closed!',null,null,'nx5')">10</button>
+        <button class="opt" onclick="chkOp(this,'12','12','fb5b','12 chairs! 6 × 2 = 12. Case closed!',null,null,'nx5')">12</button>
+        <button class="opt" onclick="chkOp(this,'14','12','fb5b','12 chairs! 6 × 2 = 12. Case closed!',null,null,'nx5')">14</button>
+        <button class="opt" onclick="chkOp(this,'8','12','fb5b','12 chairs! 6 × 2 = 12. Case closed!',null,null,'nx5')">8</button>
+      </div>
+      <div class="fb" id="fb5b"></div>
+      <div class="comeback-msg" id="cb5b">You came back and cracked it. Exactly like Theo did. 🌱</div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h5')">💡 Hint</button>
+    <div class="hint-box" id="h5">8÷4: think 4×?=8. Answer is 2! Then 6 rows × 2 chairs = 6×2 = 12. Division then multiplication — same fact family!</div>
+    <button class="btn btn-coral btn-next" id="nx5" onclick="goTo('win')">🏆 Close the Case!</button>
+  </div>
+</div>
+
+<!-- ═══════════ WIN ═══════════ -->
+<div class="screen" id="s-win">
+  <span class="win-icon">🏆</span>
+  <div class="win-title">Case Closed!</div>
+  <div class="maya-say" style="max-width:540px;">
+    <span class="maya-face">🧒‍♀️</span>
+    <div class="maya-txt">The trophy was repaired. Theo helped put it back. His name went on a small card next to it that read: <em>"Restored after an accident. Reported honestly by Theo, Year 4."</em> <span class="joke">He thought it was embarrassing. Most people thought it was the coolest thing on the whole shelf.</span></div>
+  </div>
+  <div class="win-box">
+    <strong style="color:var(--gold);">What Maya learned on this case:</strong><br><br>
+    Every wrong answer she got today taught her something. Every mistake she spotted — in the grid, in the division, in the logic — made the next step clearer. <span style="color:var(--teal)">Mistakes aren't the opposite of learning. They ARE learning.</span><br><br>
+    <span style="color:var(--green)">Theo figured that out too. Just took him a little longer. And that's completely fine.</span>
+  </div>
+  <div class="motto" style="font-size:1.1rem;">🌱 Every mistake is just a step you haven't finished yet.</div>
+  <div class="skill-row">
+    <span class="spill">🔢 Number Grids</span>
+    <span class="spill">✖️ Multiplication</span>
+    <span class="spill">➗ Division</span>
+    <span class="spill">🧩 Logic Puzzle</span>
+    <span class="spill">🍰 Fractions</span>
+    <span class="spill">🌱 Growth Mindset</span>
+  </div>
+  <button class="btn btn-gold" onclick="location.reload()">🔄 Investigate Again!</button>
+</div>
+
+<script>
+// ── GLOBAL STATE ─────────────────────────────────
+var mistakeLog = {}; // tracks which questions had wrong attempts
+
+// ── NAV ─────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var id = n === 'win' ? 's-win' : 's-' + n;
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  var done = n === 'win' ? 5 : typeof n === 'number' ? n - 1 : 0;
+  document.getElementById('prog').style.width = (done / 5 * 100) + '%';
+  updTrail(done);
+  if (n === 1) buildGrid1();
+  if (n === 2) { buildShare2(); }
+  if (n === 3) resetLogic();
+  if (n === 4) buildFracTiles();
+  if (n === 'win') celebrate();
+}
+
+function updTrail(done) {
+  for (var i = 0; i < 5; i++) {
+    var d = document.getElementById('td' + i);
+    d.className = 'tdot';
+    if (i < done) d.classList.add('done');
+    else if (i === done) d.classList.add('active');
+  }
+}
+
+// ── TEACH / HINT ─────────────────────────────────
+function togT(id) {
+  var p = document.getElementById(id), b = p.previousElementSibling;
+  var open = p.classList.contains('show');
+  p.classList.toggle('show', !open);
+  b.classList.toggle('open', !open);
+}
+function togH(id) {
+  var el = document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// ── REVEAL ───────────────────────────────────────
+function reveal(id) {
+  if (!id) return;
+  var el = document.getElementById(id);
+  if (!el) return;
+  // Panels use class (display:none) -> remove class to show
+  if (el.classList.contains('hidden-q')) {
+    el.classList.remove('hidden-q');
+  } else {
+    // Buttons (btn-next etc) use display:none via CSS -> override with inline style
+    el.style.display = 'inline-block';
+  }
+}
+
+// ── GROWTH MINDSET HELPERS ────────────────────────
+function showGrowthWrong(id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'block';
+}
+function showComeback(id) {
+  var el = document.getElementById(id);
+  if (el) { el.style.display = 'block'; setTimeout(function() { el.style.display = 'none'; }, 4000); }
+}
+function markMistake(qId) {
+  if (!mistakeLog[qId]) mistakeLog[qId] = 0;
+  mistakeLog[qId]++;
+}
+function hadMistake(qId) { return mistakeLog[qId] && mistakeLog[qId] > 0; }
+
+// ── GENERIC CHECKERS ─────────────────────────────
+function chkIn(inputId, correct, fbId, okMsg, badMsg, revealId, nextId) {
+  var val = parseInt(document.getElementById(inputId).value, 10);
+  var fb  = document.getElementById(fbId);
+  if (isNaN(val)) { fb.textContent = 'Type a number first!'; fb.className = 'fb bad'; return; }
+  if (val === correct) {
+    fb.textContent = okMsg; fb.className = 'fb ok';
+    document.getElementById(inputId).disabled = true;
+    spawnConf(5);
+    if (revealId) setTimeout(function() { reveal(revealId); }, 500);
+    if (nextId)   setTimeout(function() { reveal(nextId); }, 500);
+  } else {
+    fb.textContent = badMsg || 'Not quite — try again!';
+    fb.className = 'fb bad';
+    markMistake(fbId);
+  }
+}
+
+function chkOp(el, picked, correct, fbId, okMsg, badMsg, revealId, nextId) {
+  var sibs = el.parentNode.querySelectorAll('.opt');
+  sibs.forEach(function(b) { b.disabled = true; });
+  var fb = document.getElementById(fbId);
+  if (picked === correct) {
+    el.className = 'opt ok';
+    fb.textContent = okMsg || 'Correct!'; fb.className = 'fb ok';
+    spawnConf(6);
+    // show comeback if they had a previous mistake on this question
+    var cbId = 'cb' + fbId.replace('fb','');
+    if (hadMistake(fbId)) showComeback(cbId);
+    if (revealId) setTimeout(function() { reveal(revealId); }, 400);
+    if (nextId)   setTimeout(function() { reveal(nextId); }, 400);
+  } else {
+    el.className = 'opt bad';
+    fb.textContent = badMsg || 'Not this one — try again!';
+    fb.className = 'fb bad';
+    markMistake(fbId);
+    // show growth wrong message
+    var gwId = 'gw' + fbId.replace('fb','');
+    var gw = document.getElementById(gwId);
+    if (gw) gw.style.display = 'block';
+    setTimeout(function() { el.className = 'opt'; sibs.forEach(function(b) { b.disabled = false; }); }, 900);
+  }
+}
+
+// ── CLUE 1: NUMBER GRID ──────────────────────────
+var grid1Data = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36];
+var grid1Selected = {};
+var grid1Checked = false;
+
+function buildGrid1() {
+  var el = document.getElementById('gridPuzzle1');
+  if (!el || el.children.length > 0) return;
+  for (var r = 0; r < 6; r++) {
+    var row = document.createElement('div'); row.className = 'grid-row';
+    for (var c = 0; c < 6; c++) {
+      var num = r * 6 + c + 1;
+      var cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      cell.textContent = num;
+      cell.id = 'gc' + num;
+      cell.onclick = (function(n) { return function() { toggleCell(n); }; })(num);
+      row.appendChild(cell);
+    }
+    el.appendChild(row);
+  }
+}
+
+function toggleCell(n) {
+  if (grid1Checked) return;
+  grid1Selected[n] = !grid1Selected[n];
+  var cell = document.getElementById('gc' + n);
+  cell.className = 'grid-cell' + (grid1Selected[n] ? ' selected' : '');
+}
+
+function clearGrid1() {
+  grid1Selected = {};
+  for (var i = 1; i <= 36; i++) {
+    var cell = document.getElementById('gc' + i);
+    if (cell) cell.className = 'grid-cell';
+  }
+  document.getElementById('fb1g').textContent = '';
+  document.getElementById('fb1g').className = 'fb';
+  document.getElementById('gw1').style.display = 'none';
+  grid1Checked = false;
+}
+
+function checkGrid1() {
+  var correctMultiples = {4:1,8:1,12:1,16:1,20:1,24:1,28:1,32:1,36:1};
+  var allCorrect = true;
+  // check each cell
+  for (var i = 1; i <= 36; i++) {
+    var shouldBeSelected = !!correctMultiples[i];
+    var isSelected = !!grid1Selected[i];
+    var cell = document.getElementById('gc' + i);
+    if (shouldBeSelected && isSelected) {
+      cell.className = 'grid-cell correct-cell';
+    } else if (!shouldBeSelected && !isSelected) {
+      cell.className = 'grid-cell';
+    } else {
+      cell.className = 'grid-cell wrong-cell';
+      allCorrect = false;
+    }
+  }
+  var fb = document.getElementById('fb1g');
+  if (allCorrect) {
+    fb.textContent = '🌟 Perfect! All 9 multiples of 4 found: 4, 8, 12, 16, 20, 24, 28, 32, 36!';
+    fb.className = 'fb ok';
+    grid1Checked = true;
+    spawnConf(8);
+    setTimeout(function() { reveal('q1b'); }, 600);
+  } else {
+    fb.textContent = 'Some are wrong — red cells need fixing! Multiples of 4 are in the 4 times table.';
+    fb.className = 'fb bad';
+    markMistake('fb1g');
+    document.getElementById('gw1').style.display = 'block';
+  }
+}
+
+// ── CLUE 2: DIVISION + MAYA MISTAKE ──────────────
+var a2aWrong = false;
+
+function chkIn2a() {
+  var val = parseInt(document.getElementById('a2a').value, 10);
+  var fb  = document.getElementById('fb2a');
+  if (isNaN(val)) { fb.textContent = 'Type a number!'; fb.className = 'fb bad'; return; }
+  if (val === 4) {
+    fb.textContent = '4 beanbags per bin! 36 ÷ 9 = 4.';
+    fb.className = 'fb ok';
+    document.getElementById('a2a').disabled = true;
+    spawnConf(5);
+    if (a2aWrong) showComeback('cb2a');
+    // animate the sharing visual
+    animShare2();
+    setTimeout(function() { reveal('q2b'); }, 800);
+  } else {
+    fb.textContent = 'Not quite! Think: 9 × ? = 36. Count in 9s!';
+    fb.className = 'fb bad';
+    a2aWrong = true;
+    markMistake('fb2a');
+    document.getElementById('gw2a').style.display = 'block';
+  }
+}
+
+function buildShare2() {
+  var el = document.getElementById('sv2a');
+  if (!el || el.children.length > 0) return;
+  for (var b = 0; b < 9; b++) {
+    var bk = document.createElement('div'); bk.className = 'sbucket'; bk.setAttribute('data-n', 'Bin '+(b+1));
+    for (var k = 0; k < 4; k++) {
+      var it = document.createElement('span'); it.className = 'sbi'; it.textContent = '🟡';
+      bk.appendChild(it);
+    }
+    el.appendChild(bk);
+  }
+}
+
+function animShare2() {
+  var items = document.querySelectorAll('#sv2a .sbi');
+  items.forEach(function(it, i) {
+    setTimeout(function() { it.classList.add('in'); }, i * 60 + 200);
+  });
+}
+
+// ── CLUE 3: LOGIC PUZZLE ─────────────────────────
+
+function resetLogic() {
+  // nothing to reset — clue 3 is always fully visible
+}
+
+function pick3(name) {
+  var fb = document.getElementById('fb3');
+  var cards = document.querySelectorAll('.suspect-card');
+  cards.forEach(function(c) { c.classList.remove('confirmed','eliminated'); });
+  if (name === 'Theo') {
+    document.getElementById('sc-theo').classList.add('confirmed');
+    fb.textContent = 'Yes! Theo had PE, was running in the corridor, and his story fits every fact!';
+    fb.className = 'fb ok';
+    spawnConf(6);
+  } else {
+    document.getElementById('sc-' + name.toLowerCase()).classList.add('eliminated');
+    fb.textContent = name + ' was in ' + (name === 'Priya' ? 'art class' : 'the library') + ' — that alibi checks out. Try again!';
+    fb.className = 'fb bad';
+  }
+}
+
+function pick3b(el, picked) {
+  var sibs = document.querySelectorAll('#o3b .opt');
+  sibs.forEach(function(b) { b.disabled = true; });
+  var fb = document.getElementById('fb3b');
+  if (picked === '54') {
+    el.className = 'opt ok';
+    fb.textContent = '54 metres! 9 x 6 = 54. That is definitely fast enough to bump a cabinet!';
+    fb.className = 'fb ok';
+    spawnConf(6);
+    document.getElementById('nx3').style.display = 'inline-block';
+  } else {
+    el.className = 'opt bad';
+    fb.textContent = 'Not quite! Try: 5x6=30, then 4x6=24, then add them together!';
+    fb.className = 'fb bad';
+    setTimeout(function() {
+      el.className = 'opt';
+      sibs.forEach(function(b) { b.disabled = false; });
+    }, 900);
+  }
+}
+
+// ── CLUE 4: FRACTION BUILDER ─────────────────────
+var frac1Shaded = 0;
+var frac1Checked = false;
+
+function buildFracTiles() {
+  var el = document.getElementById('fracTiles1');
+  if (!el || el.children.length > 0) return;
+  for (var i = 0; i < 5; i++) {
+    (function(idx) {
+      var tile = document.createElement('div');
+      tile.className = 'frac-tile';
+      tile.textContent = (idx + 1);
+      tile.id = 'ft' + idx;
+      tile.onclick = function() {
+        if (frac1Checked) return;
+        tile.classList.toggle('shaded');
+        frac1Shaded = document.querySelectorAll('#fracTiles1 .frac-tile.shaded').length;
+        document.getElementById('fracDisplay1').textContent = frac1Shaded + '/5';
+      };
+      el.appendChild(tile);
+    })(i);
+  }
+}
+
+function checkFrac1() {
+  var shaded = document.querySelectorAll('#fracTiles1 .frac-tile.shaded').length;
+  var fb = document.getElementById('fb4a');
+  if (shaded === 2) {
+    fb.textContent = 'Perfect! 2 out of 5 shaded = 2/5. You built the fraction!';
+    fb.className = 'fb ok';
+    frac1Checked = true;
+    spawnConf(5);
+    setTimeout(function() { reveal('q4b'); }, 600);
+  } else {
+    fb.textContent = 'You shaded ' + shaded + ' tiles, but 2/5 means exactly 2 shaded out of 5. Try again!';
+    fb.className = 'fb bad';
+    markMistake('fb4a');
+    document.getElementById('gw4').style.display = 'block';
+  }
+}
+
+// ── CLUE 5: INPUT CHECKER ────────────────────────
+// Override chkIn for clue 5a to show growth messages
+var a5aWrong = false;
+document.addEventListener('DOMContentLoaded', function() {
+  // Re-bind chkIn for a5a to track mistakes
+  var btn5a = document.querySelector('[onclick="chkIn(\'a5a\',2,\'fb5a\',\'2 chairs per row! Now for the second part...\',\'Think: 4 × ? = 8.\',\'q5b\',null)"]');
+  // The generic chkIn already handles it; just ensure growth messages show
+});
+
+// ── CONFETTI ─────────────────────────────────────
+function spawnConf(n) {
+  var cols = ['#f5c842','#4ecdc4','#e8614a','#6bcb77','#c084fc','#f0ece0','#e8b020'];
+  for (var i = 0; i < n; i++) {
+    (function() {
+      var p = document.createElement('div'); p.className = 'conf';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.width = (7 + Math.random() * 7) + 'px';
+      p.style.height = (8 + Math.random() * 12) + 'px';
+      p.style.background = cols[Math.floor(Math.random() * cols.length)];
+      p.style.setProperty('--cd', (1.2 + Math.random() * 1.4) + 's');
+      p.style.setProperty('--cdel', (Math.random() * 0.6) + 's');
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+      document.body.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 3000);
+    })();
+  }
+}
+
+function celebrate() {
+  for (var i = 0; i < 7; i++) {
+    (function(d) { setTimeout(function() { spawnConf(16); }, d); })(i * 220);
+  }
+}
+
+updTrail(0);
+</script>
 </body>
 </html>
