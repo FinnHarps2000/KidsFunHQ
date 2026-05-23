@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detective Maya – The Case of the Missing Manta Ray</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   DEEP OCEAN / VANCOUVER AQUARIUM AESTHETIC
+   Midnight navy · Bioluminescent teal · Amber warm glow
+   Watery, alive, immersive
+═══════════════════════════════════════════════ */
+:root {
+  --deep:   #060d1f;
+  --navy:   #0a1628;
+  --panel:  #0d1f3c;
+  --teal:   #00d4aa;
+  --teal2:  #00a885;
+  --blue:   #0090e0;
+  --purple: #7c3aed;
+  --purp2:  #a855f7;
+  --amber:  #f59e0b;
+  --amber2: #fbbf24;
+  --coral:  #ff6b6b;
+  --green:  #10b981;
+  --white:  #e8f4f8;
+  --muted:  #6b8caa;
+  --border: 2.5px solid rgba(0,212,170,.4);
+  --borderbright: 2.5px solid var(--teal);
+  --sh:     0 0 20px rgba(0,212,170,.15);
+  --r:      16px;
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--deep);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── WATER CAUSTICS BACKGROUND ─────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0,144,224,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 70%, rgba(124,58,237,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 50% 40%, rgba(0,212,170,.04) 0%, transparent 70%);
+}
+
+/* BUBBLES */
+.bubble {
+  position: fixed; border-radius: 50%;
+  border: 1.5px solid rgba(0,212,170,.25);
+  pointer-events: none; z-index: 0;
+  animation: bubbleRise var(--bd,12s) var(--bdel,0s) linear infinite;
+}
+@keyframes bubbleRise {
+  0%   { transform: translateY(0) scale(1);   opacity:.5; }
+  50%  { transform: translateY(-40vh) scale(1.1); opacity:.3; }
+  100% { transform: translateY(-100vh) scale(.8); opacity:0; }
+}
+
+/* PROGRESS */
+.prog-rail { position:fixed;top:0;left:0;width:100%;height:7px;background:var(--navy);z-index:200; }
+.prog-fill { height:100%;background:linear-gradient(90deg,var(--teal),var(--purp2),var(--amber));transition:width .6s ease; }
+
+/* SCREENS */
+.screen { display:none;position:relative;z-index:1;min-height:100vh;padding:24px 14px 50px;flex-direction:column;align-items:center;justify-content:center;gap:16px; }
+.screen.active { display:flex; }
+
+/* ── TITLE ──────────────────────────────────────── */
+#s-title { text-align:center; gap:18px; }
+
+.manta-anim {
+  font-size:80px; display:block;
+  animation: mantaSwim 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(0,212,170,.6));
+}
+@keyframes mantaSwim {
+  0%,100% { transform: translateX(0) rotate(-4deg) translateY(0); }
+  30%      { transform: translateX(12px) rotate(2deg) translateY(-8px); }
+  60%      { transform: translateX(-8px) rotate(-2deg) translateY(4px); }
+}
+
+h1.tt { font-family:'Fredoka',cursive;font-size:clamp(2.2rem,5.5vw,3.8rem);color:var(--teal);line-height:1.05;text-shadow:0 0 30px rgba(0,212,170,.5); }
+h2.ts { font-family:'Fredoka',cursive;font-size:clamp(1rem,3vw,1.5rem);color:var(--amber2); }
+
+.intro-panel {
+  max-width:540px;background:var(--panel);border:var(--borderbright);border-radius:var(--r);
+  box-shadow:var(--sh),inset 0 1px 0 rgba(255,255,255,.05);
+  padding:18px 22px;font-size:.98rem;line-height:1.8;font-weight:700;
+}
+.intro-panel strong { color:var(--teal); }
+
+/* TRAIL */
+.trail { display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center; }
+.tdot {
+  width:44px;height:44px;border-radius:50%;border:2px solid rgba(0,212,170,.3);
+  background:var(--panel);display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;transition:all .3s;box-shadow:0 0 10px rgba(0,212,170,.1);
+}
+.tdot.done   { background:var(--teal2);border-color:var(--teal);box-shadow:0 0 12px rgba(0,212,170,.4); }
+.tdot.active { background:var(--amber);border-color:var(--amber2);animation:tdPulse 1s ease-in-out infinite; }
+@keyframes tdPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.14)} }
+
+/* ── BUTTONS ────────────────────────────────────── */
+.btn { font-family:'Fredoka',cursive;font-size:1.3rem;padding:12px 28px;border:var(--borderbright);border-radius:50px;cursor:pointer;transition:all .15s;letter-spacing:.3px;box-shadow:0 0 14px rgba(0,212,170,.2); }
+.btn:hover  { transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,212,170,.3); }
+.btn:active { transform:translateY(1px); }
+.btn-teal   { background:var(--teal);color:var(--deep); }
+.btn-amber  { background:var(--amber);color:var(--deep); }
+.btn-purple { background:var(--purple);color:#fff; }
+.btn-coral  { background:var(--coral);color:#fff; }
+.btn-sm     { font-size:.95rem;padding:8px 18px; }
+.btn-next   { display:none;margin-top:14px; }
+.btn-ghost  { background:transparent;border-color:var(--muted);color:var(--muted); }
+
+/* ── CLUE CARD ──────────────────────────────────── */
+.ccard {
+  background:var(--panel);border:var(--borderbright);border-radius:var(--r);
+  box-shadow:var(--sh),inset 0 1px 0 rgba(255,255,255,.04);
+  padding:22px 18px;max-width:720px;width:100%;
+  animation:cardIn .45s cubic-bezier(.34,1.56,.64,1);text-align:center;
+}
+@keyframes cardIn { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:none} }
+
+.loc-tag {
+  display:inline-block;background:linear-gradient(135deg,var(--teal2),var(--blue));
+  color:#fff;font-family:'Fredoka',cursive;font-size:.82rem;letter-spacing:2px;
+  padding:4px 14px;border-radius:8px;border:var(--border);
+  box-shadow:0 0 10px rgba(0,144,224,.3);margin-bottom:10px;text-transform:uppercase;
+}
+.cicon  { font-size:3.2rem;display:block;margin:6px 0;filter:drop-shadow(0 0 10px rgba(0,212,170,.5)); }
+.ctitle { font-family:'Fredoka',cursive;font-size:1.8rem;color:var(--teal);margin-bottom:6px;text-shadow:0 0 20px rgba(0,212,170,.3); }
+
+/* ── MAYA SPEECH ────────────────────────────────── */
+.maya-say {
+  display:flex;gap:12px;align-items:flex-start;
+  background:rgba(13,31,60,.8);border:var(--border);border-radius:var(--r);
+  padding:13px 16px;margin:8px 0;text-align:left;position:relative;
+  backdrop-filter:blur(4px);
+}
+.maya-say.right { flex-direction:row-reverse;text-align:right; }
+.maya-face { font-size:2.2rem;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(0,212,170,.3)); }
+.maya-txt  { font-size:.94rem;line-height:1.75;font-weight:700;color:var(--white); }
+.maya-txt em   { color:var(--teal);font-style:normal;text-decoration:underline wavy var(--teal2); }
+.maya-txt .joke { color:var(--amber2);font-style:italic; }
+.maya-txt .hl   { color:var(--coral);font-weight:900; }
+.maya-txt .va   { color:var(--purp2);font-weight:900; }
+
+/* speech tail */
+.maya-say::before { content:'';position:absolute;left:-17px;top:16px;border:8px solid transparent;border-right-color:rgba(0,212,170,.4); }
+.maya-say::after  { content:'';position:absolute;left:-12px;top:18px;border:6px solid transparent;border-right-color:var(--panel); }
+.maya-say.right::before { left:auto;right:-17px;border-right-color:transparent;border-left-color:rgba(0,212,170,.4); }
+.maya-say.right::after  { left:auto;right:-12px;border-right-color:transparent;border-left-color:var(--panel); }
+
+.maya-think {
+  background:rgba(124,58,237,.15);border:2px solid rgba(124,58,237,.35);border-radius:20px;
+  padding:11px 18px;margin:8px 0;font-size:.91rem;font-weight:700;
+  color:var(--purp2);text-align:center;font-style:italic;
+}
+.maya-think::before { content:'💭  '; font-style:normal; }
+
+/* SPLASH effect */
+.splash-msg {
+  background:rgba(0,144,224,.2);border:2px solid var(--blue);border-radius:var(--r);
+  padding:10px 16px;margin:8px 0;font-size:.9rem;font-weight:700;
+  color:#93c5fd;text-align:center;animation:splashIn .4s ease;
+}
+@keyframes splashIn { from{transform:scaleY(.5) translateY(-10px);opacity:0} to{transform:none;opacity:1} }
+
+/* ── Q PANEL ────────────────────────────────────── */
+.qpanel {
+  background:rgba(6,13,31,.6);border:var(--border);border-radius:var(--r);
+  padding:14px 16px;margin:12px 0;text-align:left;
+  backdrop-filter:blur(4px);
+}
+.qlabel { font-weight:900;font-size:1rem;color:var(--white);margin-bottom:10px; }
+
+/* FEEDBACK */
+.fb { font-family:'Fredoka',cursive;font-size:1.1rem;min-height:26px;margin-top:8px; }
+.fb.ok  { color:var(--green);  animation:fbPop .4s ease; }
+.fb.bad { color:var(--coral);  animation:fbShake .4s ease; }
+@keyframes fbPop   { 0%{transform:scale(.7)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+@keyframes fbShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+
+/* OPTIONS */
+.opts { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0; }
+.opt {
+  font-family:'Fredoka',cursive;font-size:1.15rem;padding:10px 20px;
+  border:var(--border);border-radius:var(--r);
+  background:var(--navy);color:var(--white);cursor:pointer;
+  transition:all .14s;box-shadow:0 0 8px rgba(0,212,170,.08);
+}
+.opt:hover  { background:rgba(0,212,170,.12);border-color:var(--teal);transform:translateY(-2px); }
+.opt.ok  { background:rgba(16,185,129,.25);border-color:var(--green);color:var(--green);pointer-events:none;transform:none; }
+.opt.bad { background:rgba(255,107,107,.2);border-color:var(--coral);color:var(--coral);animation:fbShake .4s; }
+
+/* ANS INPUT */
+.ansin {
+  font-family:'Fredoka',cursive;font-size:1.9rem;width:110px;padding:6px 12px;
+  text-align:center;border:var(--borderbright);border-radius:var(--r);
+  background:var(--navy);color:var(--teal);outline:none;letter-spacing:2px;
+  box-shadow:0 0 10px rgba(0,212,170,.15);
+}
+.ansin:focus { box-shadow:0 0 16px rgba(0,212,170,.3); }
+
+/* ── TEACH PANEL ────────────────────────────────── */
+.teach-tog {
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:rgba(0,168,133,.2);border:var(--border);border-radius:var(--r);
+  color:var(--teal);padding:9px 16px;cursor:pointer;
+  font-family:'Fredoka',cursive;font-size:.98rem;width:100%;margin-bottom:4px;transition:all .14s;
+}
+.teach-tog:hover { background:rgba(0,212,170,.18); }
+.teach-tog .arr  { transition:transform .3s; }
+.teach-tog.open .arr { transform:rotate(180deg); }
+.teach-panel {
+  display:none;background:rgba(0,50,40,.5);border:var(--border);border-radius:var(--r);
+  padding:14px;margin-bottom:10px;backdrop-filter:blur(4px);text-align:left;
+  animation:cardIn .3s ease;
+}
+.teach-panel.show { display:block; }
+.teach-hd { font-family:'Fredoka',cursive;font-size:.98rem;color:var(--teal);margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+.tstep    { display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;padding:8px;background:rgba(0,0,0,.2);border-radius:10px;border:1px solid rgba(0,212,170,.15); }
+.tstep-n  { width:26px;height:26px;border-radius:50%;background:var(--teal2);color:var(--deep);font-family:'Fredoka',cursive;font-size:.88rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700; }
+.tstep-t  { font-size:.9rem;font-weight:700;line-height:1.55;color:var(--white); }
+.tstep-t .em { color:var(--teal);font-size:1.05em; }
+
+/* GROUPS VIS */
+.gvis { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.gpod {
+  border:2px solid rgba(0,212,170,.4);border-radius:12px;padding:8px;
+  background:rgba(0,212,170,.08);display:flex;flex-wrap:wrap;gap:5px;
+  justify-content:center;align-items:center;min-width:52px;position:relative;
+  opacity:0;transform:scale(0);transition:opacity .3s,transform .3s;
+}
+.gpod.pop { opacity:1;transform:scale(1); }
+.gpod::after {
+  content:attr(data-l);position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  font-family:'Fredoka',cursive;font-size:.68rem;background:var(--teal2);color:var(--deep);
+  padding:1px 7px;border-radius:6px;white-space:nowrap;font-weight:700;
+}
+.gi { font-size:1.4rem; }
+
+/* NUMBER LINE */
+.nl-wrap { overflow-x:auto;padding:14px 4px 4px;margin:10px 0; }
+.nl      { display:flex;align-items:flex-end;position:relative;min-width:fit-content; }
+.nl-base { position:absolute;bottom:14px;left:22px;right:22px;height:2px;background:rgba(255,255,255,.3); }
+.nltick  { display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0; }
+.nlnum   { font-family:'Fredoka',cursive;font-size:.85rem;margin-bottom:4px;color:var(--muted); }
+.nlbar   { width:1px;height:12px;background:rgba(255,255,255,.25); }
+.nlmark  { width:34px;height:34px;border-radius:50%;background:var(--teal2);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Fredoka',cursive;font-size:.82rem;color:var(--deep);font-weight:700;margin-bottom:2px;box-shadow:0 0 8px rgba(0,212,170,.4); }
+.nlhop   { position:absolute;border:none;border-top:2px solid var(--amber);height:26px;top:-24px;border-radius:50% 50% 0 0;opacity:.8; }
+.nlhop-l { position:absolute;top:-42px;font-family:'Fredoka',cursive;font-size:.68rem;color:var(--amber);transform:translateX(-50%); }
+
+/* SHARE VIS */
+.share-row  { display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.sbucket {
+  border:2px solid rgba(0,212,170,.4);border-radius:0 0 14px 14px;
+  background:rgba(0,212,170,.06);min-width:66px;min-height:72px;
+  display:flex;flex-direction:column;align-items:center;padding:7px 6px;gap:3px;position:relative;
+}
+.sbucket::before {
+  content:attr(data-n);position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+  font-family:'Fredoka',cursive;font-size:.72rem;background:var(--teal2);color:var(--deep);
+  padding:1px 8px;border-radius:5px;white-space:nowrap;font-weight:700;
+}
+.sbucket.special::before { background:var(--amber); }
+.sbi { font-size:1.25rem;opacity:0;transform:translateY(-8px);transition:all .3s; }
+.sbi.in { opacity:1;transform:none; }
+
+/* REMAINDER VIS */
+.rem-vis  { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.rem-grp  { border:2px solid var(--teal2);border-radius:10px;padding:7px;background:rgba(0,212,170,.07);display:flex;gap:3px; }
+.rem-left {
+  border:2px dashed var(--coral);border-radius:10px;padding:7px;
+  background:rgba(255,107,107,.08);display:flex;gap:3px;position:relative;
+}
+.rem-left::after {
+  content:'Leftover!';position:absolute;top:-17px;left:50%;transform:translateX(-50%);
+  font-family:'Fredoka',cursive;font-size:.67rem;color:var(--coral);white-space:nowrap;
+  background:var(--navy);padding:1px 6px;border:1.5px solid var(--coral);border-radius:5px;
+}
+
+/* BOX METHOD */
+.boxm { border:var(--border);border-radius:10px;overflow:hidden;margin:10px auto;max-width:330px;box-shadow:var(--sh); }
+.boxm-top  { background:rgba(0,212,170,.2);padding:6px;text-align:center;font-family:'Fredoka',cursive;font-size:1rem;color:var(--teal);border-bottom:var(--border); }
+.boxm-row  { display:flex;border-bottom:1px solid rgba(0,212,170,.2); }
+.boxm-row:last-child { border-bottom:none; }
+.boxm-left { background:rgba(0,212,170,.15);width:48px;padding:6px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',cursive;font-size:.95rem;color:var(--teal);border-right:var(--border); }
+.boxm-cell { flex:1;padding:8px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',cursive;font-size:1.05rem;background:rgba(0,0,0,.2);color:var(--white); }
+.boxm-sum  { background:rgba(0,212,170,.2);color:var(--teal);padding:8px;text-align:center;font-family:'Fredoka',cursive;font-size:1rem; }
+
+/* FACT FAMILY */
+.ff-list { display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0; }
+.ffi { background:rgba(0,0,0,.3);border:var(--border);border-radius:8px;padding:5px 13px;font-family:'Fredoka',cursive;font-size:.95rem; }
+.ffi.m { color:var(--teal); }
+.ffi.d { color:var(--amber2); }
+
+/* PIE */
+.pie-row  { display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:12px 0; }
+.pie-wrap { text-align:center; }
+.pie      { width:88px;height:88px;border-radius:50%;border:2px solid rgba(0,212,170,.4);position:relative;overflow:hidden;background:rgba(0,0,0,.3); }
+.pie-lbl  { font-family:'Fredoka',cursive;font-size:.92rem;color:var(--teal);margin-top:6px; }
+.pie-sub  { font-size:.74rem;color:var(--muted); }
+
+/* PENGUIN ROW */
+.penguin-row { display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0; }
+.penguin-card {
+  background:rgba(0,0,0,.35);border:var(--border);border-radius:14px;
+  padding:10px 8px;text-align:center;min-width:70px;font-size:.8rem;color:var(--white);
+  font-weight:700;transition:all .3s;
+}
+.penguin-card .pface { font-size:2.2rem;display:block;margin-bottom:4px; }
+.penguin-card .pname { font-family:'Fredoka',cursive;font-size:.85rem;color:var(--teal); }
+.penguin-card.fed { border-color:var(--green);background:rgba(16,185,129,.12); }
+.penguin-card.drama {
+  border-color:var(--amber);background:rgba(245,158,11,.1);
+  animation:dramaticWobble 1.2s ease-in-out infinite;
+}
+@keyframes dramaticWobble { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+
+/* HIDDEN */
+.hidden-q { opacity:.22;pointer-events:none;transition:opacity .45s; }
+
+/* HINT */
+.hint-tog { font-size:.86rem;font-weight:800;border:var(--border);border-radius:20px;background:transparent;color:var(--muted);padding:5px 16px;cursor:pointer;margin-top:6px;transition:all .15s; }
+.hint-tog:hover { color:var(--teal);border-color:var(--teal); }
+.hint-box { display:none;background:rgba(0,50,40,.6);border:var(--border);border-radius:var(--r);padding:10px 14px;font-size:.88rem;font-weight:700;color:var(--teal);margin-top:8px;text-align:left;animation:cardIn .3s ease;backdrop-filter:blur(4px); }
+
+/* ── WIN ────────────────────────────────────────── */
+#s-win { text-align:center;gap:18px; }
+.win-icon  { font-size:78px;display:block;animation:mantaSwim 2s ease-in-out infinite; }
+.win-title { font-family:'Fredoka',cursive;font-size:clamp(2rem,5vw,3.4rem);color:var(--teal);text-shadow:0 0 30px rgba(0,212,170,.4); }
+.win-box   { max-width:540px;background:var(--panel);border:var(--borderbright);border-radius:var(--r);box-shadow:var(--sh);padding:18px 22px;font-size:.97rem;line-height:1.8;font-weight:700; }
+.skill-row { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
+.spill     { font-family:'Fredoka',cursive;font-size:.92rem;background:rgba(0,212,170,.2);color:var(--teal);border:var(--border);border-radius:30px;padding:5px 14px; }
+
+/* CONFETTI */
+.conf { position:fixed;top:-18px;pointer-events:none;z-index:999;border-radius:3px;animation:cfall var(--cd,2s) var(--cdel,0s) ease-in forwards; }
+@keyframes cfall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+</style>
+</head>
+<body>
+<div class="prog-rail"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<!-- ═══ BUBBLES ═══ -->
+<script>
+(function(){
+  for(var i=0;i<18;i++){
+    var b=document.createElement('div'); b.className='bubble';
+    var sz=4+Math.random()*14;
+    b.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'%;bottom:-'+sz+'px;--bd:'+(8+Math.random()*14)+'s;--bdel:'+(Math.random()*10)+'s;';
+    document.body.appendChild(b);
+  }
+})();
+</script>
+
+<!-- ═══════════ TITLE ═══════════ -->
+<div class="screen active" id="s-title">
+  <span class="manta-anim">🐟</span>
+  <h1 class="tt">Detective Maya</h1>
+  <h2 class="ts">The Case of the Missing Manta Ray</h2>
+  <div style="font-family:'Fredoka',cursive;font-size:.9rem;color:var(--teal);letter-spacing:2px;opacity:.7;">📍 VANCOUVER AQUARIUM</div>
+  <div class="intro-panel">
+    Maya's class is on a school trip to the <strong>Vancouver Aquarium</strong> when the announcement crackles over the speakers: <strong>"Manta the manta ray has disappeared from her tank."</strong> The whole aquarium goes into lockdown mode. Handlers are running. Someone dropped a clipboard. A child is crying about a gift shop penguin. It is absolute chaos. <strong>Maya puts on her detective hat. Figuratively. She doesn't actually own a hat.</strong>
+  </div>
+  <div class="trail">
+    <div class="tdot active" id="td0">🪼</div>
+    <div style="color:var(--muted);font-size:1rem;">▶</div>
+    <div class="tdot" id="td1">🐧</div>
+    <div style="color:var(--muted);font-size:1rem;">▶</div>
+    <div class="tdot" id="td2">🦈</div>
+    <div style="color:var(--muted);font-size:1rem;">▶</div>
+    <div class="tdot" id="td3">🐳</div>
+    <div style="color:var(--muted);font-size:1rem;">▶</div>
+    <div class="tdot" id="td4">🔬</div>
+  </div>
+  <button class="btn btn-teal" onclick="goTo(1)">🔍 Investigate!</button>
+</div>
+
+<!-- ═══════════ CLUE 1 — JELLYFISH GALLERY — MULTIPLICATION ═══════════ -->
+<div class="screen" id="s-1">
+  <div class="ccard">
+    <div class="loc-tag">🪼 Jellyfish Gallery — Clue 1 of 5</div>
+    <span class="cicon">🪼</span>
+    <div class="ctitle">Glowing Witnesses!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Maya walks into the jellyfish gallery and immediately forgets what she was doing. <span class="joke">They're glowing. They're all just... gently glowing. In purple and blue. Maya stands there for a full twelve seconds doing nothing useful at all.</span></div>
+    </div>
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt"><em>Focus. Manta is missing.</em> A keeper rushes past and says Manta was last spotted near <em>this gallery</em>. A clue is taped to the nearest tank — but it's a <em>maths problem</em>, because apparently the staff have a lot of time on their hands.</div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🪼 There are 5 jellyfish tanks. Each tank has 8 jellyfish. How many jellyfish are there in total?</div>
+
+      <button class="teach-tog" onclick="togT('t1')">
+        <span>📖 Maya explains: "Multiplication — same as times!"</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t1">
+        <div class="teach-hd">🌟 Multiplication just means "groups of"!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">5 tanks, 8 jellyfish each. That's <span class="em">5 groups of 8</span>. Multiplication — or times — means we're adding the same number over and over!</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Watch the groups appear — each pod is one tank:</div></div>
+        <div class="gvis" id="gv1"></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Skip count in 8s: <span class="em">8, 16, 24, 32, 40</span>. Five jumps of 8 = 40!</div></div>
+        <div class="nl-wrap" id="nl1"></div>
+        <div class="tstep"><div class="tstep-n">4</div><div class="tstep-t">5 × 8 = <span class="em">40</span>. "Multiplied by" is just a fancier way of saying "times"!</div></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.2rem;">5 × 8 =</span>
+        <input class="ansin" id="a1" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-teal btn-sm" onclick="chkIn('a1',40,'fb1','40 jellyfish! Maya tears her eyes away from the glow and keeps moving.','Try again! Count in 8s: 8, 16, 24, 32, 40. Five jumps!','q1b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb1"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q1b">
+      <div class="maya-say" style="margin-bottom:10px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">The note on the tank says: <em>"Manta visited here at feeding time. There are 6 rows of feeding markers on the floor, with 7 markers in each row."</em> <span class="joke">Who designs this clue system? A very organised criminal, apparently.</span></div>
+      </div>
+      <div class="qlabel">🧮 6 rows × 7 markers. What is 6 multiplied by 7? (Multiplied — same as times!)</div>
+      <div class="opts" id="o1b">
+        <button class="opt" onclick="chkOp(this,'36','42','fb1b','42 markers! 6 × 7 = 42. The trail leads to Penguin Cove!','Count 7 six times: 7, 14, 21, 28, 35, 42!',null,'nx1')">36</button>
+        <button class="opt" onclick="chkOp(this,'42','42','fb1b','42 markers! 6 × 7 = 42. The trail leads to Penguin Cove!','Count 7 six times: 7, 14, 21, 28, 35, 42!',null,'nx1')">42</button>
+        <button class="opt" onclick="chkOp(this,'48','42','fb1b','42 markers! 6 × 7 = 42. The trail leads to Penguin Cove!','Count 7 six times: 7, 14, 21, 28, 35, 42!',null,'nx1')">48</button>
+        <button class="opt" onclick="chkOp(this,'35','42','fb1b','42 markers! 6 × 7 = 42. The trail leads to Penguin Cove!','Count 7 six times: 7, 14, 21, 28, 35, 42!',null,'nx1')">35</button>
+      </div>
+      <div class="fb" id="fb1b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h1')">💡 Hint</button>
+    <div class="hint-box" id="h1">Multiplication = times = groups of! For 5×8: think of 5 groups of 8 things. Count up: 8, 16, 24, 32, 40.</div>
+    <button class="btn btn-teal btn-next" id="nx1" onclick="goTo(2)">Follow Manta's trail →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 2 — PENGUIN COVE — DIVISION + REMAINDERS ═══════════ -->
+<div class="screen" id="s-2">
+  <div class="ccard">
+    <div class="loc-tag">🐧 Penguin Cove — Clue 2 of 5</div>
+    <span class="cicon">🐧</span>
+    <div class="ctitle">Doug Has Feelings About Fish.</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Maya arrives at Penguin Cove. The keeper looks frazzled. <span class="joke">"We're trying to feed them but the fish won't divide evenly and DOUG is being very dramatic about it."</span> One penguin at the end is staring at the wall with his flippers crossed. His name tag says <em class="va">DOUG</em>.</div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🐟 The keeper has 26 fish to share equally between 4 penguins. How many does each penguin get? And how many fish are left over?</div>
+
+      <button class="teach-tog" onclick="togT('t2a')">
+        <span>📖 Division with remainders — Maya explains!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t2a">
+        <div class="teach-hd">🌟 Division = sharing equally. But sometimes things don't divide perfectly!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">Share 26 fish into 4 equal groups. Ask: <span class="em">4 × ? = something close to 26</span>? Count: 4×6=24. So 6 fish each!</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">4 groups of 6 = 24. We had 26. So 26 − 24 = <span class="em">2 left over</span>. Those 2 fish are the remainder!</div></div>
+        <div class="rem-vis" id="rv2"></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">So 26 ÷ 4 = <span class="em">6 remainder 2</span>. Check: (6 × 4) + 2 = 24 + 2 = 26 ✅</div></div>
+        <div class="tstep"><div class="tstep-n">4</div><div class="tstep-t">Doug gets 6 fish. Doug is still not happy. This is about something deeper than fish, and Maya does not have time to unpack it.</div></div>
+      </div>
+
+      <div class="penguin-row" id="penguinRow"></div>
+
+      <div class="opts" id="o2a">
+        <button class="opt" onclick="chkOp(this,'5r2','6r2','fb2a','6 remainder 2! Each penguin gets 6 fish, with 2 left over. Doug receives his 6 fish and continues to stare at the wall.','Try: 4×6=24. 26-24=? How many left over?','q2b',null)">5 remainder 2</button>
+        <button class="opt" onclick="chkOp(this,'6r2','6r2','fb2a','6 remainder 2! Each penguin gets 6 fish, with 2 left over. Doug receives his 6 fish and continues to stare at the wall.','Try: 4×6=24. 26-24=? How many left over?','q2b',null)">6 remainder 2</button>
+        <button class="opt" onclick="chkOp(this,'7r0','6r2','fb2a','6 remainder 2! Each penguin gets 6 fish, with 2 left over. Doug receives his 6 fish and continues to stare at the wall.','Try: 4×6=24. 26-24=? How many left over?','q2b',null)">7 remainder 0</button>
+        <button class="opt" onclick="chkOp(this,'6r3','6r2','fb2a','6 remainder 2! Each penguin gets 6 fish, with 2 left over. Doug receives his 6 fish and continues to stare at the wall.','Try: 4×6=24. 26-24=? How many left over?','q2b',null)">6 remainder 3</button>
+      </div>
+      <div class="fb" id="fb2a"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q2b">
+      <div class="maya-say" style="margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">The keeper hands Maya a note found near the exhibit. It mentions Manta heading toward the <em>shark tunnel</em>. But first: one more division clue! <span class="joke">Doug watches Maya go. His expression says: "I too am investigating something. My own feelings."</span></div>
+      </div>
+      <div class="qlabel">🧮 45 fish are shared between 9 penguins. How many each? (Division = sharing equally — the reverse of times!)</div>
+
+      <button class="teach-tog" onclick="togT('t2b')">
+        <span>📖 The multiplication link — use it!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t2b">
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">45 ÷ 9 — think backwards: <span class="em">9 × ? = 45</span>. Count in 9s: 9, 18, 27, 36, <span class="em">45</span>. That's 5 jumps!</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">So 45 ÷ 9 = <span class="em">5</span>. Fact family: 9×5=45, 5×9=45, 45÷9=5, 45÷5=9.</div></div>
+        <div class="ff-list">
+          <span class="ffi m">9 × 5 = 45</span>
+          <span class="ffi m">5 × 9 = 45</span>
+          <span class="ffi d">45 ÷ 9 = 5</span>
+          <span class="ffi d">45 ÷ 5 = 9</span>
+        </div>
+      </div>
+
+      <div class="opts" id="o2b">
+        <button class="opt" onclick="chkOp(this,'4','5','fb2b','5 fish each! 45 ÷ 9 = 5. The sharks await!','Think: 9 × ? = 45. Count in 9s!',null,'nx2')">4</button>
+        <button class="opt" onclick="chkOp(this,'5','5','fb2b','5 fish each! 45 ÷ 9 = 5. The sharks await!','Think: 9 × ? = 45. Count in 9s!',null,'nx2')">5</button>
+        <button class="opt" onclick="chkOp(this,'6','5','fb2b','5 fish each! 45 ÷ 9 = 5. The sharks await!','Think: 9 × ? = 45. Count in 9s!',null,'nx2')">6</button>
+        <button class="opt" onclick="chkOp(this,'9','5','fb2b','5 fish each! 45 ÷ 9 = 5. The sharks await!','Think: 9 × ? = 45. Count in 9s!',null,'nx2')">9</button>
+      </div>
+      <div class="fb" id="fb2b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h2')">💡 Hint</button>
+    <div class="hint-box" id="h2">Division is sharing equally! For 26÷4: how many 4s fit in 26? 4×6=24, so 6 each with 2 left over. For 45÷9: think 9×?=45!</div>
+    <button class="btn btn-teal btn-next" id="nx2" onclick="goTo(3)">Into the shark tunnel! →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 3 — SHARK TUNNEL — BOX METHOD ═══════════ -->
+<div class="screen" id="s-3">
+  <div class="ccard">
+    <div class="loc-tag">🦈 The Shark Tunnel — Clue 3 of 5</div>
+    <span class="cicon">🦈</span>
+    <div class="ctitle">Definitely Not Scared.</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Maya steps into the underwater shark tunnel. It is a glass tube. There are sharks. Above her. Around her. A large one does a slow lap of the tunnel. <span class="joke">Maya is fine. She is absolutely fine. Everything is fine.</span></div>
+    </div>
+    <div class="maya-think">"That shark just looked at me. It definitely looked directly at me. I'm going to solve this clue very quickly and then leave at a completely normal pace that is not running."</div>
+
+    <div class="qpanel">
+      <div class="qlabel">🦈 A clue tag on the tunnel wall: "This tunnel has 8 rows of floor tiles, 9 tiles in each row. How many tiles in total?" (Multiplied means times — same thing!)</div>
+
+      <button class="teach-tog" onclick="togT('t3a')">
+        <span>📖 The Box Method — break big numbers apart!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t3a">
+        <div class="teach-hd">🌟 Split it into easier parts!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">8 × 9 feels big. Split 9 into <span class="em">5 + 4</span> — two easier numbers!</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Work out each part: <span class="em">8 × 5 = 40</span> and <span class="em">8 × 4 = 32</span>.</div></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Add them together: 40 + 32 = <span class="em">72</span>. So 8 × 9 = 72!</div></div>
+        <div class="boxm">
+          <div class="boxm-top">9 = 5 + 4</div>
+          <div class="boxm-row">
+            <div class="boxm-left">× 8</div>
+            <div class="boxm-cell">8 × 5 = <b>40</b></div>
+            <div class="boxm-cell">8 × 4 = <b>32</b></div>
+          </div>
+          <div class="boxm-sum">40 + 32 = 72</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.2rem;">8 × 9 =</span>
+        <input class="ansin" id="a3" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-teal btn-sm" onclick="chkIn('a3',72,'fb3','72 tiles! Maya does not look up at the sharks. She is very focused on maths right now.','Try the box: 8×5=40, 8×4=32, then add!','q3b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb3"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q3b">
+      <div class="maya-say" style="margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Maya finds a second tag further along the tunnel. <span class="joke">She walks faster. One of the sharks appears to be following along, curious. "It's fine," Maya tells herself. "They're behind glass." She walks faster anyway.</span></div>
+      </div>
+      <div class="qlabel">🧮 Now try: 7 × 8 = ? Use the box method yourself! (Split 8 into 5 + 3)</div>
+
+      <button class="teach-tog" onclick="togT('t3b')">
+        <span>📖 Your turn — the box method for 7 × 8</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t3b">
+        <div class="boxm">
+          <div class="boxm-top">8 = 5 + 3</div>
+          <div class="boxm-row">
+            <div class="boxm-left">× 7</div>
+            <div class="boxm-cell">7 × 5 = <b>35</b></div>
+            <div class="boxm-cell">7 × 3 = <b>21</b></div>
+          </div>
+          <div class="boxm-sum">35 + 21 = ?</div>
+        </div>
+      </div>
+
+      <div class="opts" id="o3b">
+        <button class="opt" onclick="chkOp(this,'54','56','fb3b','56! 7×5=35 and 7×3=21. 35+21=56. Maya exits the tunnel at a brisk professional pace.','Try: 7×5=35, then 7×3=21. Now add 35+21!',null,'nx3')">54</button>
+        <button class="opt" onclick="chkOp(this,'56','56','fb3b','56! 7×5=35 and 7×3=21. 35+21=56. Maya exits the tunnel at a brisk professional pace.','Try: 7×5=35, then 7×3=21. Now add 35+21!',null,'nx3')">56</button>
+        <button class="opt" onclick="chkOp(this,'63','56','fb3b','56! 7×5=35 and 7×3=21. 35+21=56. Maya exits the tunnel at a brisk professional pace.','Try: 7×5=35, then 7×3=21. Now add 35+21!',null,'nx3')">63</button>
+        <button class="opt" onclick="chkOp(this,'49','56','fb3b','56! 7×5=35 and 7×3=21. 35+21=56. Maya exits the tunnel at a brisk professional pace.','Try: 7×5=35, then 7×3=21. Now add 35+21!',null,'nx3')">49</button>
+      </div>
+      <div class="fb" id="fb3b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h3')">💡 Hint</button>
+    <div class="hint-box" id="h3">Box method: split the second number into 5 + something. For 8×9: split 9 into 5+4. Do 8×5=40 and 8×4=32. Add: 72!</div>
+    <button class="btn btn-teal btn-next" id="nx3" onclick="goTo(4)">To Beluga Bay! →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 4 — BELUGA BAY — FRACTIONS ═══════════ -->
+<div class="screen" id="s-4">
+  <div class="ccard">
+    <div class="loc-tag">🐳 Beluga Bay — Clue 4 of 5</div>
+    <span class="cicon">🐳</span>
+    <div class="ctitle">The Belugas Have No Respect.</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Maya arrives at Beluga Bay. The three belugas are called Luna, Nanuq, and Steve. <span class="joke">Steve is eyeing Maya in a way that suggests he has done this before.</span> A clue card is taped to the observation window.</div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🐳 The beluga tank holds 24 buckets of water. The keepers have refilled 3/8 of the tank today. How many buckets is that? (3/8 of 24 = ?)</div>
+
+      <button class="teach-tog" onclick="togT('t4a')">
+        <span>📖 Fractions of amounts — "of" means divide!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t4a">
+        <div class="teach-hd">🌟 Finding a fraction of a number!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">3/8 of 24</span>. The bottom number (8) tells us how many equal groups to split into. So: 24 ÷ 8 = <span class="em">3</span>. That is one eighth (1/8).</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">The top number (3) tells us how many of those groups we want. So 3 × 3 = <span class="em">9</span>. That is three eighths!</div></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Shortcut: <span class="em">divide by the bottom, multiply by the top</span>. 24 ÷ 8 = 3, then 3 × 3 = 9!</div></div>
+        <div class="pie-row" id="pie4a"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.2rem;">3/8 of 24 =</span>
+        <input class="ansin" id="a4" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-teal btn-sm" onclick="chkIn('a4',9,'fb4','9 buckets! Divide by 8 to get 3, then multiply by 3 to get 9!','Try: 24÷8=3 (one eighth). Then 3×3=9 (three eighths)!','q4b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb4"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q4b">
+      <div class="splash-msg">💦 SPLASH! Steve the beluga soaks Maya's notebook. She stares at him. He stares back. He does not look sorry.</div>
+      <div class="maya-say" style="margin-top:8px;margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt"><span class="joke">"Steven."</span> Maya says it very calmly. <span class="joke">Steve blows a small bubble. This is not an apology. This is a statement.</span> Maya finds another clue card — a dry one, mercifully — tucked behind the tank.</div>
+      </div>
+      <div class="qlabel">🧩 There are 20 fish in the feeding bucket. Luna eats 1/4 of them and Nanuq eats 2/5 of them. How many does Luna eat? (1/4 of 20)</div>
+
+      <button class="teach-tog" onclick="togT('t4b')">
+        <span>📖 Same trick: divide by bottom, multiply by top!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t4b">
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">1/4 of 20</span>: divide 20 into 4 equal groups. 20 ÷ 4 = <span class="em">5</span>.</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">We want 1 of those groups, so the answer is just <span class="em">5</span>. Luna eats 5 fish!</div></div>
+        <div class="share-row" id="sv4b"></div>
+      </div>
+
+      <div class="opts" id="o4b">
+        <button class="opt" onclick="chkOp(this,'4','5','fb4b','5 fish! 1/4 of 20 = 20÷4 = 5. Luna is happy. Steve is still watching.','Try: divide 20 into 4 equal groups. 20÷4=?',null,'nx4')">4</button>
+        <button class="opt" onclick="chkOp(this,'5','5','fb4b','5 fish! 1/4 of 20 = 20÷4 = 5. Luna is happy. Steve is still watching.','Try: divide 20 into 4 equal groups. 20÷4=?',null,'nx4')">5</button>
+        <button class="opt" onclick="chkOp(this,'8','5','fb4b','5 fish! 1/4 of 20 = 20÷4 = 5. Luna is happy. Steve is still watching.','Try: divide 20 into 4 equal groups. 20÷4=?',null,'nx4')">8</button>
+        <button class="opt" onclick="chkOp(this,'10','5','fb4b','5 fish! 1/4 of 20 = 20÷4 = 5. Luna is happy. Steve is still watching.','Try: divide 20 into 4 equal groups. 20÷4=?',null,'nx4')">10</button>
+      </div>
+      <div class="fb" id="fb4b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h4')">💡 Hint</button>
+    <div class="hint-box" id="h4">For fractions of amounts: divide by the bottom number first, then multiply by the top. For 3/8 of 24: 24÷8=3, then 3×3=9!</div>
+    <button class="btn btn-teal btn-next" id="nx4" onclick="goTo(5)">To the Discovery Centre! →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE 5 — DISCOVERY CENTRE — FACT FAMILIES ═══════════ -->
+<div class="screen" id="s-5">
+  <div class="ccard">
+    <div class="loc-tag">🔬 Discovery Centre — Clue 5 of 5</div>
+    <span class="cicon">🔬</span>
+    <div class="ctitle">Where IS Manta?!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">The head keeper, Dr Tanaka, is in the Discovery Centre surrounded by clipboards. She looks simultaneously relieved and embarrassed. <span class="joke">"We may have... found Manta,"</span> she says. <span class="joke">"She was behind the large decorative coral the whole time. She does this sometimes. She likes it back there. We call it her little holiday."</span></div>
+    </div>
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Maya stares at Dr Tanaka. <span class="joke">"She goes on holiday. Inside her own tank." "She's very independent." "She's a manta ray." "A very independent manta ray."</span></div>
+    </div>
+    <div class="maya-think">"I tracked a manta ray who was just... hiding behind a rock. I am the world's greatest detective."</div>
+
+    <div class="qpanel">
+      <div class="qlabel">📋 To officially close the case, Maya must fill in the aquarium incident report. It uses fact families! Complete these to submit the report.</div>
+
+      <button class="teach-tog" onclick="togT('t5a')">
+        <span>📖 Fact Family Triangles — × and ÷ are the same family!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t5a">
+        <div class="teach-hd">🌟 Three numbers, four facts!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">Any three numbers that multiply together form a family. Example: 4, 6 and 24. Because 4 × 6 = 24!</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">From those three numbers you get <span class="em">four facts</span>: two multiplication and two division. They all use the same three numbers!</div></div>
+        <div class="ff-list">
+          <span class="ffi m">4 × 6 = 24</span>
+          <span class="ffi m">6 × 4 = 24</span>
+          <span class="ffi d">24 ÷ 4 = 6</span>
+          <span class="ffi d">24 ÷ 6 = 4</span>
+        </div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">The rule: if you know one fact, you know all four! <span class="em">Multiplication and division are just the same family, going in different directions.</span></div></div>
+      </div>
+
+      <div class="qlabel" style="margin-top:10px;">🔢 The numbers 3, 7 and 21 are a fact family. What is 21 ÷ 7?</div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.2rem;">21 ÷ 7 =</span>
+        <input class="ansin" id="a5" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-teal btn-sm" onclick="chkIn('a5',3,'fb5','3! Because 7 × 3 = 21. The fact family works!','Think: 7 × ? = 21. Count in 7s!','q5b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb5"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q5b">
+      <div class="maya-say" style="margin-bottom:8px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Dr Tanaka leads Maya to Manta's tank. Sure enough, Manta is floating serenely behind a large coral, looking approximately zero percent guilty. <span class="joke">She flaps one wing lazily. It might be a wave. It might just be swimming. It's impossible to tell with manta rays.</span></div>
+      </div>
+      <div class="qlabel">🏁 Final report question: The aquarium has 6 staff working on the case. Each spent 8 minutes searching. How many total minutes? Then: 48 minutes divided into 6 equal shifts — how long is each shift? (Show the fact family!)</div>
+
+      <button class="teach-tog" onclick="togT('t5b')">
+        <span>📖 Use the fact family — multiply then divide!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t5b">
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">6 × 8 = <span class="em">48</span> total minutes. (Split: 5×8=40, 1×8=8, add: 48!)</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Now 48 ÷ 6 = ? It's in the same fact family! If 6 × 8 = 48, then 48 ÷ 6 = <span class="em">8</span>!</div></div>
+        <div class="ff-list">
+          <span class="ffi m">6 × 8 = 48</span>
+          <span class="ffi m">8 × 6 = 48</span>
+          <span class="ffi d">48 ÷ 6 = 8</span>
+          <span class="ffi d">48 ÷ 8 = 6</span>
+        </div>
+      </div>
+
+      <div class="qlabel">So 48 ÷ 6 = ?</div>
+      <div class="opts" id="o5b">
+        <button class="opt" onclick="chkOp(this,'6','8','fb5b','8 minutes each! 48÷6=8. Case officially closed! Manta continues her holiday.','Think: 6 × ? = 48. Or: you just worked out 6×8=48 above!',null,'nx5')">6</button>
+        <button class="opt" onclick="chkOp(this,'7','8','fb5b','8 minutes each! 48÷6=8. Case officially closed! Manta continues her holiday.','Think: 6 × ? = 48. Or: you just worked out 6×8=48 above!',null,'nx5')">7</button>
+        <button class="opt" onclick="chkOp(this,'8','8','fb5b','8 minutes each! 48÷6=8. Case officially closed! Manta continues her holiday.','Think: 6 × ? = 48. Or: you just worked out 6×8=48 above!',null,'nx5')">8</button>
+        <button class="opt" onclick="chkOp(this,'9','8','fb5b','8 minutes each! 48÷6=8. Case officially closed! Manta continues her holiday.','Think: 6 × ? = 48. Or: you just worked out 6×8=48 above!',null,'nx5')">9</button>
+      </div>
+      <div class="fb" id="fb5b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h5')">💡 Hint</button>
+    <div class="hint-box" id="h5">Fact families: if you know 7×3=21, you know 21÷7=3 for free! For the final: 6×8=48, so 48÷6 must be 8. Same family, opposite direction!</div>
+    <button class="btn btn-coral btn-next" id="nx5" onclick="goTo('win')">🐟 Close the Case!</button>
+  </div>
+</div>
+
+<!-- ═══════════ WIN ═══════════ -->
+<div class="screen" id="s-win">
+  <span class="win-icon">🐟</span>
+  <div class="win-title">Case Closed — Manta Found!</div>
+  <div class="maya-say" style="max-width:540px;">
+    <span class="maya-face">🧒‍♀️</span>
+    <div class="maya-txt">Maya filed her report. It read: <em>"Manta Ray found behind coral. No foul play. Manta was simply having a moment. Estimated duration: 4 hours. Suspects: none. Investigation cost: several solved maths problems, one soggy notebook (Steve), one slightly terrifying shark tunnel."</em></div>
+  </div>
+  <div class="win-box">
+    Dr Tanaka thanked Maya with a <strong>lifetime pass to the Vancouver Aquarium</strong> and a stuffed manta ray toy. <span style="color:var(--amber2)">Doug the penguin, upon hearing the case was closed, turned back around to face the group. Progress.</span><br><br>
+    Maya took the bus back with her class. When her teacher asked what she'd learned, she said: <span style="color:var(--teal)">"Multiplication is the same as times. Division is just sharing. And Steve the beluga is not to be trusted near open notebooks."</span><br><br>
+    <span style="color:var(--purp2)">The teacher gave her full marks. For the maths. Not for the Steve comment. Though honestly, the Steve comment was also correct.</span>
+  </div>
+  <div class="skill-row">
+    <span class="spill">✖️ Multiplication</span>
+    <span class="spill">➗ Division</span>
+    <span class="spill">🔢 Remainders</span>
+    <span class="spill">📦 Box Method</span>
+    <span class="spill">🍰 Fractions</span>
+    <span class="spill">🔺 Fact Families</span>
+  </div>
+  <button class="btn btn-teal" onclick="location.reload()">🔄 Investigate Again!</button>
+</div>
+
+<script>
+// ── NAV ─────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var id = n === 'win' ? 's-win' : 's-' + n;
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  var done = n === 'win' ? 5 : typeof n === 'number' ? n - 1 : 0;
+  document.getElementById('prog').style.width = (done / 5 * 100) + '%';
+  updTrail(done);
+  if (n === 1) { buildGvis('gv1', 5, 8, '🪼'); buildNL('nl1', 5, 8); }
+  if (n === 2) { buildRem2(); buildPenguins(); }
+  if (n === 4) { buildPie4a(); buildShare4b(); }
+  if (n === 'win') celebrate();
+}
+
+function updTrail(done) {
+  for (var i = 0; i < 5; i++) {
+    var d = document.getElementById('td' + i);
+    d.className = 'tdot';
+    if (i < done) d.classList.add('done');
+    else if (i === done) d.classList.add('active');
+  }
+}
+
+// ── TEACH / HINT ─────────────────────────────────
+function togT(id) {
+  var p = document.getElementById(id);
+  var b = p.previousElementSibling;
+  var open = p.classList.contains('show');
+  p.classList.toggle('show', !open);
+  b.classList.toggle('open', !open);
+}
+function togH(id) {
+  var el = document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// ── REVEAL ───────────────────────────────────────
+function reveal(id) {
+  if (!id) return;
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (el.classList.contains('hidden-q')) el.classList.remove('hidden-q');
+  else el.style.display = 'inline-block';
+}
+
+// ── CHECKERS ─────────────────────────────────────
+function chkIn(inputId, correct, fbId, okMsg, badMsg, revealId, nextId) {
+  var val = parseInt(document.getElementById(inputId).value, 10);
+  var fb  = document.getElementById(fbId);
+  if (isNaN(val)) { fb.textContent = 'Type a number first!'; fb.className = 'fb bad'; return; }
+  if (val === correct) {
+    fb.textContent = okMsg; fb.className = 'fb ok';
+    document.getElementById(inputId).disabled = true;
+    spawnConf(5);
+    if (revealId) setTimeout(function() { reveal(revealId); }, 500);
+    if (nextId)   setTimeout(function() { reveal(nextId); }, 500);
+  } else {
+    fb.textContent = badMsg; fb.className = 'fb bad';
+  }
+}
+
+function chkOp(el, picked, correct, fbId, okMsg, badMsg, revealId, nextId) {
+  var sibs = el.parentNode.querySelectorAll('.opt');
+  sibs.forEach(function(b) { b.disabled = true; });
+  var fb = document.getElementById(fbId);
+  if (picked === correct) {
+    el.className = 'opt ok';
+    fb.textContent = okMsg; fb.className = 'fb ok';
+    spawnConf(6);
+    if (revealId) setTimeout(function() { reveal(revealId); }, 400);
+    if (nextId)   setTimeout(function() { reveal(nextId); }, 400);
+  } else {
+    el.className = 'opt bad';
+    fb.textContent = badMsg; fb.className = 'fb bad';
+    setTimeout(function() {
+      el.className = 'opt';
+      sibs.forEach(function(b) { b.disabled = false; });
+    }, 900);
+  }
+}
+
+// ── VISUALS ──────────────────────────────────────
+
+function buildGvis(id, groups, perGroup, icon) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  for (var g = 0; g < groups; g++) {
+    (function(gi) {
+      var pod = document.createElement('div');
+      pod.className = 'gpod';
+      pod.setAttribute('data-l', 'Tank ' + (gi + 1));
+      for (var i = 0; i < perGroup; i++) {
+        var sp = document.createElement('span');
+        sp.className = 'gi'; sp.textContent = icon;
+        pod.appendChild(sp);
+      }
+      el.appendChild(pod);
+      setTimeout(function() { pod.classList.add('pop'); }, gi * 180);
+    })(g);
+  }
+}
+
+function buildNL(id, jumps, step) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  var total = jumps * step;
+  var wrap = document.createElement('div');
+  wrap.className = 'nl'; wrap.style.position = 'relative';
+  var base = document.createElement('div'); base.className = 'nl-base';
+  wrap.appendChild(base);
+  for (var i = 0; i <= total; i++) {
+    var tick = document.createElement('div'); tick.className = 'nltick';
+    if (i % step === 0 && i > 0) {
+      var mk = document.createElement('div'); mk.className = 'nlmark'; mk.textContent = i; tick.appendChild(mk);
+    }
+    var nb = document.createElement('div'); nb.className = 'nlnum';
+    nb.textContent = (i % step === 0 && i === 0) ? '0' : '';
+    tick.appendChild(nb);
+    var bar = document.createElement('div'); bar.className = 'nlbar'; tick.appendChild(bar);
+    wrap.appendChild(tick);
+  }
+  for (var j = 0; j < jumps; j++) {
+    var hop = document.createElement('div'); hop.className = 'nlhop';
+    var s = j * step, e = (j+1) * step;
+    hop.style.left  = 'calc(' + (s/total*100) + '% + 22px)';
+    hop.style.width = 'calc(' + ((e-s)/total*100) + '%)';
+    wrap.appendChild(hop);
+    var lbl = document.createElement('div'); lbl.className = 'nlhop-l';
+    lbl.textContent = '+' + step;
+    lbl.style.left = 'calc(' + ((s+(e-s)/2)/total*100) + '% + 22px)';
+    wrap.appendChild(lbl);
+  }
+  el.appendChild(wrap);
+}
+
+function buildRem2() {
+  var el = document.getElementById('rv2');
+  if (!el || el.children.length > 0) return;
+  for (var g = 0; g < 4; g++) {
+    var grp = document.createElement('div'); grp.className = 'rem-grp';
+    for (var i = 0; i < 6; i++) {
+      var sp = document.createElement('span'); sp.style.fontSize = '1.3rem'; sp.textContent = '🐟';
+      grp.appendChild(sp);
+    }
+    el.appendChild(grp);
+  }
+  var rem = document.createElement('div'); rem.className = 'rem-left';
+  for (var r = 0; r < 2; r++) {
+    var sr = document.createElement('span'); sr.style.fontSize = '1.3rem'; sr.textContent = '🐟';
+    rem.appendChild(sr);
+  }
+  el.appendChild(rem);
+}
+
+function buildPenguins() {
+  var el = document.getElementById('penguinRow');
+  if (!el || el.children.length > 0) return;
+  var names = ['Pip','Cleo','Roo','Doug'];
+  names.forEach(function(name, i) {
+    var card = document.createElement('div');
+    card.className = 'penguin-card' + (name === 'Doug' ? ' drama' : '');
+    card.innerHTML = '<span class="pface">🐧</span><div class="pname">' + name + '</div>' +
+      (name === 'Doug' ? '<div style="font-size:.7rem;color:var(--amber)">...fine.</div>' : '<div style="font-size:.7rem;color:var(--green)">6 fish ✓</div>');
+    el.appendChild(card);
+    if (name !== 'Doug') {
+      setTimeout(function(c) { return function() { c.classList.add('fed'); }; }(card), i * 300 + 400);
+    }
+  });
+}
+
+function buildPie4a() {
+  var el = document.getElementById('pie4a');
+  if (!el || el.children.length > 0) return;
+  var data = [
+    { label: '3/8 filled', frac: 3/8, color: '#00d4aa' },
+    { label: '5/8 to go',  frac: 5/8, color: 'rgba(0,212,170,.15)' }
+  ];
+  data.forEach(function(d) {
+    var wrap = document.createElement('div'); wrap.className = 'pie-wrap';
+    var deg = d.frac * 360;
+    var pie = document.createElement('div'); pie.className = 'pie';
+    pie.innerHTML = '<svg viewBox="0 0 100 100" style="width:100%;height:100%;">' +
+      '<path d="' + slicePath(deg) + '" fill="' + d.color + '"/>' +
+      '<circle cx="50" cy="50" r="49" fill="none" stroke="rgba(0,212,170,.4)" stroke-width="3"/></svg>';
+    wrap.appendChild(pie);
+    var lbl = document.createElement('div'); lbl.className = 'pie-lbl'; lbl.textContent = d.label; wrap.appendChild(lbl);
+    el.appendChild(wrap);
+  });
+}
+
+function slicePath(deg) {
+  var r=50, cx=50, cy=50;
+  var rad = (deg - 90) * Math.PI / 180;
+  var x = cx + r * Math.cos(rad), y = cy + r * Math.sin(rad);
+  return 'M'+cx+','+cy+' L'+cx+','+(cy-r)+' A'+r+','+r+' 0 '+(deg>180?1:0)+',1 '+x+','+y+' Z';
+}
+
+function buildShare4b() {
+  var el = document.getElementById('sv4b');
+  if (!el || el.children.length > 0) return;
+  for (var b = 0; b < 4; b++) {
+    var bk = document.createElement('div'); bk.className = 'sbucket'; bk.setAttribute('data-n', 'Group '+(b+1));
+    for (var k = 0; k < 5; k++) {
+      var it = document.createElement('span'); it.className = 'sbi'; it.textContent = '🐟';
+      bk.appendChild(it);
+      (function(item, delay) { setTimeout(function() { item.classList.add('in'); }, delay); })(it, (b*5+k)*80+300);
+    }
+    el.appendChild(bk);
+  }
+}
+
+// ── CONFETTI ─────────────────────────────────────
+function spawnConf(n) {
+  var cols = ['#00d4aa','#0090e0','#7c3aed','#f59e0b','#ff6b6b','#fff','#10b981'];
+  for (var i = 0; i < n; i++) {
+    (function() {
+      var p = document.createElement('div'); p.className = 'conf';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.width = (7 + Math.random() * 7) + 'px';
+      p.style.height = (8 + Math.random() * 12) + 'px';
+      p.style.background = cols[Math.floor(Math.random() * cols.length)];
+      p.style.setProperty('--cd', (1.2 + Math.random() * 1.4) + 's');
+      p.style.setProperty('--cdel', (Math.random() * 0.6) + 's');
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+      document.body.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 3000);
+    })();
+  }
+}
+
+function celebrate() {
+  for (var i = 0; i < 7; i++) {
+    (function(d) { setTimeout(function() { spawnConf(16); }, d); })(i * 220);
+  }
+}
+
+updTrail(0);
+</script>
+</body>
+</html>

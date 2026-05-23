@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spelling Wordle</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#fdf6ec;--card:#fff;--correct:#5cb85c;--present:#f0ad4e;
+    --absent:#b0b0b0;--empty:#e8e0d5;--border:#d4c9b8;--text:#3a2e22;
+    --accent:#e86a3a;--accent2:#5b9bd5;--accent3:#9b59b6;
+    --shadow:0 4px 18px rgba(60,40,10,0.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 12px 40px}
+  body::before{content:'';position:fixed;inset:0;
+    background-image:radial-gradient(circle,#d4c9b8 1.5px,transparent 1.5px);
+    background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
+  .container{position:relative;z-index:1;width:100%;max-width:600px;
+    display:flex;flex-direction:column;align-items:center;gap:20px}
+  header{text-align:center}
+  h1{font-family:'Fredoka One',cursive;font-size:2.6rem;color:var(--accent);
+    letter-spacing:1px;text-shadow:3px 3px 0 #f7d0b8}
+  .subtitle{font-size:1rem;color:#8a7a68;font-weight:600;margin-top:4px}
+  .btn{padding:10px 22px;border:none;border-radius:12px;font-family:'Fredoka One',cursive;
+    font-size:1.05rem;cursor:pointer;transition:transform .1s,box-shadow .1s;letter-spacing:.5px}
+  .btn:active{transform:translateY(2px)}
+  .btn-add{background:var(--accent2);color:#fff;box-shadow:0 3px 0 #3a7ab0}
+  .btn-add:active{box-shadow:none}
+  .btn-start{background:var(--accent);color:#fff;box-shadow:0 3px 0 #b84d1f;
+    font-size:1.15rem;padding:13px 32px;width:100%;margin-top:4px}
+  .btn-start:active{box-shadow:none}
+  .btn-review{background:var(--accent3);color:#fff;box-shadow:0 3px 0 #6c3483;
+    font-size:1.15rem;padding:13px 32px;width:100%}
+  .btn-review:active{box-shadow:none}
+  .btn-next{background:var(--accent2);color:#fff;box-shadow:0 3px 0 #3a7ab0;
+    font-size:1.1rem;padding:11px 28px}
+  .btn-next:active{box-shadow:none}
+  .btn-sm{background:#f0ece4;color:var(--text);border:2px solid var(--border);
+    font-size:.85rem;padding:6px 14px;border-radius:8px}
+  .btn-danger{background:#fde8e8;color:#c0392b;border:2px solid #f5c6c6}
+  .setup-card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);
+    padding:28px 32px;width:100%;display:flex;flex-direction:column;gap:16px}
+  .setup-card label{font-weight:800;font-size:1rem;color:var(--text);margin-bottom:4px;display:block}
+  .word-list-area{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .word-list-area input[type="text"]{flex:1;min-width:140px;padding:10px 16px;
+    border:2.5px solid var(--border);border-radius:12px;font-size:1.1rem;
+    font-family:'Nunito',sans-serif;font-weight:700;color:var(--text);
+    background:var(--bg);outline:none;transition:border-color .2s;text-transform:uppercase}
+  .word-list-area input:focus{border-color:var(--accent2)}
+  .word-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#f0ece4;border:2px solid var(--border);border-radius:8px;
+    padding:5px 12px;font-weight:700;font-size:.95rem;
+    display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:1px}
+  .chip button{background:none;border:none;cursor:pointer;font-size:.85rem;
+    color:#b0a090;padding:0;line-height:1;font-weight:800}
+  .chip button:hover{color:var(--accent)}
+  .divider{border:none;border-top:2px dashed var(--border);margin:4px 0}
+  .history-card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);
+    padding:20px 24px;width:100%;display:flex;flex-direction:column;gap:12px}
+  .history-header{display:flex;justify-content:space-between;align-items:center}
+  .history-title{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--accent3)}
+  .history-count{font-size:.85rem;font-weight:700;color:#8a7a68;
+    background:var(--bg);border-radius:8px;padding:3px 10px}
+  .history-grid{display:flex;flex-wrap:wrap;gap:8px;max-height:160px;overflow-y:auto}
+  .history-chip{background:#f0ece4;border:2px solid var(--border);border-radius:8px;
+    padding:4px 10px;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:1px;
+    display:flex;align-items:center;gap:6px;cursor:default}
+  .history-chip.mastered{border-color:var(--correct);background:#edfaed;color:#256b35}
+  .history-chip.struggled{border-color:#f0a060;background:#fff4ea;color:#a05010}
+  .history-chip .chip-remove{background:none;border:none;cursor:pointer;
+    font-size:.75rem;color:#b0a090;padding:0;line-height:1}
+  .history-chip .chip-remove:hover{color:#c0392b}
+  .empty-history{font-size:.95rem;color:#b0a090;font-weight:600;text-align:center;padding:8px 0}
+  .review-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .review-row label{font-weight:700;font-size:.95rem;color:#8a7a68}
+  .review-row input[type="range"]{flex:1;min-width:80px;accent-color:var(--accent3)}
+  .review-count-display{font-family:'Fredoka One',cursive;font-size:1.1rem;
+    color:var(--accent3);min-width:28px;text-align:center}
+  .clue-banner{width:100%;background:linear-gradient(135deg,#e8f4fd,#d0eaf8);
+    border:2.5px solid #a8d4f0;border-radius:16px;
+    padding:14px 20px;display:flex;gap:12px;align-items:flex-start;min-height:58px}
+  .clue-icon{font-size:1.5rem;flex-shrink:0;line-height:1.3}
+  .clue-text{font-size:1.05rem;font-weight:700;color:#1a5a8a;line-height:1.4}
+  .clue-loading{display:flex;align-items:center;gap:8px;color:#6a9fc0;font-weight:600;font-size:.95rem}
+  .dot-pulse span{display:inline-block;width:7px;height:7px;background:#6a9fc0;
+    border-radius:50%;animation:dotPulse 1.2s infinite;margin:0 2px}
+  .dot-pulse span:nth-child(2){animation-delay:.2s}
+  .dot-pulse span:nth-child(3){animation-delay:.4s}
+  @keyframes dotPulse{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}
+  .hint-box{width:100%;background:linear-gradient(135deg,#fff8e1,#fff3cd);
+    border:2.5px solid #f0c060;border-radius:14px;
+    padding:12px 18px;display:flex;gap:10px;align-items:flex-start;
+    animation:slideIn .3s ease;min-height:48px}
+  .hint-box.hidden{display:none!important}
+  .hint-icon{font-size:1.3rem;flex-shrink:0}
+  .hint-text{font-size:.98rem;font-weight:700;color:#7a5a00;line-height:1.4}
+  @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+  .game-card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);
+    padding:22px 24px 24px;width:100%;display:flex;flex-direction:column;align-items:center;gap:16px}
+  .game-header{display:flex;justify-content:space-between;align-items:center;width:100%}
+  .word-counter,.tries-display{font-size:.95rem;font-weight:700;color:#8a7a68;
+    background:var(--bg);border-radius:10px;padding:5px 14px}
+  .mode-badge{font-family:'Fredoka One',cursive;font-size:.85rem;
+    padding:4px 12px;border-radius:20px;letter-spacing:.5px}
+  .mode-badge.review{background:#ede0f8;color:var(--accent3);border:2px solid #c9a0e8}
+  .grid{display:flex;flex-direction:column;gap:8px}
+  .grid-row{display:flex;gap:8px}
+  .tile{width:58px;height:58px;border-radius:10px;display:flex;align-items:center;
+    justify-content:center;font-family:'Fredoka One',cursive;font-size:1.7rem;
+    text-transform:uppercase;border:3px solid var(--border);background:var(--empty);
+    color:transparent;transition:background .35s,border-color .35s,color .35s,transform .15s}
+  .tile.filled{border-color:#b8a898;color:var(--text);background:#fff}
+  .tile.correct{background:var(--correct);border-color:var(--correct);color:#fff}
+  .tile.present{background:var(--present);border-color:var(--present);color:#fff}
+  .tile.absent{background:var(--absent);border-color:var(--absent);color:#fff}
+  .tile.pop{animation:pop .1s ease}
+  .tile.flip{animation:flip .5s ease forwards}
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+  @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(-90deg)}100%{transform:rotateX(0)}}
+  .keyboard{display:flex;flex-direction:column;gap:7px;width:100%}
+  .key-row{display:flex;justify-content:center;gap:5px}
+  .key{height:52px;min-width:36px;border-radius:8px;border:none;background:#e8e0d5;
+    font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;
+    transition:background .25s,color .25s,transform .1s;color:var(--text);
+    padding:0 6px;flex:1;max-width:42px}
+  .key.wide{max-width:64px;font-size:.8rem;letter-spacing:.5px}
+  .key:active{transform:translateY(2px)}
+  .key.correct{background:var(--correct);color:#fff}
+  .key.present{background:var(--present);color:#fff}
+  .key.absent{background:var(--absent);color:#fff}
+  .message{font-family:'Fredoka One',cursive;font-size:1.3rem;text-align:center;
+    padding:10px 20px;border-radius:14px;min-height:44px;width:100%;transition:opacity .3s}
+  .message.success{background:#d4edda;color:#256b35}
+  .message.fail{background:#fde8e8;color:#c0392b}
+  .message.hint{background:#fff3cd;color:#856404}
+  .message.empty{opacity:0}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}
+    40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+  .shake{animation:shake .4s ease}
+  @keyframes bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-10px)}60%{transform:translateY(-5px)}}
+  .bounce-row .tile{animation:bounce .6s ease}
+  .bounce-row .tile:nth-child(1){animation-delay:.00s}.bounce-row .tile:nth-child(2){animation-delay:.08s}
+  .bounce-row .tile:nth-child(3){animation-delay:.16s}.bounce-row .tile:nth-child(4){animation-delay:.24s}
+  .bounce-row .tile:nth-child(5){animation-delay:.32s}.bounce-row .tile:nth-child(6){animation-delay:.40s}
+  .bounce-row .tile:nth-child(7){animation-delay:.48s}.bounce-row .tile:nth-child(8){animation-delay:.56s}
+  .bounce-row .tile:nth-child(9){animation-delay:.64s}
+  .finish-card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);
+    padding:36px 32px;width:100%;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:16px}
+  .finish-card h2{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--accent)}
+  .results-grid{display:flex;flex-direction:column;gap:6px;width:100%}
+  .result-row{display:flex;justify-content:space-between;align-items:center;
+    background:var(--bg);border-radius:10px;padding:8px 16px;font-weight:700}
+  .result-word{text-transform:uppercase;letter-spacing:1px;font-size:1.05rem}
+  .result-score{font-size:1.1rem}
+  .finish-btns{display:flex;gap:12px;width:100%;flex-wrap:wrap}
+  .finish-btns .btn{flex:1}
+  .stars{display:flex;gap:6px;font-size:1.5rem}
+  .hidden{display:none!important}
+  @media(max-width:420px){.tile{width:44px;height:44px;font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🔤 Spelling Wordle</h1>
+    <div class="subtitle">A spelling game for budding champions!</div>
+  </header>
+
+  <div class="setup-card" id="setupScreen">
+    <div>
+      <label>Add words to practise:</label>
+      <div class="word-list-area">
+        <input type="text" id="wordInput" placeholder="e.g. WEDDING" maxlength="12"/>
+        <button class="btn btn-add" onclick="addWord()">+ Add</button>
+      </div>
+    </div>
+    <div class="word-chips" id="wordChips"></div>
+    <button class="btn btn-start" onclick="startGame(false)" id="startBtn" disabled>▶ Start New Game</button>
+  </div>
+
+  <div class="history-card" id="historyPanel">
+    <div class="history-header">
+      <div class="history-title">📚 Word Bank</div>
+      <div class="history-count" id="historyCount">0 words</div>
+    </div>
+    <div class="history-grid" id="historyGrid">
+      <div class="empty-history">No words saved yet — play a game to start building your word bank!</div>
+    </div>
+    <hr class="divider">
+    <div class="review-row">
+      <label>Review:</label>
+      <input type="range" id="reviewCount" min="1" max="10" value="5" oninput="updateReviewCount()">
+      <div class="review-count-display" id="reviewCountDisplay">5</div>
+      <span style="font-size:.9rem;font-weight:700;color:#8a7a68">words</span>
+    </div>
+    <button class="btn btn-review" onclick="startReview()" id="reviewBtn" disabled>🎲 Random Review</button>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-sm btn-danger" onclick="clearHistory()" id="clearBtn" style="display:none">🗑 Clear Word Bank</button>
+    </div>
+  </div>
+
+  <div class="game-card hidden" id="gameScreen">
+    <div class="game-header">
+      <div class="word-counter" id="wordCounter">Word 1 of 1</div>
+      <div id="modeBadgeWrap"></div>
+      <div class="tries-display" id="triesDisplay">Tries: 0 / 6</div>
+    </div>
+    <div class="clue-banner">
+      <div class="clue-icon">🔍</div>
+      <div id="clueContent"><div class="clue-loading"><span>Loading clue</span><div class="dot-pulse"><span></span><span></span><span></span></div></div></div>
+    </div>
+    <div class="hint-box hidden" id="hintBox">
+      <div class="hint-icon">💡</div>
+      <div class="hint-text" id="hintText"></div>
+    </div>
+    <div class="message empty" id="message"></div>
+    <div class="grid" id="grid"></div>
+    <div class="keyboard" id="keyboard"></div>
+    <div style="display:flex;gap:12px;justify-content:center;width:100%">
+      <button class="btn btn-next hidden" id="nextBtn" onclick="nextWord()">Next Word →</button>
+    </div>
+  </div>
+
+  <div class="finish-card hidden" id="finishScreen">
+    <div class="stars" id="finishStars"></div>
+    <h2>All done! 🎉</h2>
+    <div id="finishMessage" style="font-size:1.05rem;color:#8a7a68;font-weight:600;"></div>
+    <div class="results-grid" id="resultsGrid"></div>
+    <div class="finish-btns">
+      <button class="btn btn-review" onclick="startReview()">🎲 Review Again</button>
+      <button class="btn btn-start" onclick="goHome()">🏠 Home</button>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════
+// STATIC WORD DICTIONARY
+// Each word has: clue + hints[] per tricky pattern
+// hints are arrays — first is shown by default, rest rotate in
+// ═══════════════════════════════════════════
+const DICT = {
+  // Format: { clue, patterns: { "LETTERS": "hint about that specific pattern" }, hints: ["fallback hints in order"] }
+  // patterns keys are substrings of the word that, if wrong, trigger that specific hint
+  "COME":    { clue:"You do this when someone calls your name across the room. What's the word?", patterns:{"OME":"Watch out — the O in COME says /u/ like 'sun', not /o/ like 'home'!","E":"Don't forget the silent E at the end: C-O-M-E."}, hints:["Remember: COME ends with a silent E — C-O-M-E.","The O sounds like /u/ — unusual for a word with silent E!","Think: come, some, done — these O's all say /u/."] },
+  "SOME":    { clue:"Not all, and not none — just a little bit of something. What's the word?", patterns:{"OME":"Watch out — the O in SOME says /u/ like 'sun', not /o/!","E":"Don't forget the silent E: S-O-M-E."}, hints:["Remember: S-O-M-E — the O says /u/, not /o/.","Think: some, come, done — unusual O sounds.","Don't forget the silent E at the end."] },
+  "SAID":    { clue:"When words come out of your mouth, you have ___ something. What's the word?", patterns:{"AI":"Watch out! The AI in SAID says /e/ like 'bed' — not /ay/ like 'rain'.","AID":"The middle is A-I-D, but the AI sounds like /e/.","SA":"It starts with S-A, even though it sounds like /se/."},hints:["Remember: S-A-I-D — the AI makes an /e/ sound, not /ay/.","Think: SAID rhymes with 'bed', not 'paid'.","Don't forget the I — it's there even though it's quiet."] },
+  "HAVE":    { clue:"You do this with toys, pets, and friends — they belong to you! What's the word?", patterns:{"VE":"Remember: words don't end in just V in English — the silent E is needed: H-A-V-E.","HAV":"It's not HAF — the /f/ sound here is spelled V-E."},hints:["Remember: H-A-V-E — the VE ending, not just V.","The E is silent but essential — without it we'd have 'hav'!","Think: have, give, live — they all end in VE."] },
+  "WERE":    { clue:"Yesterday you played outside. You ___ having so much fun! What's the missing word?", patterns:{"ERE":"Remember: W-E-R-E — the ERE says /er/, not /eer/.","WER":"It's W-E-R, not W-U-R."},hints:["Remember: W-E-R-E — two E's, one at each end.","The middle sounds like /er/ — spelled E-R.","Don't mix it up with 'where' — that's a different word!"] },
+  "THEY":    { clue:"More than one person, but not 'we'. What word do we use for other people?", patterns:{"TH":"Remember: THEY starts with TH — two letters, one sound.","EY":"The ending is EY saying /ay/ — not AY.","HE":"THEY contains HE — but it says /ay/ at the end!"},hints:["Remember: T-H-E-Y — TH at the start, EY at the end.","The EY says /ay/ — like 'grey' or 'hey'.","Think: THEY contains HEY!"] },
+  "WHAT":    { clue:"You say this to ask about something you don't know yet. ___ is that thing?", patterns:{"WH":"Remember: WHAT starts with WH — the H changes the W sound.","WHA":"The A in WHAT sounds like /o/ — W-H-A-T."},hints:["Remember: W-H-A-T — WH at the start.","The A sounds like /o/ — 'whot'!","Think: what, where, when, why — question words love WH."] },
+  "THERE":   { clue:"Something is far away — it's over ___. Point and say the word!", patterns:{"HERE":"HERE is hiding inside THERE — T + HERE!","ERE":"The middle is E-R-E — two E's around an R.","E":"Don't forget the silent E at the very end."},hints:["Remember: THERE = T + HERE — HERE is hiding inside!","W-H-E-R-E = 'where', T-H-E-R-E = 'there'.","Don't forget the silent E at the end."] },
+  "THEIR":   { clue:"It belongs to them — it's ___ toy. What's the word?", patterns:{"EIR":"The ending is E-I-R — E before I here.","HEI":"Watch out for EI — it's E then I, not I then E."},hints:["Remember: T-H-E-I-R — E before I in this word.","Think: 'i before e EXCEPT after...' — this is an exception!","Don't mix it with 'there' — THEIR means belonging to them."] },
+  "ABOUT":   { clue:"A book can be ___ dogs, space, or cooking. What's that little word?", patterns:{"OU":"The OU in ABOUT makes an /ow/ sound — like in 'out'.","OUT":"ABOUT has OUT hiding at the end — ab-OUT!"},hints:["Remember: A-B-O-U-T — the OU says /ow/.","Think: ABOUT contains OUT — ab-OUT!","Don't write ABOWT — it's OU not OW."] },
+  "HOUSE":   { clue:"You sleep here, eat here, and call it home every day. What is it?", patterns:{"OU":"The OU says /ow/ — like in 'out' and 'cloud'. You already have it right!","SE":"The ending is S-E — not just S, and not Z-E.","USE":"The end is -USE — H-O-USE."},hints:["Remember: H-O-U-S-E — OU says /ow/, silent E at the end.","The S sounds like /z/ but is still spelled S.","Think: house, mouse, louse — OU + SE pattern."] },
+  "WOULD":   { clue:"You say this when offering help: ___ you like a hand?", patterns:{"OUL":"There's a silent L hiding in WOULD — W-O-U-L-D.","WOU":"The WOU sounds like /woo/ — the L is completely silent!"},hints:["Remember: W-O-U-L-D — the L is silent!","Think: could, would, should — they all hide a silent L.","Say it: /wood/ — but write W-O-U-L-D."] },
+  "COULD":   { clue:"When you're able to do something, you say 'I ___ do it!' What's the word?", patterns:{"OUL":"Silent L in COULD — C-O-U-L-D.","COU":"The COU sounds like /coo/ — C-O-U."},hints:["Remember: C-O-U-L-D — the L is completely silent.","Think: could, would, should — silent L siblings!","Say /kood/ but write C-O-U-L-D."] },
+  "SHOULD":  { clue:"When something is the right thing to do, you say you ___ do it.", patterns:{"SH":"SHOULD starts with SH — one sound, two letters.","OUL":"Silent L: S-H-O-U-L-D."},hints:["Remember: S-H-O-U-L-D — SH at the start, silent L inside.","Think: should, could, would — the silent L trio!","SH says /sh/ like 'ship', then -ould."] },
+  "FRIEND":  { clue:"Someone you play with, laugh with, and share secrets with. What are they?", patterns:{"IE":"FRIEND has IE — I before E: F-R-I-E-N-D.","IEN":"The middle is I-E-N — watch those vowels!"},hints:["Remember: F-R-I-E-N-D — I before E.","Don't skip the IE vowel pair in the middle!","Think: fri-END — the END is at the end!"] },
+  "PEOPLE":  { clue:"Lots of humans all together — a crowd of them. What's the word?", patterns:{"EO":"There's an E-O in the middle — P-E-O-P-L-E.","PLE":"The ending is -PLE, saying /pul/."},hints:["Remember: P-E-O-P-L-E — two P's and two E's!","The -PLE ending sounds like /pul/.","Think: peo-PLE — the PLE ending is like 'apple', 'table'."] },
+  "BECAUSE": { clue:"You use this word to explain why. I'm happy ___ it's sunny! What's the word?", patterns:{"AU":"The AU in BECAUSE says /aw/ or /uh/ — B-E-C-A-U-S-E.","CAUS":"The middle is C-A-U-S — watch for the AU."},hints:["Remember: B-E-C-A-U-S-E — AU in the middle.","Break it up: be-CAUSE.","The -AUSE sounds like 'awz'."] },
+  "NIGHT":   { clue:"The sun has gone down, the stars are out, and it's dark outside. What time is it?", patterns:{"IGH":"The IGH says /ī/ — G and H are both silent: N-I-G-H-T.","GH":"The GH after I is completely silent!"},hints:["Remember: N-I-G-H-T — IGH says /ī/, GH is silent.","Think: night, light, right, fight — the IGH family.","Don't write NITE — the GH is hidden but real."] },
+  "LIGHT":   { clue:"The sun gives it, a lamp makes it — it helps you see in the dark. What is it?", patterns:{"IGH":"IGH says /ī/ — the G and H are silent: L-I-G-H-T.","GH":"Silent GH after the I!"},hints:["Remember: L-I-G-H-T — IGH with silent GH.","Think: light, night, right — IGH family.","Don't write LITE — the GH matters!"] },
+  "EIGHT":   { clue:"It comes after seven and before nine. What number is it?", patterns:{"EIGH":"The EIGH says /ay/ — five letters for one sound!","GH":"The GH is completely silent in EIGHT."},hints:["Remember: E-I-G-H-T — EIGH says /ay/.","The GH is totally silent.","Think: eight, weight — EIGH says /ay/."] },
+  "THOUGHT":  { clue:"When you used your brain to have an idea, what did you do?", patterns:{"OUGH":"OUGH in THOUGHT says /aw/ — T-H-O-U-G-H-T.","GHT":"The GHT at the end — G and H are silent, just T sounds."},hints:["Remember: T-H-O-U-G-H-T — OUGH says /aw/.","Think: thought, bought, fought — OUGH=/aw/ family.","The GH is silent — only the T makes a sound."] },
+  "THROUGH":  { clue:"You go ___ a tunnel — not over it and not under it. What's the word?", patterns:{"OUGH":"OUGH in THROUGH says /oo/ — different from 'thought'!","GH":"The GH at the end is silent — T-H-R-O-U-G-H."},hints:["Remember: T-H-R-O-U-G-H — OUGH says /oo/ here.","Think: through rhymes with 'blue' and 'you'.","Don't write THRU — the OUGH is needed."] },
+  "ENOUGH":   { clue:"When you have just the right amount — not too much, not too little. What's the word?", patterns:{"OUGH":"OUGH in ENOUGH says /uff/ — the F sound is spelled GH!","GH":"The GH makes an /f/ sound here — unusual!"},hints:["Remember: E-N-O-U-G-H — OUGH says /uff/.","The F sound at the end is spelled GH!","Think: enough, rough, tough — OUGH=/uff/ family."] },
+  "CAUGHT":   { clue:"When you throw a ball and someone grabs it, what have they done?", patterns:{"AUGH":"AUGH says /aw/ — C-A-U-G-H-T.","GH":"The GH is completely silent."},hints:["Remember: C-A-U-G-H-T — AUGH says /aw/, GH is silent.","Think: caught, taught, daughter — AUGH family.","The AU makes an /aw/ sound."] },
+  "BOUGHT":   { clue:"When you paid money for something at the shops, what did you do?", patterns:{"OUGH":"OUGH says /aw/ in BOUGHT — same as 'thought'.","GH":"Silent GH — B-O-U-G-H-T."},hints:["Remember: B-O-U-G-H-T — OUGH says /aw/.","Think: bought, thought, fought — OUGH=/aw/ family.","GH is silent — only T sounds at the end."] },
+  "LAUGH":    { clue:"When something is funny, what does your tummy shake and your mouth open to do?", patterns:{"AUGH":"AUGH in LAUGH — the AU says /a/ and GH says /f/!","GH":"The GH makes an /f/ sound here — L-A-U-G-H."},hints:["Remember: L-A-U-G-H — the GH makes an /f/ sound!","Think: laugh, draught — GH can say /f/.","Don't write LAF — the GH is spelling the F!"] },
+  "LITTLE":   { clue:"The opposite of big — very, very small indeed. What's the word?", patterns:{"TT":"Double T in LITTLE — L-I-T-T-L-E.","LE":"The -LE ending says /ul/ — like 'table'."},hints:["Remember: L-I-T-T-L-E — double T in the middle.","The -LE at the end says /ul/.","Think: little, battle, kettle — double consonant before -LE."] },
+  "MIDDLE":   { clue:"Not the start and not the end — the ___ of the line. What's the word?", patterns:{"DD":"Double D in MIDDLE — M-I-D-D-L-E.","LE":"The -LE ending says /ul/."},hints:["Remember: M-I-D-D-L-E — double D in the middle!","The -LE says /ul/ — like 'muddle'.","Think: middle, muddle, riddle — all have double consonant + LE."] },
+  "WATER":    { clue:"Fish swim in it, you drink it, and rain is made of it. What is it?", patterns:{"A":"The A in WATER says /aw/ — not /a/ like in 'cat'.","ER":"The -ER ending says /er/."},hints:["Remember: W-A-T-E-R — the A sounds like /aw/.","The -ER ending says /er/ like in 'her'.","Think: water, wafer — the A makes that /aw/ sound."] },
+  "EVERY":    { clue:"Not just one, not just some — all of them, each one. What's the word?", patterns:{"EVE":"EVERY starts with EVE — E-V-E-R-Y.","ERY":"The ending is -ERY — E-R-Y saying /ree/."},hints:["Remember: E-V-E-R-Y — starts with EVE.","Break it up: EV-ER-Y.","Don't write AVERY — it's E at the start, not A."] },
+  "GREAT":    { clue:"When something is really, really good — even better than just good! What's the word?", patterns:{"EA":"The EA in GREAT says /ay/ — not /ee/! G-R-E-A-T.","EAT":"The middle and end are E-A-T — but EA says /ay/ here."},hints:["Remember: G-R-E-A-T — EA says /ay/ here, not /ee/.","Think: great, break, steak — EA can say /ay/!","Don't mix it with 'grate' — G-R-E-A-T has an A."] },
+  "WEATHER":  { clue:"Rain, sunshine, wind, and snow all describe this. What's the word?", patterns:{"EA":"The EA in WEATHER says /e/ — like in 'bread'.","TH":"TH in the middle is one sound — W-E-A-T-H-E-R."},hints:["Remember: W-E-A-T-H-E-R — EA says /e/ here.","Think: weather, feather, leather — EA=/e/ family.","There's a TH in the middle — one sound, two letters."] },
+  "STRAIGHT": { clue:"A ruler draws a perfectly ___ line. What kind of line is it?", patterns:{"AIGH":"The AIGH says /ay/ — S-T-R-A-I-G-H-T.","GH":"Silent GH after the AI."},hints:["Remember: S-T-R-A-I-G-H-T — AIGH says /ay/, GH is silent.","Lots of letters, one syllable!","Think: straight, weight — AIGH pattern."] },
+  "BELIEVE":  { clue:"When you think something is true and real, you ___ it. What's the word?", patterns:{"IE":"BELIEVE has IE — I before E: B-E-L-I-E-V-E.","IEV":"The middle is I-E-V-E — I before E."},hints:["Remember: B-E-L-I-E-V-E — I before E.","Think: beLIEve — LIE is hiding in the middle!","Don't forget the silent E at the very end."] },
+  "RECEIVE":  { clue:"When someone gives you a present, what do you do with it?", patterns:{"EI":"After C, it's E-I not I-E — R-E-C-E-I-V-E!","CEI":"Remember: i before e EXCEPT AFTER C — so after C it's EI."},hints:["Remember: R-E-C-E-I-V-E — after C, it's EI not IE.","'I before E, except after C' — RECEIVE follows that rule!","Watch the CEI — C, then E, then I."] },
+  "SCIENCE":  { clue:"Biology, chemistry, and physics are all types of this school subject. What is it?", patterns:{"SCI":"SCIENCE starts with SC — S-C-I.","ENCE":"The ending is -ENCE, not -ANCE."},hints:["Remember: S-C-I-E-N-C-E — SC at the start.","The ending is -ENCE not -ANCE.","Break it up: SCI-ENCE."] },
+  "NECESSARY": { clue:"When you absolutely must have or do something, it is ___. What's the word?", patterns:{"SS":"One C but double S — N-E-C-E-S-S-A-R-Y.","NECE":"Just one C — N-E-C-E, not NECCE."},hints:["Remember: one C, double S — N-E-C-E-S-S-A-R-Y.","Think: one Collar, two Socks — NeCeSSary.","Break it up: NEC-ES-SAR-Y."] },
+  "SEPARATE":  { clue:"When two things are apart and not together, they are ___. What's the word?", patterns:{"ARA":"The middle is A-R-A — sep-A-R-A-te, not sep-E-R-A-te!","SEPE":"Watch out! It's SEP-A-R-ATE not SEP-E-RATE."},hints:["Remember: S-E-P-A-R-A-T-E — A in the middle, not E.","Think: there's a RAT hiding in sepaRATE!","Break it up: SEP-A-RATE."] },
+  "WEDNESDAY": { clue:"It comes after Tuesday and before Thursday. What day is it?", patterns:{"DN":"There's a silent D after WED — W-E-D-N-E-S-D-A-Y.","WEDNES":"Say it: WENZ-day. But write WED-NES-DAY!"},hints:["Remember: W-E-D-N-E-S-D-A-Y — the D after WED is silent!","Say /WENZ-day/ but write WEDNESDAY.","WED is hiding at the start — like getting married!"] },
+  "FEBRUARY":  { clue:"The shortest month of the year — sometimes with an extra day! What month is it?", patterns:{"BR":"There's an R after B — FEB-R-U-ARY, not FEB-YOO-ARY.","FEBR":"The tricky part is F-E-B-R — don't drop that R!"},hints:["Remember: F-E-B-R-U-A-R-Y — the R after B is often forgotten.","Say it carefully: FEB-ROO-ARY.","Don't skip the R — FEB-R-U-ARY."] },
+  "LIBRARY":   { clue:"You borrow books from here and return them when you're done. What is it?", patterns:{"BR":"There's a BR cluster — LI-BRAR-Y.","LIBRA":"The middle syllable is BRAR — L-I-B-R-A-R."},hints:["Remember: L-I-B-R-A-R-Y — two R's!","Break it up: LIB-RAAR-Y — don't drop the middle A.","People often say LI-BRY — but it's LIB-RAAR-Y."] },
+  "KNOWLEDGE": { clue:"Everything you have learned and remember is your ___. What's the word?", patterns:{"KN":"The K is silent — K-N-O-W-L-E-D-G-E.","DGE":"The -DGE ending — D is silent before GE.","OW":"The OW says /oh/ here, not /ow/."},hints:["Remember: K-N-O-W-L-E-D-G-E — the K is silent.","Think: KNOW + LEDGE = KNOWLEDGE — two tricky parts!","DGE at the end — the D is silent."] },
+  "ISLAND":    { clue:"A piece of land completely surrounded by water on all sides. What is it?", patterns:{"SL":"There's a silent S — I-S-L-A-N-D, but said /ī-land/.","ISL":"The S is there but you never say it!"},hints:["Remember: I-S-L-A-N-D — the S is completely silent.","Say /ī-land/ but write I-S-L-A-N-D.","That sneaky silent S trips everyone up!"] },
+  "KNIFE":     { clue:"You use it to cut food — it has a sharp blade and a handle. What is it?", patterns:{"KN":"The K is completely silent — K-N-I-F-E.","KNI":"K-N-I — the K is there but stays quiet."},hints:["Remember: K-N-I-F-E — the K is silent.","Think: knife, kneel, knock, know — KN hides the K.","Don't write NIFE — the K is real, just quiet!"] },
+  "WRITE":     { clue:"You do this with a pencil to make words appear on paper. What is it?", patterns:{"WR":"The W is completely silent — W-R-I-T-E.","WRI":"W-R-I — silent W at the start."},hints:["Remember: W-R-I-T-E — the W is silent.","Think: write, wrote, wrong, wrap — WR hides the W.","Don't forget the silent E at the end too!"] },
+  "WRONG":     { clue:"When an answer is not right, it is ___. What's the word?", patterns:{"WR":"Silent W — W-R-O-N-G.","WRO":"W-R-O at the start — W is silent."},hints:["Remember: W-R-O-N-G — silent W at the start.","Think: wrong, write, wrap — WR always hides the W.","It's not RONG — the W is silent but real!"] },
+  "PHONE":     { clue:"You use it to call and message people — most carry one everywhere. What is it?", patterns:{"PH":"PH makes an /f/ sound — P-H-O-N-E.","PHO":"The start is P-H, not F."},hints:["Remember: P-H-O-N-E — PH says /f/.","Think: phone, photo, dolphin — PH always says /f/.","Don't write FONE — it's PH at the start!"] },
+  "ANSWER":    { clue:"When someone asks a question, you give them an ___. What's the word?", patterns:{"SW":"There's a silent W — A-N-S-W-E-R, said /AN-ser/.","NSW":"The NSW sounds like /ns/ — the W hides!"},hints:["Remember: A-N-S-W-E-R — the W is silent.","Say /AN-ser/ but write A-N-S-W-E-R.","That sneaky silent W trips everyone up!"] },
+  "CASTLE":    { clue:"A big stone building where kings and queens lived — often with a moat. What is it?", patterns:{"STL":"The T is silent — C-A-S-T-L-E, said /CAS-ul/.","TLE":"The -TLE ending — T is silent, LE says /ul/."},hints:["Remember: C-A-S-T-L-E — the T is completely silent.","The -LE ending says /ul/.","Think: castle, whistle, thistle — all hide a silent T."] },
+  "LISTEN":    { clue:"When someone is speaking, you should ___ carefully. What's the word?", patterns:{"ST":"Silent T — L-I-S-T-E-N, said /LIS-en/.","STEN":"The T is there but silent — S-T-E-N."},hints:["Remember: L-I-S-T-E-N — the T is silent.","Say /LIS-en/ but write L-I-S-T-E-N.","Think: listen, fasten, glisten — silent T family."] },
+  "SPECIAL":   { clue:"Your birthday is a ___ day — unique and different from all others. What's the word?", patterns:{"CIAL":"The -CIAL ending says /shul/ — S-P-E-C-I-A-L.","CI":"The CI makes a /sh/ sound — unusual!"},hints:["Remember: S-P-E-C-I-A-L — -CIAL says /shul/.","The CI sounds like /sh/ — like 'official', 'social'.","Break it up: SPE-CIAL."] },
+  "STATION":   { clue:"Trains stop here for passengers to get on and off. What is it?", patterns:{"TION":"The -TION ending says /shun/ — S-T-A-T-I-O-N.","ION":"The ION at the end — TION together says /shun/."},hints:["Remember: S-T-A-T-I-O-N — -TION says /shun/.","Think: station, nation, action — -TION is everywhere!","Break it: STA-TION."] },
+  "PICTURE":   { clue:"You draw one, paint one, or take one with a camera. What is it?", patterns:{"TURE":"The -TURE ending says /cher/ — P-I-C-T-U-R-E.","CTU":"The middle is C-T-U — don't forget the C!"},hints:["Remember: P-I-C-T-U-R-E — -TURE says /cher/.","Think: picture, adventure, nature — -TURE=/cher/.","Don't forget the C after I: P-I-C-TURE."] },
+  "NATURE":    { clue:"Trees, animals, rivers, and mountains — all of this is ___. What's the word?", patterns:{"TURE":"The -TURE says /cher/ — N-A-T-U-R-E.","A":"The A at the start says its name — /nay/."},hints:["Remember: N-A-T-U-R-E — -TURE says /cher/.","The A is long — NAY-cher.","Think: na-TURE — like picture, adventure."] },
+  "ADDRESS":   { clue:"The number and street name that tells people where you live. What is it?", patterns:{"DD":"Double D — A-D-D-R-E-S-S.","SS":"Double S at the end too!","ADDR":"Start with A-D-D-R."},hints:["Remember: A-D-D-R-E-S-S — double D AND double S.","Think: ADD + RESS. The ADD part really doubles the D!","Two D's at the start, two S's at the end."] },
+  "SWIMMING":  { clue:"You do this in a pool or ocean, using your arms and legs in the water.", patterns:{"MM":"Double M — S-W-I-M-M-I-N-G — the M doubles before -ING.","IMMI":"The middle is I-M-M-I — double M!"},hints:["Remember: S-W-I-M-M-I-N-G — double M!","When adding -ING to SWIM, the M doubles.","Short vowel + one consonant = double before -ING."] },
+  "RUNNING":   { clue:"Moving fast on your feet — faster than walking. What are you doing?", patterns:{"NN":"Double N — R-U-N-N-I-N-G.","UNNI":"The middle is U-N-N-I — double N!"},hints:["Remember: R-U-N-N-I-N-G — double N.","RUN + ING = RUNNING. The N doubles!","Short vowel + N = double the N before -ING."] },
+  "BEGINNING": { clue:"The very start of something — a story, a race, or a journey. What's the word?", patterns:{"NN":"Double N — B-E-G-I-N-N-I-N-G.","INNI":"The double N is in the middle — I-N-N-I."},hints:["Remember: B-E-G-I-N-N-I-N-G — double N!","BEGIN + ING = BEGINNING. The N doubles.","Short vowel before N = double it!"] },
+  "MOUNTAIN":  { clue:"It's much bigger than a hill and reaches up into the clouds. What is it?", patterns:{"OU":"OU in MOUNTAIN says /ow/ — M-O-U-N-T-A-I-N.","AI":"And there's also AI near the end — MOUN-T-AI-N."},hints:["Remember: M-O-U-N-T-A-I-N — OU says /ow/, AI says /ay/.","Two vowel pairs in one word: OU and AI!","Break it: MOUN-TAIN — the TAIN rhymes with 'rain'."] },
+  "BEAUTIFUL": { clue:"A rainbow, a sunset, a field of flowers — one word for how they look. What is it?", patterns:{"BEAU":"It starts with BEAU — B-E-A-U, saying /byoo/.","FUL":"The ending is -FUL with just one L.","EAUTI":"The middle is E-A-U-T-I — lots of vowels!"},hints:["Remember: B-E-A-U-T-I-F-U-L — starts with BEAU.","The -FUL ending has only ONE L.","Think: beauty → beautiful. Start with BEAUTY, add FUL."] },
+  "IMPORTANT": { clue:"When something really matters and you must pay attention to it. What's the word?", patterns:{"OR":"The middle is -POR- — im-POR-tant.","ANT":"Ends in -ANT — I-M-P-O-R-T-A-N-T."},hints:["Remember: I-M-P-O-R-T-A-N-T — -ANT at the end.","Break it: IM-POR-TANT.","The middle is POR, not PUR."] },
+  "DIFFERENT":  { clue:"Two things that are not the same as each other are ___ from each other. What's the word?", patterns:{"FF":"Double F — D-I-F-F-E-R-E-N-T.","FFER":"The double F is in D-I-F-F-E-R."},hints:["Remember: D-I-F-F-E-R-E-N-T — double F.","Think: DIFFER + ENT. The double F is in DIFFER.","Break it: DIF-FER-ENT."] },
+  "WHICH":  { clue:"You use this word when choosing between options. ___ one do you want?", patterns:{"WH":"WHICH starts with WH — W-H-I-C-H.","CH":"Ends in CH — like 'church'."},hints:["Remember: W-H-I-C-H — WH at the start, CH at the end.","Think: which, what, where — question words love WH.","Don't write WICH — the W and H both matter."] },
+  "WHOLE":  { clue:"When nothing is missing and everything is there — the ___ thing. What's the word?", patterns:{"WH":"Silent W — W-H-O-L-E. The WH sounds like just H.","OLE":"The -OLE rhymes with 'mole' — silent E."},hints:["Remember: W-H-O-L-E — the W is silent.","WHOLE contains HOLE — a hole in the whole!","The silent E makes the O long: /hōl/."] },
+  "PROBABLY":  { clue:"When something is likely to happen but not certain — it will ___ happen. What's the word?", patterns:{"ABL":"The middle is A-B-L — PROB-AB-LY, not PROB-LY.","PROBA":"Three syllables: PROB-AB-LY — don't skip the middle bit."},hints:["Remember: P-R-O-B-A-B-L-Y — three syllables, not two.","Break it: PROB-AB-LY. Don't skip the middle A!","Think: PROBABLE → PROBABLY."] },
+  "POSSIBLE":  { clue:"When something can happen or be done, it is ___. What's the word?", patterns:{"SS":"Double S — P-O-S-S-I-B-L-E.","IBLE":"Ends in -IBLE, not -ABLE."},hints:["Remember: P-O-S-S-I-B-L-E — double S.","The ending is -IBLE not -ABLE.","Break it: POSS-IBLE. The double S is in POSS."] },
+  "TERRIBLE":  { clue:"When something is really, really bad or frightening, it's ___. What's the word?", patterns:{"RR":"Double R — T-E-R-R-I-B-L-E.","IBLE":"Ends in -IBLE, not -ABLE."},hints:["Remember: T-E-R-R-I-B-L-E — double R.","The ending is -IBLE not -ABLE.","Break it: TERR-IBLE."] },
+  "ADVENTURE": { clue:"An exciting journey into the unknown, full of surprises. What is it?", patterns:{"TURE":"The -TURE says /cher/ — AD-VEN-TURE.","VEN":"The middle is V-E-N — ad-VEN-ture."},hints:["Remember: A-D-V-E-N-T-U-R-E — -TURE says /cher/.","Break it: AD-VEN-TURE.","Think: adven-TURE — like picture, nature."] },
+  "DAUGHTER":  { clue:"A parent's female child. What is she called?", patterns:{"AUGH":"AUGH in DAUGHTER — the GH is silent, AU says /aw/.","GH":"Silent GH — D-A-U-G-H-T-E-R."},hints:["Remember: D-A-U-G-H-T-E-R — AUGH, silent GH.","Think: caught, taught, daughter — AUGH family.","Don't forget the -ER ending."] },
+  "ANIMAL":    { clue:"A dog, a shark, a butterfly, and an elephant are all this. What are they?", patterns:{"AN":"Three syllables: AN-I-MAL.","IMA":"The middle is I-M-A — an-I-MAL."},hints:["Remember: A-N-I-M-A-L — three syllables.","Break it: AN-I-MAL.","Two A's and one I — A, I, A."] },
+  "FAMILY":    { clue:"Your parents, brothers, sisters, and you — all together. What are you?", patterns:{"ILY":"The ending is I-L-Y — fam-I-LY.","FAMI":"Three syllables: FAM-I-LY."},hints:["Remember: F-A-M-I-L-Y — three syllables.","Break it: FAM-I-LY.","Ends in Y, not EY or IE."] },
+  "MEASURE":   { clue:"When you use a ruler to find out how long something is, what do you do?", patterns:{"EA":"EA says /e/ here — like 'bread' — M-E-A-S-U-R-E.","URE":"The ending is -URE saying /zhur/ — mea-SURE."},hints:["Remember: M-E-A-S-U-R-E — EA says /e/ here.","The -SURE ending sounds like /zhur/.","Think: measure, treasure, pleasure — EA and SURE pattern."] }
+};
+
+// ═══════════════════════════════════════════
+// SMART HINT ENGINE
+// Looks at exactly what the child got wrong vs right
+// and returns the most useful coaching message
+// ═══════════════════════════════════════════
+function buildHint(word, guess, result) {
+  const entry = DICT[word.toUpperCase()];
+
+  // ── 1. Work out what's right and what's wrong ──
+  const correctPositions = [];
+  const wrongPositions   = [];
+  for (let i = 0; i < word.length; i++) {
+    if (result[i] === 'correct') {
+      correctPositions.push({ i, letter: word[i] });
+    } else {
+      wrongPositions.push({ i, expected: word[i], got: guess[i] || '' });
+    }
+  }
+
+  // ── 2. Build "what you got right" part ──
+  let rightPart = '';
+  if (correctPositions.length > 0 && correctPositions.length < word.length) {
+    // Find runs of correct letters to describe naturally
+    const correctLetters = correctPositions.map(p => p.letter.toUpperCase()).join('');
+    if (correctPositions.length === 1) {
+      rightPart = `You got the "${correctLetters}" right! `;
+    } else if (correctPositions.length <= 3) {
+      rightPart = `You got "${correctLetters}" right! `;
+    } else {
+      rightPart = `You've got ${correctPositions.length} letters right already! `;
+    }
+  }
+
+  // ── 3. Find the most relevant pattern-specific hint ──
+  let patternHint = '';
+  if (entry && entry.patterns) {
+    // Find which patterns in the word match what was guessed wrong
+    // A pattern is "relevant" if:
+    //   (a) it appears in the word AND
+    //   (b) the child got at least one letter of that pattern wrong
+    const wrongIndices = new Set(wrongPositions.map(p => p.i));
+
+    let bestPattern = null;
+    let bestScore   = -1;
+
+    for (const [pattern, hint] of Object.entries(entry.patterns)) {
+      // Find where this pattern sits in the word
+      const wLower = word.toLowerCase();
+      const pLower = pattern.toLowerCase();
+      const idx    = wLower.indexOf(pLower);
+      if (idx === -1) continue;
+
+      // Count how many letters of this pattern are wrong
+      let wrongInPattern = 0;
+      let rightInPattern = 0;
+      for (let j = 0; j < pattern.length; j++) {
+        if (wrongIndices.has(idx + j)) wrongInPattern++;
+        else rightInPattern++;
+      }
+
+      // Score: prioritise patterns where something went wrong
+      // but don't suggest a pattern the child already has completely right
+      if (wrongInPattern === 0) continue; // child already nailed this pattern
+      const score = wrongInPattern * 2 - rightInPattern;
+      if (score > bestScore) { bestScore = score; bestPattern = hint; }
+    }
+
+    if (bestPattern) patternHint = bestPattern;
+  }
+
+  // ── 4. Fall back to ordered generic hints if no pattern match ──
+  if (!patternHint && entry && entry.hints) {
+    // Pick the next unused hint from the list
+    const usedCount = typeof window._hintIndex === 'undefined' ? 0 : window._hintIndex;
+    patternHint = entry.hints[usedCount % entry.hints.length];
+    window._hintIndex = (usedCount + 1);
+  }
+
+  // ── 5. If word not in dictionary, ask Claude ──
+  if (!patternHint) return null; // triggers API fallback
+
+  return rightPart + patternHint;
+}
+
+// ═══════════════════════════════════════════
+// API HELPER (only fires for unknown words)
+// ═══════════════════════════════════════════
+async function callClaude(prompt, maxTokens = 400) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": "claude-web",
+      "anthropic-version": "2023-06-01"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: maxTokens,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  const data = await res.json();
+  return data.content.map(i => i.text || '').join('').trim();
+}
+
+// ═══════════════════════════════════════════
+// WORD DATA LOADER
+// Uses DICT first; falls back to API for unknowns
+// ═══════════════════════════════════════════
+async function generateWordData(words) {
+  const result = {};
+  const needsAPI = [];
+
+  words.forEach(w => {
+    const upper = w.toUpperCase();
+    if (DICT[upper]) {
+      result[upper] = { clue: DICT[upper].clue, hints: DICT[upper].hints };
+    } else if (wordBank[upper] && wordBank[upper].clue) {
+      result[upper] = { clue: wordBank[upper].clue, hints: wordBank[upper].hints };
+    } else {
+      needsAPI.push(upper);
+    }
+  });
+
+  if (needsAPI.length === 0) return result;
+
+  const wordDetails = needsAPI.map(w => `- ${w} (${w.length} letters)`).join('\n');
+  const prompt = `You are an expert literacy teacher helping children aged 6-9 learn to spell.
+
+For each word below, produce:
+1. "clue": A vivid question a child aged 6-9 can answer. The answer IS the word. NEVER mention the word itself, NEVER mention letter count. Make it fun and concrete — reference what the thing looks, feels, sounds or does.
+2. "hints": Exactly 3 word-specific spelling hints. Each must name the exact letters or pattern (e.g. "the OU in house", "the silent GH"). Under 20 words each. Start with Remember/Don't forget/Think about/Watch out for. DO NOT invent patterns that aren't in the word.
+
+Words:
+${wordDetails}
+
+Respond ONLY with valid JSON, no markdown:
+{"WORD":{"clue":"...","hints":["...","...","..."]}}`;
+
+  try {
+    const text  = await callClaude(prompt, 800);
+    const clean = text.replace(/```json|```/g,'').trim();
+    const fresh = JSON.parse(clean);
+    Object.assign(result, fresh);
+  } catch(e) {
+    console.error('API fallback failed:', e);
+    needsAPI.forEach(w => {
+      result[w] = {
+        clue: `Can you spell this word? Give it your best shot!`,
+        hints: ["Say the word slowly and think about each sound.", "Check the beginning and end carefully.", "Think about any unusual letter patterns."]
+      };
+    });
+  }
+  return result;
+}
+
+// ═══════════════════════════════════════════
+// LIVE HINT — called after each wrong guess
+// ═══════════════════════════════════════════
+async function getSpellingHint(word, guess, result) {
+  window._hintIndex = window._hintIndex || 0;
+
+  // Try static hint engine first
+  const staticHint = buildHint(word, guess, result);
+  if (staticHint) return staticHint;
+
+  // Fall back to API for unknown words
+  const errors = [];
+  const correct = [];
+  for (let i = 0; i < word.length; i++) {
+    if (result[i] === 'correct') correct.push(`"${word[i]}" at position ${i+1}`);
+    else errors.push(`position ${i+1}: wrote "${guess[i]||'?'}", correct is "${word[i]}"`);
+  }
+
+  const rightPart = correct.length > 0
+    ? `You got ${correct.join(', ')} right already. `
+    : '';
+
+  try {
+    const hint = await callClaude(
+      `A child (aged 6-9) learning to spell "${word}" guessed "${guess}".
+${rightPart}Errors: ${errors.join('; ')}.
+Write ONE encouraging coaching tip (max 18 words) about their specific mistake — name the exact letters involved.
+Start with Remember/Don't forget/Think about/Watch out for. Reply with only the tip.`, 100);
+    return rightPart + hint;
+  } catch { return null; }
+}
+
+// ═══════════════════════════════════════════
+// PERSISTENT STORAGE
+// ═══════════════════════════════════════════
+const STORAGE_KEY = 'spellingWordle_wordBank_v2';
+function loadWordBank() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+function saveWordBank(bank) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bank)); } catch {} }
+let wordBank = loadWordBank();
+
+function upsertWordBank(word, data, solved) {
+  const ex = wordBank[word] || { clue:'', hints:[], timesPlayed:0, timesSolved:0, lastPlayed:null };
+  wordBank[word] = {
+    clue: data.clue || ex.clue,
+    hints: data.hints || ex.hints,
+    timesPlayed: ex.timesPlayed + 1,
+    timesSolved: ex.timesSolved + (solved ? 1 : 0),
+    lastPlayed: new Date().toISOString()
+  };
+  saveWordBank(wordBank);
+}
+
+// ═══════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════
+let wordList = [], wordIndex = 0, currentWord = '', currentGuess = '';
+let currentRow = 0, maxRows = 6, gameOver = false;
+let results = [], keyStates = {}, wordData = {}, isReviewMode = false;
+
+const KEYBOARD_ROWS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['ENTER','Z','X','C','V','B','N','M','⌫']
+];
+
+// ═══════════════════════════════════════════
+// SETUP UI
+// ═══════════════════════════════════════════
+document.getElementById('wordInput').addEventListener('keydown', e => { if (e.key==='Enter') addWord(); });
+
+function addWord() {
+  const input = document.getElementById('wordInput');
+  const word = input.value.trim().toUpperCase().replace(/[^A-Z]/g,'');
+  if (!word || word.length < 2) { input.value=''; return; }
+  if (wordList.includes(word)) { input.value=''; return; }
+  wordList.push(word); input.value='';
+  renderSetupChips();
+  document.getElementById('startBtn').disabled = wordList.length === 0;
+}
+function removeFromSetup(word) {
+  wordList = wordList.filter(w => w !== word);
+  renderSetupChips();
+  document.getElementById('startBtn').disabled = wordList.length === 0;
+}
+function renderSetupChips() {
+  document.getElementById('wordChips').innerHTML = wordList.map(w =>
+    `<div class="chip">${w} <button onclick="removeFromSetup('${w}')">✕</button></div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// HISTORY / WORD BANK UI
+// ═══════════════════════════════════════════
+function renderHistoryPanel() {
+  const words = Object.keys(wordBank);
+  document.getElementById('historyCount').textContent = `${words.length} word${words.length!==1?'s':''}`;
+  const grid = document.getElementById('historyGrid');
+  const reviewBtn = document.getElementById('reviewBtn');
+  const clearBtn  = document.getElementById('clearBtn');
+  if (words.length === 0) {
+    grid.innerHTML = '<div class="empty-history">No words saved yet — play a game to start building your word bank!</div>';
+    reviewBtn.disabled = true; clearBtn.style.display = 'none'; return;
+  }
+  const sorted = words.sort((a,b) => new Date(wordBank[b].lastPlayed) - new Date(wordBank[a].lastPlayed));
+  grid.innerHTML = sorted.map(w => {
+    const d = wordBank[w];
+    const rate = d.timesPlayed > 0 ? d.timesSolved / d.timesPlayed : 0;
+    const cls  = rate >= 0.7 ? 'mastered' : d.timesPlayed > 1 ? 'struggled' : '';
+    const icon = rate >= 0.7 ? '✅' : (d.timesPlayed > 1 && rate < 0.5) ? '🔄' : '';
+    return `<div class="history-chip ${cls}" title="Played ${d.timesPlayed}x, solved ${d.timesSolved}x">
+      ${icon?`<span>${icon}</span>`:''}${w}
+      <button class="chip-remove" onclick="removeFromBank('${w}')">✕</button></div>`;
+  }).join('');
+  const slider = document.getElementById('reviewCount');
+  slider.max = Math.min(words.length, 20);
+  if (parseInt(slider.value) > slider.max) slider.value = slider.max;
+  updateReviewCount();
+  reviewBtn.disabled = false;
+  clearBtn.style.display = 'block';
+}
+function removeFromBank(word) {
+  if (!confirm(`Remove "${word}" from your word bank?`)) return;
+  delete wordBank[word]; saveWordBank(wordBank); renderHistoryPanel();
+}
+function clearHistory() {
+  if (!confirm('Clear the entire word bank? This cannot be undone.')) return;
+  wordBank = {}; saveWordBank(wordBank); renderHistoryPanel();
+}
+function updateReviewCount() {
+  document.getElementById('reviewCountDisplay').textContent = document.getElementById('reviewCount').value;
+}
+
+// ═══════════════════════════════════════════
+// GAME START
+// ═══════════════════════════════════════════
+async function startGame(reviewMode) {
+  isReviewMode = reviewMode;
+  wordIndex = 0; results = []; wordData = {};
+  window._hintIndex = 0;
+
+  if (!reviewMode) {
+    wordList = [...wordList].sort(() => Math.random() - 0.5);
+  } else {
+    const bankWords = Object.keys(wordBank);
+    const count = parseInt(document.getElementById('reviewCount').value);
+    wordList = pickReviewWords(bankWords, count);
+  }
+
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('historyPanel').classList.add('hidden');
+  document.getElementById('finishScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  document.getElementById('modeBadgeWrap').innerHTML = isReviewMode
+    ? '<div class="mode-badge review">🎲 Review Mode</div>' : '';
+
+  loadWord();
+
+  const generated = await generateWordData(wordList);
+  wordData = generated;
+  if (wordIndex === 0 && wordData[currentWord]) showClue(currentWord);
+}
+
+function pickReviewWords(bankWords, count) {
+  const weighted = [];
+  bankWords.forEach(w => {
+    const d = wordBank[w];
+    const rate = d.timesPlayed > 0 ? d.timesSolved / d.timesPlayed : 0;
+    const weight = rate < 0.5 ? 3 : rate < 0.8 ? 2 : 1;
+    for (let i = 0; i < weight; i++) weighted.push(w);
+  });
+  const shuffled = weighted.sort(() => Math.random() - 0.5);
+  const picked = [];
+  for (const w of shuffled) { if (!picked.includes(w)) picked.push(w); if (picked.length >= count) break; }
+  return picked;
+}
+function startReview() { if (Object.keys(wordBank).length === 0) return; startGame(true); }
+
+// ═══════════════════════════════════════════
+// WORD LOADING
+// ═══════════════════════════════════════════
+function loadWord() {
+  currentWord = wordList[wordIndex];
+  currentGuess = ''; currentRow = 0; gameOver = false; keyStates = {};
+  window._hintIndex = 0;
+
+  document.getElementById('wordCounter').textContent = `Word ${wordIndex+1} of ${wordList.length}`;
+  document.getElementById('triesDisplay').textContent = `Tries: 0 / ${maxRows}`;
+  document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('hintBox').classList.add('hidden');
+  setMessage('','');
+
+  // DICT words show clue immediately — no loading delay
+  const upper = currentWord.toUpperCase();
+  if (DICT[upper]) {
+    document.getElementById('clueContent').innerHTML = `<div class="clue-text">${DICT[upper].clue}</div>`;
+  } else if (wordData[upper]) {
+    showClue(upper);
+  } else {
+    document.getElementById('clueContent').innerHTML = `<div class="clue-loading"><span>Loading clue</span><div class="dot-pulse"><span></span><span></span><span></span></div></div>`;
+  }
+  buildGrid(); buildKeyboard();
+}
+function showClue(word) {
+  const data = wordData[word];
+  if (!data) return;
+  document.getElementById('clueContent').innerHTML = `<div class="clue-text">${data.clue}</div>`;
+}
+
+// ═══════════════════════════════════════════
+// GRID
+// ═══════════════════════════════════════════
+function buildGrid() {
+  const grid = document.getElementById('grid'); grid.innerHTML = '';
+  const len = currentWord.length;
+  const tileSize = len<=6?58:len<=8?50:len<=10?44:38;
+  const fontSize = len<=6?1.7:len<=8?1.4:1.1;
+  for (let r=0;r<maxRows;r++) {
+    const row = document.createElement('div'); row.className='grid-row'; row.id=`row-${r}`;
+    for (let c=0;c<len;c++) {
+      const tile = document.createElement('div'); tile.className='tile'; tile.id=`tile-${r}-${c}`;
+      tile.style.width=tileSize+'px'; tile.style.height=tileSize+'px'; tile.style.fontSize=fontSize+'rem';
+      row.appendChild(tile);
+    }
+    grid.appendChild(row);
+  }
+}
+function updateCurrentRow() {
+  for (let c=0;c<currentWord.length;c++) {
+    const tile = document.getElementById(`tile-${currentRow}-${c}`);
+    if (c<currentGuess.length) { tile.textContent=currentGuess[c]; tile.classList.add('filled'); }
+    else { tile.textContent=''; tile.classList.remove('filled'); }
+  }
+}
+function revealRow(guess) {
+  const result = scoreLetter(guess, currentWord);
+  for (let c=0;c<currentWord.length;c++) {
+    const tile = document.getElementById(`tile-${currentRow}-${c}`);
+    setTimeout(()=>{ tile.classList.add('flip'); setTimeout(()=>{ tile.classList.add(result[c]); updateKeyState(guess[c],result[c]); renderKeyboard(); },250); },c*90);
+  }
+  return result;
+}
+function scoreLetter(guess, answer) {
+  const len=answer.length, result=Array(len).fill('absent'), used=Array(len).fill(false);
+  for (let i=0;i<len;i++) if (guess[i]===answer[i]) { result[i]='correct'; used[i]=true; }
+  for (let i=0;i<len;i++) {
+    if (result[i]==='correct') continue;
+    for (let j=0;j<len;j++) { if (!used[j]&&guess[i]===answer[j]) { result[i]='present'; used[j]=true; break; } }
+  }
+  return result;
+}
+function updateKeyState(letter, state) {
+  const p={correct:3,present:2,absent:1};
+  if (!keyStates[letter]||p[state]>p[keyStates[letter]]) keyStates[letter]=state;
+}
+
+// ═══════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════
+function buildKeyboard() {
+  const kb=document.getElementById('keyboard'); kb.innerHTML='';
+  KEYBOARD_ROWS.forEach(row=>{
+    const rowEl=document.createElement('div'); rowEl.className='key-row';
+    row.forEach(k=>{
+      const btn=document.createElement('button');
+      btn.className='key'+(k.length>1?' wide':''); btn.textContent=k; btn.id=`key-${k}`;
+      btn.onclick=()=>handleKey(k); rowEl.appendChild(btn);
+    }); kb.appendChild(rowEl);
+  });
+  window.onkeydown=(e)=>{
+    if (e.key==='Enter') handleKey('ENTER');
+    else if (e.key==='Backspace') handleKey('⌫');
+    else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+  };
+}
+function renderKeyboard() {
+  Object.entries(keyStates).forEach(([l,s])=>{
+    const btn=document.getElementById(`key-${l}`);
+    if (btn){btn.classList.remove('correct','present','absent');btn.classList.add(s);}
+  });
+}
+
+// ═══════════════════════════════════════════
+// GAME LOGIC
+// ═══════════════════════════════════════════
+function handleKey(key) {
+  if (gameOver) return;
+  if (key==='⌫'){if(currentGuess.length>0){currentGuess=currentGuess.slice(0,-1);updateCurrentRow();}return;}
+  if (key==='ENTER'){submitGuess();return;}
+  if (/^[A-Z]$/.test(key)&&currentGuess.length<currentWord.length){
+    currentGuess+=key; updateCurrentRow();
+    const tile=document.getElementById(`tile-${currentRow}-${currentGuess.length-1}`);
+    tile.classList.remove('pop'); void tile.offsetWidth; tile.classList.add('pop');
+  }
+}
+
+async function submitGuess() {
+  if (currentGuess.length<currentWord.length){shakeRow(currentRow);setMessage(`Need ${currentWord.length} letters!`,'hint');return;}
+  const result=revealRow(currentGuess);
+  const won=result.every(r=>r==='correct');
+  const guessSnap=currentGuess;
+  document.getElementById('triesDisplay').textContent=`Tries: ${currentRow+1} / ${maxRows}`;
+  const delay=currentWord.length*90+350;
+
+  if (!won) {
+    getSpellingHint(currentWord, guessSnap, result).then(hint=>{
+      if (hint&&!gameOver){
+        document.getElementById('hintText').textContent=hint;
+        const box=document.getElementById('hintBox');
+        box.classList.remove('hidden'); box.style.animation='none'; void box.offsetWidth; box.style.animation='';
+      }
+    });
+  }
+
+  setTimeout(()=>{
+    if (won){
+      document.getElementById(`row-${currentRow}`).classList.add('bounce-row');
+      document.getElementById('hintBox').classList.add('hidden');
+      const msgs=['🌟 Brilliant!','🎉 Amazing!','⭐ Superstar!','🏆 Perfect!','🥳 You got it!'];
+      setMessage(msgs[Math.floor(Math.random()*msgs.length)],'success');
+      results.push({word:currentWord,solved:true,tries:currentRow+1});
+      upsertWordBank(currentWord, wordData[currentWord]||{}, true);
+      gameOver=true; showNextOrFinish();
+    } else {
+      currentRow++; currentGuess='';
+      if (currentRow>=maxRows){
+        setMessage(`The word was: ${currentWord}`,'fail');
+        results.push({word:currentWord,solved:false,tries:maxRows});
+        upsertWordBank(currentWord, wordData[currentWord]||{}, false);
+        gameOver=true; showNextOrFinish();
+      } else { setMessage('',''); }
+    }
+  }, delay);
+}
+
+function shakeRow(row){const el=document.getElementById(`row-${row}`);el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}
+function setMessage(text,type){const el=document.getElementById('message');el.textContent=text;el.className='message '+(text?type:'empty');}
+function showNextOrFinish(){
+  if (wordIndex<wordList.length-1){document.getElementById('nextBtn').classList.remove('hidden');}
+  else{setTimeout(showFinish,900);}
+}
+function nextWord(){wordIndex++;loadWord();}
+
+// ═══════════════════════════════════════════
+// FINISH SCREEN
+// ═══════════════════════════════════════════
+function showFinish(){
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('finishScreen').classList.remove('hidden');
+  const solved=results.filter(r=>r.solved).length, total=results.length, pct=solved/total;
+  document.getElementById('finishStars').textContent=pct===1?'⭐⭐⭐':pct>=0.66?'⭐⭐':pct>=0.33?'⭐':'';
+  const msgs=pct===1?'Perfect score — you nailed every word! 🎊':pct>=0.66?'Great effort — most words cracked! 💪':pct>=0.33?'Good try — keep practising those tricky ones! 📚':'Keep going — practice makes perfect! 🌱';
+  document.getElementById('finishMessage').textContent=`${solved} of ${total} words solved. ${msgs}`;
+  document.getElementById('resultsGrid').innerHTML=results.map(r=>`
+    <div class="result-row">
+      <span class="result-word">${r.word}</span>
+      <span class="result-score">${r.solved?'✅ '+r.tries+(r.tries===1?' try':' tries'):'❌ not solved'}</span>
+    </div>`).join('');
+  renderHistoryPanel();
+}
+function goHome(){
+  wordList=[];wordData={};renderSetupChips();
+  document.getElementById('startBtn').disabled=true;
+  document.getElementById('finishScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('setupScreen').classList.remove('hidden');
+  document.getElementById('historyPanel').classList.remove('hidden');
+  renderHistoryPanel(); window.onkeydown=null;
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderHistoryPanel();
+</script>
+</body>
+</html>

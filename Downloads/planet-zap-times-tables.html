@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planet Zap — Alien Chef's Kitchen</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   DESIGN SYSTEM — Retro Space Kitchen
+   Primary: Deep space navy + warm amber + electric teal
+═══════════════════════════════════════════════════════ */
+:root {
+  --space:   #0d1b2a;
+  --navy:    #1a2f45;
+  --panel:   #162236;
+  --amber:   #f4a259;
+  --amber2:  #e07b25;
+  --teal:    #2ec4b6;
+  --teal2:   #1a8f84;
+  --green:   #6bcb77;
+  --red:     #ff6b6b;
+  --yellow:  #ffd166;
+  --purple:  #9b72cf;
+  --white:   #f0f4f8;
+  --muted:   #7a9ab8;
+  --glow-a:  #f4a25966;
+  --glow-t:  #2ec4b666;
+  --r:       16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--space);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── STARFIELD ─────────────────────────────────────── */
+#starfield {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.star {
+  position: absolute; background: #fff; border-radius: 50%;
+  animation: twinkle var(--d, 3s) var(--delay, 0s) infinite alternate ease-in-out;
+}
+@keyframes twinkle { from{opacity:.1} to{opacity:1} }
+
+/* Nebula blobs */
+.nebula {
+  position: fixed; border-radius: 50%; filter: blur(80px);
+  pointer-events: none; z-index: 0; opacity: .18;
+}
+
+/* ── SCREENS ───────────────────────────────────────── */
+.screen {
+  display: none; position: relative; z-index: 1;
+  min-height: 100vh; padding: 20px;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px;
+}
+.screen.active { display: flex; }
+
+/* ── TITLE SCREEN ──────────────────────────────────── */
+#s-title { text-align: center; gap: 24px; }
+
+.ufo {
+  font-size: 90px;
+  display: block;
+  animation: ufo-hover 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px var(--teal));
+}
+@keyframes ufo-hover {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-16px) rotate(3deg); }
+}
+
+h1.title-main {
+  font-family: 'Boogaloo', cursive;
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  line-height: 1;
+  color: var(--amber);
+  text-shadow: 0 0 30px var(--glow-a), 3px 3px 0 #7a3500;
+}
+h1.title-sub {
+  font-family: 'Boogaloo', cursive;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  color: var(--teal);
+  text-shadow: 0 0 20px var(--glow-t);
+  margin-top: -10px;
+}
+
+.title-story {
+  max-width: 520px;
+  font-size: 1.05rem; line-height: 1.7;
+  color: #b8d4f0;
+  background: var(--navy);
+  border: 2px solid var(--teal2);
+  border-radius: var(--r);
+  padding: 16px 20px;
+}
+.title-story strong { color: var(--amber); }
+
+/* TABLE SELECTOR */
+.table-selector { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.table-selector label { font-weight: 800; font-size: 1.05rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.table-grid {
+  display: grid; grid-template-columns: repeat(6, 52px); gap: 8px;
+}
+.tbl-btn {
+  width: 52px; height: 52px;
+  font-family: 'Boogaloo', cursive; font-size: 1.4rem;
+  border: 2px solid var(--navy);
+  border-radius: 10px;
+  background: var(--navy);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+.tbl-btn:hover { border-color: var(--amber); color: var(--amber); transform: scale(1.1); }
+.tbl-btn.unlocked { color: var(--white); border-color: var(--teal2); }
+.tbl-btn.unlocked:hover { border-color: var(--teal); box-shadow: 0 0 12px var(--glow-t); }
+.tbl-btn.mastered { background: var(--teal2); border-color: var(--teal); color: var(--white); }
+.tbl-btn .star-badge {
+  position: absolute; top: -6px; right: -6px;
+  font-size: .7rem; background: var(--yellow); color: #333;
+  border-radius: 50%; width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900;
+}
+
+/* ── BUTTONS ───────────────────────────────────────── */
+.btn {
+  font-family: 'Boogaloo', cursive; font-size: 1.5rem;
+  padding: 14px 36px; border: none; border-radius: 50px;
+  cursor: pointer; letter-spacing: .5px;
+  transition: transform .15s, box-shadow .15s, filter .15s;
+  position: relative; overflow: hidden;
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(255,255,255,.15); opacity: 0; transition: opacity .15s;
+}
+.btn:hover { transform: scale(1.06); }
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: scale(.97); }
+
+.btn-amber {
+  background: linear-gradient(135deg, var(--amber), var(--amber2));
+  color: #1a0800; box-shadow: 0 6px 0 #7a3500, 0 8px 20px var(--glow-a);
+}
+.btn-teal {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  color: #001a18; box-shadow: 0 6px 0 #0e5550, 0 8px 20px var(--glow-t);
+}
+.btn-ghost {
+  background: transparent; border: 2px solid var(--muted);
+  color: var(--muted); box-shadow: none; font-size: 1.1rem; padding: 8px 22px;
+}
+.btn-ghost:hover { border-color: var(--white); color: var(--white); }
+
+/* ── GAME SCREEN ───────────────────────────────────── */
+#s-game {
+  justify-content: flex-start;
+  padding-top: 16px;
+  gap: 12px;
+}
+
+/* TOP HUD */
+.hud {
+  width: 100%; max-width: 780px;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--navy); border-radius: var(--r);
+  padding: 10px 18px;
+  border: 1px solid #1e3a54;
+}
+.hud-table-name {
+  font-family: 'Boogaloo', cursive; font-size: 1.4rem;
+  color: var(--amber); white-space: nowrap;
+}
+.hud-progress-wrap {
+  flex: 1; background: var(--panel); border-radius: 99px; height: 14px;
+  overflow: hidden; border: 1px solid #1e3a54;
+}
+.hud-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  border-radius: 99px;
+  transition: width .5s ease;
+}
+.hud-score {
+  font-family: 'Boogaloo', cursive; font-size: 1.3rem;
+  color: var(--yellow); white-space: nowrap;
+}
+.hud-lives { font-size: 1.3rem; white-space: nowrap; }
+
+/* KITCHEN SCENE */
+.kitchen-scene {
+  width: 100%; max-width: 780px;
+  background: var(--navy);
+  border-radius: 20px;
+  border: 2px solid #1e3a54;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.kitchen-scene::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, #1e3a5488 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* RECIPE CARD */
+.recipe-card {
+  background: linear-gradient(135deg, #1f3d5c, #162a3e);
+  border: 2px solid var(--amber2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.recipe-card::before {
+  content: 'ALIEN RECIPE';
+  position: absolute; top: -10px; left: 20px;
+  background: var(--amber2); color: #1a0800;
+  font-family: 'Boogaloo', cursive; font-size: .8rem;
+  padding: 2px 10px; border-radius: 6px; letter-spacing: 1px;
+}
+.recipe-title {
+  font-family: 'Boogaloo', cursive; font-size: 1.35rem;
+  color: var(--amber); margin-bottom: 6px;
+}
+.recipe-desc { font-size: .95rem; color: #b8d4f0; line-height: 1.5; }
+.recipe-equation {
+  font-family: 'Boogaloo', cursive; font-size: 1.7rem;
+  color: var(--white); margin-top: 8px; text-align: center;
+  letter-spacing: 2px;
+}
+.recipe-equation .unknown {
+  display: inline-block;
+  background: var(--panel); border: 2px dashed var(--teal);
+  border-radius: 8px; min-width: 52px; text-align: center;
+  color: var(--teal); padding: 0 6px;
+  animation: pulse-border 1.2s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%,100% { border-color: var(--teal); box-shadow: 0 0 0 0 var(--glow-t); }
+  50%      { border-color: #6fffef;    box-shadow: 0 0 8px 2px var(--glow-t); }
+}
+
+/* VISUAL GROUPS */
+.groups-display {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  margin: 12px 0;
+  min-height: 70px; align-items: center;
+}
+.group-pod {
+  background: var(--panel);
+  border: 2px solid #2a4a6a;
+  border-radius: 12px;
+  padding: 8px;
+  display: flex; flex-wrap: wrap; gap: 5px;
+  justify-content: center; align-items: center;
+  min-width: 52px;
+  opacity: 0; transform: scale(.5);
+  transition: opacity .3s, transform .3s;
+}
+.group-pod.show { opacity: 1; transform: scale(1); }
+.ingredient-icon { font-size: 1.6rem; line-height: 1; }
+
+/* ANSWER INPUT AREA */
+.answer-zone {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  margin-top: 8px;
+}
+
+/* NUMBER PAD */
+.numpad {
+  display: grid; grid-template-columns: repeat(4, 62px);
+  gap: 8px;
+}
+.num-btn {
+  width: 62px; height: 54px;
+  font-family: 'Boogaloo', cursive; font-size: 1.5rem;
+  background: var(--panel); border: 2px solid #1e3a54;
+  border-radius: 10px; color: var(--white);
+  cursor: pointer; transition: all .15s;
+}
+.num-btn:hover { background: #1e3a54; border-color: var(--teal); color: var(--teal); transform: scale(1.08); }
+.num-btn:active { transform: scale(.95); }
+.num-btn.del { background: #2a1a1a; border-color: #5a2a2a; color: var(--red); }
+.num-btn.del:hover { background: #3d1a1a; border-color: var(--red); }
+.num-btn.submit { background: var(--teal2); border-color: var(--teal); color: #001a18; grid-column: span 2; }
+.num-btn.submit:hover { background: var(--teal); box-shadow: 0 0 14px var(--glow-t); }
+
+.answer-display {
+  font-family: 'Boogaloo', cursive; font-size: 3rem;
+  color: var(--white);
+  background: var(--panel);
+  border: 3px solid var(--teal2);
+  border-radius: 14px;
+  min-width: 130px; padding: 4px 20px;
+  text-align: center; min-height: 64px;
+  transition: border-color .2s;
+  letter-spacing: 2px;
+}
+.answer-display.correct { border-color: var(--green); color: var(--green); animation: pop .4s ease; }
+.answer-display.wrong   { border-color: var(--red);   color: var(--red);   animation: wiggle .4s ease; }
+@keyframes pop    { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+@keyframes wiggle { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+/* FEEDBACK TOAST */
+.feedback-toast {
+  font-family: 'Boogaloo', cursive; font-size: 1.3rem;
+  min-height: 32px; text-align: center;
+  transition: all .3s;
+}
+.feedback-toast.correct { color: var(--green); }
+.feedback-toast.wrong   { color: var(--red); }
+
+/* HINT STRIP */
+.hint-strip {
+  font-size: .9rem; color: var(--muted);
+  text-align: center; padding: 6px 14px;
+  background: var(--panel); border-radius: 8px;
+  border: 1px dashed #2a4a6a;
+  cursor: pointer; transition: all .2s;
+}
+.hint-strip:hover { border-color: var(--amber); color: var(--amber); }
+.hint-text-revealed { color: var(--yellow); font-style: italic; }
+
+/* ── RECIPE BOOK (times table chart) ──────────────── */
+#s-book { gap: 20px; }
+.book-container {
+  background: var(--navy);
+  border: 2px solid var(--amber2);
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 720px; width: 100%;
+}
+.book-title {
+  font-family: 'Boogaloo', cursive; font-size: 1.8rem;
+  color: var(--amber); text-align: center; margin-bottom: 16px;
+}
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 3px;
+  font-size: clamp(.55rem, 1.2vw, .82rem);
+}
+.book-cell {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px;
+  font-weight: 700; font-family: 'Boogaloo', cursive;
+  transition: all .2s;
+  min-width: 0;
+}
+.book-cell.header { background: var(--amber2); color: #1a0800; font-size: 1em; }
+.book-cell.hidden { background: var(--panel); color: #3a5a7a; }
+.book-cell.unlocked-cell { background: #1a3a50; color: var(--teal); border: 1px solid var(--teal2); }
+.book-cell.unlocked-cell:hover { background: var(--teal2); color: var(--white); transform: scale(1.1); z-index: 1; }
+.book-cell.mastered-cell { background: var(--teal2); color: var(--white); }
+
+/* ── ROUND COMPLETE ────────────────────────────────── */
+#s-complete { text-align: center; gap: 20px; }
+.complete-icon { font-size: 80px; animation: bounce-big 1s ease-in-out infinite; }
+@keyframes bounce-big { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+.complete-title { font-family: 'Boogaloo', cursive; font-size: clamp(2rem,5vw,3.5rem); color: var(--amber); text-shadow: 0 0 30px var(--glow-a); }
+.stats-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.stat-card {
+  background: var(--navy); border: 2px solid var(--teal2); border-radius: 14px;
+  padding: 14px 22px; text-align: center; min-width: 110px;
+}
+.stat-val { font-family: 'Boogaloo', cursive; font-size: 2.2rem; color: var(--amber); }
+.stat-lbl { font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.new-facts {
+  background: var(--navy); border: 2px solid var(--amber2); border-radius: 14px;
+  padding: 14px 20px; max-width: 480px; width: 100%;
+}
+.new-facts-title { font-family: 'Boogaloo', cursive; font-size: 1.15rem; color: var(--amber); margin-bottom: 10px; }
+.fact-chip {
+  display: inline-block; background: var(--teal2); color: var(--white);
+  border-radius: 8px; padding: 4px 12px; margin: 3px;
+  font-family: 'Boogaloo', cursive; font-size: 1.1rem;
+}
+
+/* ── CONFETTI ──────────────────────────────────────── */
+.confetti { position: fixed; pointer-events: none; z-index: 999; }
+.confetti-p {
+  position: absolute; top: -20px; width: 10px; height: 14px;
+  border-radius: 3px;
+  animation: fall var(--fd, 2s) var(--fdelay, 0s) ease-in forwards;
+}
+@keyframes fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(540deg); opacity: 0; }
+}
+
+/* ── PLANET ZAPPER MINI EASTER EGG OVERLAY ─────────── */
+.zap-burst {
+  position: fixed; pointer-events: none; z-index: 500;
+  font-size: 2rem; animation: burst .6s ease forwards;
+}
+@keyframes burst {
+  0%   { transform: scale(.2); opacity: 1; }
+  60%  { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* ── RESPONSIVE ────────────────────────────────────── */
+@media (max-width: 500px) {
+  .numpad { grid-template-columns: repeat(4, 56px); gap: 6px; }
+  .num-btn { width: 56px; height: 50px; font-size: 1.3rem; }
+  .table-grid { grid-template-columns: repeat(4, 52px); }
+  .book-grid { grid-template-columns: repeat(7, 1fr); font-size: .6rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- STARFIELD -->
+<div id="starfield"></div>
+<div class="nebula" style="width:600px;height:600px;top:-150px;left:-200px;background:radial-gradient(#2ec4b6,transparent)"></div>
+<div class="nebula" style="width:500px;height:500px;bottom:-100px;right:-150px;background:radial-gradient(#f4a259,transparent)"></div>
+
+<!-- ═════════════ TITLE SCREEN ═════════════ -->
+<div class="screen active" id="s-title">
+  <span class="ufo">🛸</span>
+  <h1 class="title-main">PLANET ZAP</h1>
+  <h1 class="title-sub">Alien Chef's Kitchen</h1>
+
+  <div class="title-story">
+    Chef Zoggle needs your help! 🍳 Her spaceship kitchen feeds the whole alien crew — but the <strong>recipe machine is broken</strong>! It can only cook if you solve the ingredient equations. Learn your times tables and <strong>keep the crew fed</strong>!
+  </div>
+
+  <div class="table-selector">
+    <label>Choose a Times Table</label>
+    <div class="table-grid" id="tableGrid"></div>
+  </div>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <button class="btn btn-amber" onclick="startGame()">🚀 Start Cooking!</button>
+    <button class="btn btn-ghost" onclick="showBook()">📖 Recipe Book</button>
+  </div>
+  <div style="font-size:.85rem;color:var(--muted);">Complete a table to unlock the next!</div>
+</div>
+
+<!-- ═════════════ GAME SCREEN ═════════════ -->
+<div class="screen" id="s-game">
+  <!-- HUD -->
+  <div class="hud">
+    <span class="hud-table-name" id="hudTableName">×3 Table</span>
+    <div class="hud-progress-wrap">
+      <div class="hud-progress-bar" id="hudBar" style="width:0%"></div>
+    </div>
+    <span class="hud-score" id="hudScore">⭐ 0</span>
+    <span class="hud-lives" id="hudLives">❤️❤️❤️</span>
+    <button class="btn btn-ghost" onclick="goHome()" style="padding:6px 14px;font-size:.9rem;">🏠</button>
+  </div>
+
+  <!-- KITCHEN SCENE -->
+  <div class="kitchen-scene" style="max-width:780px;width:100%">
+    <!-- Recipe Card -->
+    <div class="recipe-card">
+      <div class="recipe-title" id="recipeName">Glurp Stew</div>
+      <div class="recipe-desc" id="recipeDesc">Chef Zoggle needs exactly the right amount of ingredients!</div>
+      <div class="recipe-equation" id="recipeEq">
+        3 pods × 4 blorbberries = <span class="unknown" id="eqUnknown">?</span>
+      </div>
+    </div>
+
+    <!-- Visual Groups -->
+    <div class="groups-display" id="groupsDisplay"></div>
+
+    <!-- Answer Zone -->
+    <div class="answer-zone">
+      <div class="answer-display" id="ansDisplay">_</div>
+      <div class="feedback-toast" id="feedbackToast"></div>
+
+      <!-- Numpad -->
+      <div class="numpad" id="numpad">
+        <button class="num-btn" onclick="numPress('7')">7</button>
+        <button class="num-btn" onclick="numPress('8')">8</button>
+        <button class="num-btn" onclick="numPress('9')">9</button>
+        <button class="num-btn del" onclick="numDel()">⌫</button>
+        <button class="num-btn" onclick="numPress('4')">4</button>
+        <button class="num-btn" onclick="numPress('5')">5</button>
+        <button class="num-btn" onclick="numPress('6')">6</button>
+        <button class="num-btn" onclick="numPress('0')">0</button>
+        <button class="num-btn" onclick="numPress('1')">1</button>
+        <button class="num-btn" onclick="numPress('2')">2</button>
+        <button class="num-btn" onclick="numPress('3')">3</button>
+        <button class="num-btn submit" onclick="submitAnswer()" style="grid-column:span 1;">✓ Cook!</button>
+      </div>
+
+      <div class="hint-strip" id="hintStrip" onclick="revealHint()">💡 Stuck? Count the groups!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════ RECIPE BOOK ═════════════ -->
+<div class="screen" id="s-book">
+  <div class="book-container">
+    <div class="book-title">📖 Zoggle's Recipe Book (Times Table Chart)</div>
+    <div class="book-grid" id="bookGrid"></div>
+    <p style="text-align:center;color:var(--muted);font-size:.82rem;margin-top:12px;">
+      ✨ Teal cells = facts you have learned! Keep cooking to unlock more.
+    </p>
+  </div>
+  <button class="btn btn-amber" onclick="goHome()">← Back to Kitchen</button>
+</div>
+
+<!-- ═════════════ ROUND COMPLETE ═════════════ -->
+<div class="screen" id="s-complete">
+  <div class="complete-icon" id="completeIcon">🎉</div>
+  <div class="complete-title" id="completeTitle">Table Mastered!</div>
+  <p style="color:#b8d4f0;font-size:1.05rem;max-width:400px;text-align:center;" id="completeMsg">The crew is fed! You unlocked a new table.</p>
+  <div class="stats-row" id="statsRow"></div>
+  <div class="new-facts" id="newFacts"></div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px;">
+    <button class="btn btn-teal" onclick="playAgain()">🍳 Cook Again!</button>
+    <button class="btn btn-ghost" onclick="showBook()">📖 See Recipe Book</button>
+    <button class="btn btn-ghost" onclick="goHome()">🏠 Home</button>
+  </div>
+</div>
+
+<div id="confettiContainer" class="confetti"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+var INGREDIENTS = [
+  {icon:'🫐', name:'blorbberries'},
+  {icon:'🍄', name:'moon mushrooms'},
+  {icon:'⭐', name:'star shards'},
+  {icon:'🫧', name:'bubble pods'},
+  {icon:'🌙', name:'lunar lumps'},
+  {icon:'🔮', name:'crystal orbs'},
+  {icon:'🍋', name:'zesty zappers'},
+  {icon:'🌿', name:'glow greens'},
+  {icon:'💎', name:'gem chips'},
+  {icon:'🍯', name:'nectar drops'}
+];
+
+var RECIPES = [
+  {name:'Glurp Stew',       desc:'A thick, glowing soup beloved by the engine crew.'},
+  {name:'Zap Fizz',         desc:'A sparkling drink that makes antennae tingle!'},
+  {name:'Moonberry Pie',    desc:'The captain\'s favourite dessert from Sector 9.'},
+  {name:'Nebula Noodles',   desc:'Long, wobbly noodles that float in zero gravity.'},
+  {name:'Cosmic Crumble',   desc:'A crunchy treat baked under three suns.'},
+  {name:'Plasma Pudding',   desc:'Wobbly, shimmery dessert for special missions.'},
+  {name:'Galactic Gruel',   desc:'Simple but filling fuel for long space journeys.'},
+  {name:'Asteroid Cake',    desc:'Dense and rich — perfect after spacewalks.'},
+  {name:'Starship Salad',   desc:'Fresh and crisp, grown in the hydroponics bay.'},
+  {name:'Black Hole Brew',  desc:'Dark, mysterious — sipped carefully by the crew.'},
+  {name:'Solar Flare Jam',  desc:'Spicy spread for the adventurous alien crew.'},
+  {name:'Comet Cookies',    desc:'Trail snacks for missions beyond the Zap Belt.'}
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+var state = {
+  selectedTable: 2,
+  unlockedTables: loadUnlocked(),
+  masteredTables: loadMastered(),
+  learnedFacts: loadFacts(),   // Set of "a*b" strings
+  // current round
+  questions: [],
+  qIndex: 0,
+  lives: 3,
+  score: 0,
+  wrongCount: 0,
+  sessionFacts: [],
+  currentAnswer: '',
+  hintShown: false,
+  answered: false,
+  // current question
+  a: 0, b: 0, correct: 0
+};
+
+function loadUnlocked() {
+  try { return JSON.parse(localStorage.getItem('pz_unlocked') || '[2,1]'); }
+  catch(e) { return [1,2]; }
+}
+function loadMastered() {
+  try { return JSON.parse(localStorage.getItem('pz_mastered') || '[]'); }
+  catch(e) { return []; }
+}
+function loadFacts() {
+  try { return JSON.parse(localStorage.getItem('pz_facts') || '[]'); }
+  catch(e) { return []; }
+}
+function savePersist() {
+  try {
+    localStorage.setItem('pz_unlocked', JSON.stringify(state.unlockedTables));
+    localStorage.setItem('pz_mastered', JSON.stringify(state.masteredTables));
+    localStorage.setItem('pz_facts', JSON.stringify(state.learnedFacts));
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════
+// STARS
+// ═══════════════════════════════════════════════════
+(function() {
+  var sf = document.getElementById('starfield');
+  for (var i = 0; i < 120; i++) {
+    var s = document.createElement('div');
+    s.className = 'star';
+    var sz = Math.random() * 2.5 + .5;
+    s.style.cssText =
+      'width:' + sz + 'px;height:' + sz + 'px;' +
+      'top:' + (Math.random()*100) + '%;left:' + (Math.random()*100) + '%;' +
+      '--d:' + (1.5 + Math.random()*2.5) + 's;--delay:' + (Math.random()*3) + 's;';
+    sf.appendChild(s);
+  }
+})();
+
+// ═══════════════════════════════════════════════════
+// SCREEN NAVIGATION
+// ═══════════════════════════════════════════════════
+function showScreen(id) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  buildTableGrid();
+  showScreen('s-title');
+}
+
+function showBook() {
+  buildBookGrid();
+  showScreen('s-book');
+}
+
+function playAgain() {
+  buildTableGrid();
+  showScreen('s-title');
+}
+
+// ═══════════════════════════════════════════════════
+// TABLE GRID
+// ═══════════════════════════════════════════════════
+function buildTableGrid() {
+  var grid = document.getElementById('tableGrid');
+  grid.innerHTML = '';
+  for (var t = 1; t <= 12; t++) {
+    (function(tbl) {
+      var btn = document.createElement('button');
+      btn.className = 'tbl-btn';
+      btn.textContent = '×' + tbl;
+
+      var unlocked = state.unlockedTables.indexOf(tbl) !== -1;
+      var mastered = state.masteredTables.indexOf(tbl) !== -1;
+
+      if (mastered) {
+        btn.classList.add('mastered');
+        var badge = document.createElement('span');
+        badge.className = 'star-badge';
+        badge.textContent = '★';
+        btn.appendChild(badge);
+      } else if (unlocked) {
+        btn.classList.add('unlocked');
+      }
+
+      if (unlocked || mastered) {
+        btn.addEventListener('click', function() {
+          state.selectedTable = tbl;
+          // highlight selected
+          var allBtns = document.querySelectorAll('.tbl-btn');
+          for (var i = 0; i < allBtns.length; i++) allBtns[i].style.outline = '';
+          btn.style.outline = '3px solid #2ec4b6';
+        });
+      } else {
+        btn.style.opacity = '.35';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Complete earlier tables to unlock!';
+      }
+      grid.appendChild(btn);
+    })(t);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// GAME START
+// ═══════════════════════════════════════════════════
+function generateQuestions(table) {
+  // All 12 facts for the table, shuffled, with emphasis on unfamiliar ones
+  var qs = [];
+  for (var i = 1; i <= 12; i++) {
+    var factKey = Math.min(table, i) + '*' + Math.max(table, i);
+    var known = state.learnedFacts.indexOf(factKey) !== -1;
+    // Add twice if unknown
+    qs.push({a: table, b: i, weight: known ? 1 : 2});
+    if (!known) qs.push({a: table, b: i, weight: 2});
+  }
+  // Shuffle
+  for (var j = qs.length - 1; j > 0; j--) {
+    var k = Math.floor(Math.random() * (j + 1));
+    var tmp = qs[j]; qs[j] = qs[k]; qs[k] = tmp;
+  }
+  return qs.slice(0, 12);
+}
+
+function startGame() {
+  state.questions = generateQuestions(state.selectedTable);
+  state.qIndex = 0;
+  state.lives = 3;
+  state.score = 0;
+  state.wrongCount = 0;
+  state.sessionFacts = [];
+
+  showScreen('s-game');
+  document.getElementById('hudTableName').textContent = '×' + state.selectedTable + ' Table';
+  loadQuestion();
+}
+
+// ═══════════════════════════════════════════════════
+// QUESTION
+// ═══════════════════════════════════════════════════
+var ingPick = 0;
+var recipePick = 0;
+
+function loadQuestion() {
+  if (state.qIndex >= state.questions.length) {
+    endRound();
+    return;
+  }
+
+  var q = state.questions[state.qIndex];
+  state.a = q.a;
+  state.b = q.b;
+  state.correct = q.a * q.b;
+  state.currentAnswer = '';
+  state.hintShown = false;
+  state.answered = false;
+
+  updateHUD();
+
+  // Pick ingredient and recipe
+  ingPick = (ingPick + 1) % INGREDIENTS.length;
+  recipePick = (recipePick + 1) % RECIPES.length;
+  var ing = INGREDIENTS[ingPick];
+  var recipe = RECIPES[recipePick];
+
+  // Recipe card
+  document.getElementById('recipeName').textContent = recipe.name;
+  document.getElementById('recipeDesc').textContent = recipe.desc;
+
+  // Equation display
+  document.getElementById('recipeEq').innerHTML =
+    state.a + ' ' + containerWord(state.a) + ' &times; ' + state.b + ' ' + ing.name + ' each = <span class="unknown" id="eqUnknown">?</span>';
+
+  // Hint strip
+  document.getElementById('hintStrip').innerHTML = '💡 Tap to count the groups of ' + state.b;
+  document.getElementById('hintStrip').classList.remove('hint-text-revealed');
+
+  // Answer display
+  var ad = document.getElementById('ansDisplay');
+  ad.textContent = '_';
+  ad.className = 'answer-display';
+
+  // Feedback
+  document.getElementById('feedbackToast').textContent = '';
+  document.getElementById('feedbackToast').className = 'feedback-toast';
+
+  // Enable numpad
+  setNumpadEnabled(true);
+
+  // Animate groups
+  buildGroups(state.a, state.b, ing.icon);
+
+  // Progress
+  document.getElementById('hudBar').style.width = (state.qIndex / state.questions.length * 100) + '%';
+}
+
+function containerWord(n) {
+  var words = ['pod','jar','box','bowl','tray','rack','tub','crate','barrel','bag','pail','vat'];
+  return (words[n % words.length] || 'pot') + (n !== 1 ? 's' : '');
+}
+
+function buildGroups(a, b, icon) {
+  var display = document.getElementById('groupsDisplay');
+  display.innerHTML = '';
+
+  // Cap visuals for large numbers
+  var showA = Math.min(a, 6);
+  var showB = Math.min(b, 6);
+
+  for (var i = 0; i < showA; i++) {
+    (function(idx) {
+      var pod = document.createElement('div');
+      pod.className = 'group-pod';
+      for (var j = 0; j < showB; j++) {
+        var span = document.createElement('span');
+        span.className = 'ingredient-icon';
+        span.textContent = icon;
+        pod.appendChild(span);
+      }
+      if (a > 6 && idx === showA - 1) {
+        var more = document.createElement('span');
+        more.style.cssText = 'font-size:.7rem;color:var(--muted);width:100%;text-align:center;';
+        more.textContent = '+ ' + (a - showA) + ' more pods';
+        pod.appendChild(more);
+      }
+      display.appendChild(pod);
+      setTimeout(function() { pod.classList.add('show'); }, 80 + idx * 120);
+    })(i);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// NUMPAD
+// ═══════════════════════════════════════════════════
+function numPress(digit) {
+  if (state.answered) return;
+  if (state.currentAnswer.length >= 3) return;
+  state.currentAnswer += digit;
+  updateAnswerDisplay();
+}
+
+function numDel() {
+  if (state.answered) return;
+  state.currentAnswer = state.currentAnswer.slice(0, -1);
+  updateAnswerDisplay();
+}
+
+function updateAnswerDisplay() {
+  var ad = document.getElementById('ansDisplay');
+  ad.textContent = state.currentAnswer === '' ? '_' : state.currentAnswer;
+  ad.className = 'answer-display';
+}
+
+function setNumpadEnabled(enabled) {
+  var btns = document.querySelectorAll('.num-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].disabled = !enabled;
+    btns[i].style.opacity = enabled ? '' : '.5';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════
+function submitAnswer() {
+  if (state.answered) return;
+  if (state.currentAnswer === '') return;
+
+  var val = parseInt(state.currentAnswer, 10);
+  var ad = document.getElementById('ansDisplay');
+  var fb = document.getElementById('feedbackToast');
+
+  if (val === state.correct) {
+    // CORRECT
+    state.answered = true;
+    ad.className = 'answer-display correct';
+    fb.textContent = correctMsg();
+    fb.className = 'feedback-toast correct';
+    state.score += state.hintShown ? 1 : 2;
+    document.getElementById('eqUnknown').textContent = state.correct;
+    document.getElementById('eqUnknown').style.color = 'var(--green)';
+    document.getElementById('eqUnknown').style.borderColor = 'var(--green)';
+    document.getElementById('eqUnknown').style.animation = 'none';
+
+    // Record learned fact
+    var factKey = Math.min(state.a, state.b) + '*' + Math.max(state.a, state.b);
+    if (state.learnedFacts.indexOf(factKey) === -1) {
+      state.learnedFacts.push(factKey);
+    }
+    if (state.sessionFacts.indexOf(factKey) === -1) {
+      state.sessionFacts.push({a: state.a, b: state.b, ans: state.correct});
+    }
+
+    zapBurst(val);
+    setNumpadEnabled(false);
+    updateHUD();
+    setTimeout(function() {
+      state.qIndex++;
+      loadQuestion();
+    }, 1200);
+
+  } else {
+    // WRONG
+    ad.className = 'answer-display wrong';
+    state.lives--;
+    state.wrongCount++;
+
+    if (state.lives <= 0) {
+      fb.textContent = 'Oh no! The answer was ' + state.correct + '. Keep practising!';
+      fb.className = 'feedback-toast wrong';
+      updateHUD();
+      setNumpadEnabled(false);
+      setTimeout(function() {
+        // Show correct answer then move on
+        state.qIndex++;
+        loadQuestion();
+        state.lives = 1; // give one back so game can continue
+      }, 2000);
+    } else {
+      fb.textContent = wrongMsg(state.lives);
+      fb.className = 'feedback-toast wrong';
+      updateHUD();
+      state.currentAnswer = '';
+      setTimeout(function() {
+        ad.className = 'answer-display';
+        ad.textContent = '_';
+      }, 600);
+    }
+  }
+}
+
+function correctMsg() {
+  var msgs = [
+    'Zoggle cheers! Perfect!', 'The crew is happy!', 'Delicious! Spot on!',
+    'Engines glowing! Correct!', 'Galaxy-brained! Right!', 'The pot is full!'
+  ];
+  return msgs[Math.floor(Math.random() * msgs.length)];
+}
+
+function wrongMsg(lives) {
+  if (lives === 2) return 'Not quite! Try again — ' + lives + ' chances left.';
+  return 'Almost! Last chance — think carefully!';
+}
+
+function revealHint() {
+  if (state.answered) return;
+  var strip = document.getElementById('hintStrip');
+  state.hintShown = true;
+  var hintVal = state.a + ' groups of ' + state.b + ' = count all the ' + INGREDIENTS[ingPick].icon + ' icons above!';
+  strip.innerHTML = '<span class="hint-text-revealed">🔭 ' + hintVal + '</span>';
+}
+
+// ═══════════════════════════════════════════════════
+// HUD
+// ═══════════════════════════════════════════════════
+function updateHUD() {
+  document.getElementById('hudScore').textContent = '⭐ ' + state.score;
+  var hearts = '';
+  for (var i = 0; i < 3; i++) hearts += (i < state.lives) ? '❤️' : '🖤';
+  document.getElementById('hudLives').textContent = hearts;
+}
+
+// ═══════════════════════════════════════════════════
+// END ROUND
+// ═══════════════════════════════════════════════════
+function endRound() {
+  // Check if table mastered (< 2 wrong answers)
+  var mastered = state.wrongCount <= 2;
+  if (mastered && state.masteredTables.indexOf(state.selectedTable) === -1) {
+    state.masteredTables.push(state.selectedTable);
+    // Unlock next table
+    var next = state.selectedTable + 1;
+    if (next <= 12 && state.unlockedTables.indexOf(next) === -1) {
+      state.unlockedTables.push(next);
+    }
+  }
+  savePersist();
+
+  // Build complete screen
+  var icon = mastered ? '🏆' : '🍳';
+  var title = mastered ? 'Table Mastered!' : 'Round Complete!';
+  var msg = mastered
+    ? 'The ×' + state.selectedTable + ' table is in Zoggle\'s Recipe Book! Next table unlocked!'
+    : 'Great practice! Keep cooking to master the ×' + state.selectedTable + ' table!';
+
+  document.getElementById('completeIcon').textContent = icon;
+  document.getElementById('completeTitle').textContent = title;
+  document.getElementById('completeMsg').textContent = msg;
+
+  var statsRow = document.getElementById('statsRow');
+  statsRow.innerHTML = makeStat('⭐', state.score, 'Score') +
+    makeStat('✅', state.questions.length - state.wrongCount, 'Correct') +
+    makeStat('❌', state.wrongCount, 'Missed') +
+    makeStat('🧪', state.sessionFacts.length, 'Facts Learnt');
+
+  // Show facts learnt this session
+  var nf = document.getElementById('newFacts');
+  if (state.sessionFacts.length > 0) {
+    var html = '<div class="new-facts-title">✨ Facts in your Recipe Book now:</div>';
+    for (var i = 0; i < state.sessionFacts.length; i++) {
+      var f = state.sessionFacts[i];
+      html += '<span class="fact-chip">' + f.a + ' × ' + f.b + ' = ' + f.ans + '</span>';
+    }
+    nf.innerHTML = html;
+    nf.style.display = '';
+  } else {
+    nf.style.display = 'none';
+  }
+
+  showScreen('s-complete');
+  if (mastered) launchConfetti();
+}
+
+function makeStat(icon, val, lbl) {
+  return '<div class="stat-card"><div class="stat-val">' + icon + ' ' + val + '</div><div class="stat-lbl">' + lbl + '</div></div>';
+}
+
+// ═══════════════════════════════════════════════════
+// RECIPE BOOK (12×12 chart)
+// ═══════════════════════════════════════════════════
+function buildBookGrid() {
+  var grid = document.getElementById('bookGrid');
+  grid.innerHTML = '';
+
+  // On mobile, only show up to ×6 to fit
+  var maxN = window.innerWidth < 500 ? 6 : 12;
+  var cols = maxN + 1;
+  grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+
+  // Header row
+  var corner = document.createElement('div');
+  corner.className = 'book-cell header';
+  corner.textContent = '×';
+  grid.appendChild(corner);
+  for (var c = 1; c <= maxN; c++) {
+    var hc = document.createElement('div');
+    hc.className = 'book-cell header';
+    hc.textContent = c;
+    grid.appendChild(hc);
+  }
+
+  // Data rows
+  for (var r = 1; r <= maxN; r++) {
+    var hr = document.createElement('div');
+    hr.className = 'book-cell header';
+    hr.textContent = r;
+    grid.appendChild(hr);
+    for (var cc = 1; cc <= maxN; cc++) {
+      var cell = document.createElement('div');
+      cell.className = 'book-cell';
+      var factKey = Math.min(r, cc) + '*' + Math.max(r, cc);
+      var known = state.learnedFacts.indexOf(factKey) !== -1;
+      var mastered = state.masteredTables.indexOf(r) !== -1 || state.masteredTables.indexOf(cc) !== -1;
+      var val = r * cc;
+      if (mastered) {
+        cell.classList.add('mastered-cell');
+        cell.textContent = val;
+      } else if (known) {
+        cell.classList.add('unlocked-cell');
+        cell.textContent = val;
+        cell.title = r + ' × ' + cc + ' = ' + val;
+      } else {
+        cell.classList.add('hidden');
+        cell.textContent = '?';
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// ZAP BURST FX
+// ═══════════════════════════════════════════════════
+function zapBurst(val) {
+  var el = document.createElement('div');
+  el.className = 'zap-burst';
+  el.textContent = '⚡' + val + '⚡';
+  el.style.left = (30 + Math.random() * 40) + 'vw';
+  el.style.top  = (20 + Math.random() * 30) + 'vh';
+  document.body.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
+}
+
+// ═══════════════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════════════
+function launchConfetti() {
+  var cc = document.getElementById('confettiContainer');
+  cc.innerHTML = '';
+  var colors = ['#f4a259','#2ec4b6','#ffd166','#6bcb77','#ff6b6b','#9b72cf','#fff'];
+  for (var i = 0; i < 70; i++) {
+    (function() {
+      var p = document.createElement('div');
+      p.className = 'confetti-p';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.setProperty('--fd', (1.4 + Math.random() * 1.4) + 's');
+      p.style.setProperty('--fdelay', (Math.random() * .8) + 's');
+      p.style.borderRadius = Math.random() > .5 ? '50%' : '3px';
+      cc.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 3000);
+    })();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// KEYBOARD SUPPORT
+// ═══════════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  var active = document.querySelector('.screen.active');
+  if (!active || active.id !== 's-game') return;
+  if (e.key >= '0' && e.key <= '9') numPress(e.key);
+  else if (e.key === 'Backspace') numDel();
+  else if (e.key === 'Enter') submitAnswer();
+});
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+buildTableGrid();
+</script>
+</body>
+</html>

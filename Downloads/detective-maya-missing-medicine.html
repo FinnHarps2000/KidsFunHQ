@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detective Maya – The Case of the Missing Medicine</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #f0f7ff;
+  --panel:  #ffffff;
+  --red:    #e53935;
+  --orange: #f57c00;
+  --yellow: #fdd835;
+  --teal:   #00897b;
+  --teal2:  #26a69a;
+  --blue:   #1565c0;
+  --green:  #2e7d32;
+  --purple: #6a1b9a;
+  --ink:    #1a1a2e;
+  --muted:  #78909c;
+  --sand:   #fce4b4;
+  --border: 3px solid var(--ink);
+  --sh:     4px 4px 0 var(--ink);
+  --r:      16px;
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; overflow-x:hidden; }
+body::before { content:''; position:fixed; inset:0; z-index:0; pointer-events:none; background-image:repeating-linear-gradient(transparent,transparent 31px,#c8ddf022 31px,#c8ddf022 32px); }
+
+.prog-rail { position:fixed;top:0;left:0;width:100%;height:8px;background:#c8ddf0;z-index:200; }
+.prog-fill { height:100%;background:linear-gradient(90deg,var(--blue),var(--teal),var(--green));transition:width .6s ease; }
+
+.screen { display:none;position:relative;z-index:1;min-height:100vh;padding:24px 14px 50px;flex-direction:column;align-items:center;justify-content:center;gap:16px; }
+.screen.active { display:flex; }
+
+#s-title { text-align:center; gap:20px; }
+.vet-anim { font-size:80px;display:block;animation:vetbob 1.8s ease-in-out infinite;filter:drop-shadow(3px 3px 0 var(--ink)); }
+@keyframes vetbob { 0%,100%{transform:scale(1) rotate(-3deg)} 40%{transform:scale(1.12) rotate(2deg)} 60%{transform:translateY(-8px) scale(1.08)} }
+
+h1.tt { font-family:'Fredoka',cursive;font-size:clamp(2.4rem,6vw,4rem);color:var(--blue);line-height:1.05;text-shadow:3px 3px 0 var(--ink); }
+h2.ts { font-family:'Fredoka',cursive;font-size:clamp(1.1rem,3vw,1.65rem);color:var(--teal); }
+.intro-panel { max-width:540px;background:var(--panel);border:var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:18px 22px;font-size:1rem;line-height:1.8;font-weight:700; }
+.intro-panel strong { color:var(--blue); }
+
+.trail { display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center; }
+.tdot { width:44px;height:44px;border-radius:50%;border:var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:var(--sh);transition:all .3s; }
+.tdot.done   { background:var(--teal); }
+.tdot.active { background:var(--yellow);animation:tdPulse 1s ease-in-out infinite; }
+@keyframes tdPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.14)} }
+
+.btn { font-family:'Fredoka',cursive;font-size:1.35rem;padding:12px 30px;border:var(--border);border-radius:50px;cursor:pointer;box-shadow:var(--sh);transition:all .12s;letter-spacing:.3px; }
+.btn:hover  { transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink); }
+.btn:active { transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink); }
+.btn-blue   { background:var(--blue);color:#fff; }
+.btn-orange { background:var(--orange);color:#fff; }
+.btn-yellow { background:var(--yellow);color:var(--ink); }
+.btn-teal   { background:var(--teal);color:#fff; }
+.btn-sm     { font-size:1rem;padding:8px 18px; }
+.btn-next   { display:none;margin-top:14px; }
+.btn-ghost  { background:var(--panel);color:var(--muted);border-color:var(--muted);box-shadow:none;font-size:.9rem;padding:6px 16px; }
+
+.ccard { background:var(--panel);border:var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:22px 18px;max-width:720px;width:100%;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1);text-align:center; }
+@keyframes cardIn { from{opacity:0;transform:translateY(26px) scale(.97)} to{opacity:1;transform:none} }
+
+.loc-tag { display:inline-block;background:var(--blue);color:#fff;font-family:'Fredoka',cursive;font-size:.85rem;letter-spacing:2px;padding:4px 14px;border:var(--border);border-radius:8px;box-shadow:3px 3px 0 var(--ink);margin-bottom:10px;text-transform:uppercase; }
+.cicon   { font-size:3.2rem;display:block;margin:6px 0;filter:drop-shadow(3px 3px 0 var(--ink)); }
+.ctitle  { font-family:'Fredoka',cursive;font-size:1.85rem;color:var(--blue);margin-bottom:6px; }
+
+.maya-say { display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:14px 16px;margin:10px 0;text-align:left;position:relative; }
+.maya-say.right { flex-direction:row-reverse;text-align:right; }
+.maya-face { font-size:2.4rem;flex-shrink:0;filter:drop-shadow(2px 2px 0 var(--ink)); }
+.maya-txt  { font-size:.96rem;line-height:1.7;font-weight:700;color:var(--ink); }
+.maya-txt em  { color:var(--teal);font-style:normal;text-decoration:underline wavy var(--teal2); }
+.maya-txt .joke { color:var(--purple);font-style:italic; }
+.maya-txt .hl   { color:var(--blue);font-weight:900; }
+.maya-say::before { content:'';position:absolute;left:-18px;top:18px;border:9px solid transparent;border-right-color:var(--ink); }
+.maya-say::after  { content:'';position:absolute;left:-12px;top:20px;border:7px solid transparent;border-right-color:var(--panel); }
+.maya-say.right::before { left:auto;right:-18px;border-right-color:transparent;border-left-color:var(--ink); }
+.maya-say.right::after  { left:auto;right:-12px;border-right-color:transparent;border-left-color:var(--panel); }
+.maya-think { background:#f3e5f5;border:var(--border);border-radius:20px;box-shadow:var(--sh);padding:12px 18px;margin:10px 0;font-size:.92rem;font-weight:700;color:var(--purple);text-align:center;font-style:italic;position:relative; }
+.maya-think::before { content:'💭';margin-right:6px;font-style:normal; }
+
+.qpanel { background:var(--sand);border:var(--border);border-radius:var(--r);box-shadow:3px 3px 0 var(--ink);padding:14px 16px;margin:12px 0;text-align:left; }
+.qlabel { font-weight:900;font-size:1rem;color:var(--ink);margin-bottom:10px; }
+
+.fb { font-family:'Fredoka',cursive;font-size:1.15rem;min-height:26px;margin-top:8px; }
+.fb.ok  { color:var(--green);animation:fbPop .4s ease; }
+.fb.bad { color:var(--red);animation:fbShake .4s ease; }
+@keyframes fbPop   { 0%{transform:scale(.7)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+@keyframes fbShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+
+.opts { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0; }
+.opt { font-family:'Fredoka',cursive;font-size:1.2rem;padding:10px 22px;border:var(--border);border-radius:var(--r);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:all .13s; }
+.opt:hover  { transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink);background:var(--bg); }
+.opt.ok  { background:var(--green);color:#fff;pointer-events:none;transform:none;box-shadow:3px 3px 0 var(--ink); }
+.opt.bad { background:var(--red);color:#fff;animation:fbShake .4s; }
+
+.ansin { font-family:'Fredoka',cursive;font-size:2rem;width:110px;padding:6px 12px;text-align:center;border:var(--border);border-radius:var(--r);background:#fff;color:var(--ink);box-shadow:3px 3px 0 var(--ink);outline:none;letter-spacing:2px; }
+
+.teach-tog { display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--teal);color:#fff;border:var(--border);border-radius:var(--r);box-shadow:3px 3px 0 var(--ink);padding:9px 16px;cursor:pointer;font-family:'Fredoka',cursive;font-size:1rem;width:100%;margin-bottom:4px;transition:all .12s; }
+.teach-tog:hover { transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink); }
+.teach-tog .arr { transition:transform .3s; }
+.teach-tog.open .arr { transform:rotate(180deg); }
+.teach-panel { display:none;background:#e0f2f1;border:var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:3px 3px 0 var(--ink);text-align:left; }
+.teach-panel.show { display:block;animation:cardIn .3s ease; }
+.teach-hd { font-family:'Fredoka',cursive;font-size:1rem;color:var(--teal);margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+.tstep    { display:flex;gap:10px;align-items:flex-start;margin-bottom:9px;padding:8px;background:#fff;border-radius:10px;border:2px solid #b2dfdb; }
+.tstep-n  { width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-family:'Fredoka',cursive;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.tstep-t  { font-size:.91rem;font-weight:700;line-height:1.5; }
+.tstep-t .em { color:var(--teal);font-size:1.05em; }
+
+/* GROUPS VIS */
+.gvis { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.gpod { border:3px solid var(--teal);border-radius:12px;padding:8px;background:#e0f2f1;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;min-width:52px;position:relative;opacity:0;transform:scale(0);transition:opacity .3s,transform .3s; }
+.gpod.pop { opacity:1;transform:scale(1); }
+.gpod::after { content:attr(data-l);position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'Fredoka',cursive;font-size:.7rem;background:var(--teal);color:#fff;padding:1px 7px;border-radius:6px;white-space:nowrap; }
+.gi { font-size:1.4rem; }
+
+/* SKIP-COUNT SEQUENCE */
+.skip-seq { display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center;margin:10px 0; }
+.ss-n { font-family:'Fredoka',cursive;font-size:1.05rem;background:var(--blue);color:#fff;border:var(--border);border-radius:8px;padding:5px 12px;box-shadow:2px 2px 0 var(--ink);transition:all .3s; }
+.ss-n.hi { background:var(--teal);transform:scale(1.12);box-shadow:3px 3px 0 var(--ink); }
+.ss-arr { color:var(--orange);font-size:1.1rem;align-self:center;font-weight:900; }
+
+/* DOUBLE-DOUBLE VIS */
+.dd-vis { display:flex;flex-direction:column;gap:10px;align-items:center;margin:10px 0; }
+.dd-row { display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center; }
+.dd-box { font-family:'Fredoka',cursive;font-size:1rem;background:#e8f5e9;border:3px solid var(--green);border-radius:10px;padding:7px 14px;box-shadow:2px 2px 0 var(--ink); }
+.dd-arr { font-size:1.5rem;color:var(--green);font-weight:900; }
+.dd-lbl { font-family:'Fredoka',cursive;font-size:.8rem;color:var(--muted);text-align:center; }
+
+/* FIVE-PLUS-ONE VIS */
+.fpo-vis { background:#fff3e0;border:var(--border);border-radius:var(--r);padding:14px;margin:10px 0;box-shadow:3px 3px 0 var(--ink); }
+.fpo-row { display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:6px 0;align-items:center; }
+.fpo-box { font-family:'Fredoka',cursive;font-size:.95rem;border:3px solid var(--ink);border-radius:8px;padding:5px 12px;box-shadow:2px 2px 0 var(--ink); }
+.fpo-box.five { background:var(--yellow); }
+.fpo-box.one  { background:#ffccbc; }
+.fpo-box.ans  { background:var(--teal);color:#fff; }
+.fpo-eq { font-family:'Fredoka',cursive;font-size:1.05rem;color:var(--ink);text-align:center;margin-top:6px; }
+
+/* NUMBER LINE */
+.nl-wrap { overflow-x:auto;padding:12px 4px 4px;margin:10px 0; }
+.nl      { display:flex;align-items:flex-end;position:relative;min-width:fit-content; }
+.nl-base { position:absolute;bottom:14px;left:22px;right:22px;height:3px;background:var(--ink); }
+.nltick  { display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0; }
+.nlnum   { font-family:'Fredoka',cursive;font-size:.9rem;margin-bottom:4px; }
+.nlbar   { width:2px;height:14px;background:var(--ink); }
+.nlmark  { width:34px;height:34px;border-radius:50%;background:var(--teal);border:var(--border);display:flex;align-items:center;justify-content:center;font-family:'Fredoka',cursive;font-size:.82rem;color:#fff;box-shadow:2px 2px 0 var(--ink);margin-bottom:2px; }
+.nlhop   { position:absolute;border:none;border-top:3px solid var(--orange);height:28px;top:-26px;border-radius:50% 50% 0 0; }
+.nlhop-l { position:absolute;top:-44px;font-family:'Fredoka',cursive;font-size:.7rem;color:var(--orange);transform:translateX(-50%); }
+
+.hidden-q { opacity:.25;pointer-events:none;transition:opacity .45s; }
+
+.hint-tog { font-size:.88rem;font-weight:800;border:var(--border);border-radius:20px;background:var(--bg);color:var(--muted);padding:5px 16px;cursor:pointer;margin-top:6px;box-shadow:2px 2px 0 var(--ink);transition:all .15s; }
+.hint-tog:hover { background:var(--sand);color:var(--ink); }
+.hint-box { display:none;background:var(--sand);border:var(--border);border-radius:var(--r);padding:10px 14px;font-size:.9rem;font-weight:700;color:var(--ink);margin-top:8px;box-shadow:3px 3px 0 var(--ink);text-align:left;animation:cardIn .3s ease; }
+
+#s-win { text-align:center;gap:20px; }
+.win-icon  { font-size:80px;display:block;animation:vetbob 1.5s ease-in-out infinite; }
+.win-title { font-family:'Fredoka',cursive;font-size:clamp(2rem,5vw,3.5rem);color:var(--blue);text-shadow:3px 3px 0 var(--ink); }
+.win-box   { max-width:540px;background:var(--panel);border:var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:18px 22px;font-size:1rem;line-height:1.8;font-weight:700; }
+.skill-row { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
+.spill     { font-family:'Fredoka',cursive;font-size:.95rem;background:var(--teal);color:#fff;border:var(--border);border-radius:30px;padding:5px 16px;box-shadow:3px 3px 0 var(--ink); }
+
+.conf { position:fixed;top:-18px;pointer-events:none;z-index:999;border-radius:3px;animation:cfall var(--cd,2s) var(--cdel,0s) ease-in forwards; }
+@keyframes cfall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+</style>
+</head>
+<body>
+<div class="prog-rail"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<!-- ══════════ TITLE ══════════ -->
+<div class="screen active" id="s-title">
+  <span class="vet-anim">🏥</span>
+  <h1 class="tt">Detective Maya</h1>
+  <h2 class="ts">The Case of the Missing Medicine</h2>
+  <div class="intro-panel">
+    Dr Chen arrived at <strong>Paws &amp; Claws Animal Hospital</strong> this morning to find her special animal medicine — gone! Without it, the poorly patients can't be treated. The waiting room is full of nervous owners and one very suspicious-looking parrot. Maya has been called in. She is <strong>slightly concerned there will be animals</strong>. There will definitely be maths.
+  </div>
+  <div class="trail">
+    <div class="tdot active" id="td0">🏥</div>
+    <div style="font-size:1.1rem;color:var(--muted)">▶</div>
+    <div class="tdot" id="td1">💉</div>
+    <div style="font-size:1.1rem;color:var(--muted)">▶</div>
+    <div class="tdot" id="td2">🔬</div>
+    <div style="font-size:1.1rem;color:var(--muted)">▶</div>
+    <div class="tdot" id="td3">💊</div>
+    <div style="font-size:1.1rem;color:var(--muted)">▶</div>
+    <div class="tdot" id="td4">🌿</div>
+  </div>
+  <button class="btn btn-blue" onclick="goTo(1)">🔍 Start Investigating!</button>
+</div>
+
+<!-- ══════════ CLUE 1 — RECEPTION — 2× ══════════ -->
+<div class="screen" id="s-1">
+  <div class="ccard">
+    <div class="loc-tag">🏥 Reception Desk — Clue 1 of 5</div>
+    <span class="cicon">📋</span>
+    <div class="ctitle">The Appointment Book!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">The receptionist, Nurse Greta, is explaining the situation while also trying to calm down a labrador who appears to have eaten a TV remote. <span class="joke">Maya is trying to focus on the clues and not think about the labrador.</span></div>
+    </div>
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Nurse Greta says: <span class="hl">"We see 2 animals every hour. The clinic runs for 9 hours. Someone who came in today could be the thief!"</span> Maya needs to work out how many animals came through today — that's a lot of suspects.</div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🐾 2 animals per hour, 9 hours. How many animals came through today? (2 × 9 = ?)</div>
+
+      <button class="teach-tog" onclick="togT('t1')">
+        <span>📖 Times tables — Maya's method!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t1">
+        <div class="teach-hd">🌟 2 times anything — just double it!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">2 × 9</span> means 2 groups of 9. Think: 9 hours, 2 animals each hour. Here are the hours:</div></div>
+        <div class="gvis" id="gv1"></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Skip-count in 2s: <span class="em">2, 4, 6, 8, 10, 12, 14, 16, 18</span>. Count nine jumps of 2!</div></div>
+        <div class="nl-wrap" id="nl1"></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Or just <span class="em">double 9</span>: 9 + 9 = 18. The ×2 table is always just doubling!</div></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.3rem;">2 × 9 =</span>
+        <input class="ansin" id="a1" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="chkIn('a1',18,'fb1','✅ 18 animals today! That is a LOT of potential suspects (and one remote-eating labrador).','Not quite — try skip-counting in 2s, nine times!','q1b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb1"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q1b">
+      <div class="maya-say" style="margin-bottom:10px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Nurse Greta adds: <em>"Oh, and there are 2 examination rooms. Each room saw 7 different animals today."</em> Maya writes this down. <span class="joke">She does not ask about the labrador again. Safer that way.</span></div>
+      </div>
+      <div class="qlabel">🧮 2 rooms × 7 animals each. What is 2 × 7?</div>
+      <div class="opts" id="o1b">
+        <button class="opt" onclick="chkOp(this,'12','14','fb1b','✅ 14! 2 × 7 = 14. Double 7 is always 14!','Try doubling 7. What is 7 + 7?',null,'nx1')">12</button>
+        <button class="opt" onclick="chkOp(this,'14','14','fb1b','✅ 14! 2 × 7 = 14. Double 7 is always 14!','Try doubling 7. What is 7 + 7?',null,'nx1')">14</button>
+        <button class="opt" onclick="chkOp(this,'16','14','fb1b','✅ 14! 2 × 7 = 14. Double 7 is always 14!','Try doubling 7. What is 7 + 7?',null,'nx1')">16</button>
+        <button class="opt" onclick="chkOp(this,'18','14','fb1b','✅ 14! 2 × 7 = 14. Double 7 is always 14!','Try doubling 7. What is 7 + 7?',null,'nx1')">18</button>
+      </div>
+      <div class="fb" id="fb1b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h1')">💡 Quick Hint</button>
+    <div class="hint-box" id="h1">The ×2 table is just doubling! 2 × 9 = 9 + 9. For any times-2 question, just add the number to itself.</div>
+    <button class="btn btn-orange btn-next" id="nx1" onclick="goTo(2)">Check the treatment room! →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 2 — TREATMENT ROOM — 3× ══════════ -->
+<div class="screen" id="s-2">
+  <div class="ccard">
+    <div class="loc-tag">💉 Treatment Room — Clue 2 of 5</div>
+    <span class="cicon">🩺</span>
+    <div class="ctitle">The Medicine Trays!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Dr Chen meets Maya in the treatment room. She is trying to explain the situation calmly, but there is a hamster on her shoulder who keeps interrupting. <span class="joke">Maya is professionally pretending the hamster is not there.</span></div>
+    </div>
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Dr Chen: <span class="hl">"I prepare 3 medicine trays each morning. Each tray holds 8 doses. Someone has taken some — I need to know how many doses should be here!"</span></div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">💊 3 trays × 8 doses per tray. How many doses in total? (3 × 8 = ?)</div>
+
+      <button class="teach-tog" onclick="togT('t2')">
+        <span>📖 The 3 times table — Maya explains!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t2">
+        <div class="teach-hd">🌟 Groups of 3 — or skip-count in 3s!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">3 × 8</span>: three trays, 8 doses each. Here are the 3 trays:</div></div>
+        <div class="gvis" id="gv2"></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Skip-count in 8s, three times: <span class="em">8, 16, 24</span>. Three jumps of 8!</div></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Or skip-count in 3s, eight times: <span class="em">3, 6, 9, 12, 15, 18, 21, 24</span>. Both get you to 24!</div></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.3rem;">3 × 8 =</span>
+        <input class="ansin" id="a2" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="chkIn('a2',24,'fb2','✅ 24 doses! Dr Chen checks the trays. Several are missing. The plot thickens.','Not quite — count in 3s up to 8 jumps: 3, 6, 9... or count in 8s three times!','q2b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb2"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q2b">
+      <div class="maya-say" style="margin-bottom:10px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Maya finds a note near the tray shelf. It says: <em>"I also checked the vitamin shelf — 3 bottles in each of the 6 sections."</em> The handwriting is oddly tidy for a thief. <span class="joke">Possibly the neatest criminal Maya has ever encountered.</span></div>
+      </div>
+      <div class="qlabel">🧮 3 bottles × 6 sections. What is 3 × 6?</div>
+      <div class="opts" id="o2b">
+        <button class="opt" onclick="chkOp(this,'15','18','fb2b','✅ 18! 3 × 6 = 18. Skip-count: 3, 6, 9, 12, 15, 18. Six jumps!','Count in 3s, six times: 3, 6, 9, 12, 15, ...?',null,'nx2')">15</button>
+        <button class="opt" onclick="chkOp(this,'18','18','fb2b','✅ 18! 3 × 6 = 18. Skip-count: 3, 6, 9, 12, 15, 18. Six jumps!','Count in 3s, six times: 3, 6, 9, 12, 15, ...?',null,'nx2')">18</button>
+        <button class="opt" onclick="chkOp(this,'21','18','fb2b','✅ 18! 3 × 6 = 18. Skip-count: 3, 6, 9, 12, 15, 18. Six jumps!','Count in 3s, six times: 3, 6, 9, 12, 15, ...?',null,'nx2')">21</button>
+        <button class="opt" onclick="chkOp(this,'24','18','fb2b','✅ 18! 3 × 6 = 18. Skip-count: 3, 6, 9, 12, 15, 18. Six jumps!','Count in 3s, six times: 3, 6, 9, 12, 15, ...?',null,'nx2')">24</button>
+      </div>
+      <div class="fb" id="fb2b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h2')">💡 Quick Hint</button>
+    <div class="hint-box" id="h2">For 3×8: count in 3s eight times — 3, 6, 9, 12, 15, 18, 21, 24. Or count in 8s three times — 8, 16, 24!</div>
+    <button class="btn btn-orange btn-next" id="nx2" onclick="goTo(3)">To the X-ray room! →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 3 — X-RAY ROOM — 4× ══════════ -->
+<div class="screen" id="s-3">
+  <div class="ccard">
+    <div class="loc-tag">🔬 X-Ray Room — Clue 3 of 5</div>
+    <span class="cicon">🦴</span>
+    <div class="ctitle">Paw Prints on the Shelf!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">The X-ray room has 4 medicine shelves along the wall. Maya notices something immediately. <span class="hl">Paw prints.</span> Small ones, in the dust on the shelf. Something small and clever had been up there.</div>
+    </div>
+    <div class="maya-think">
+      "Small paws. Very nimble. This is not a dog. Dogs are not nimble. Definitely not a cat either — cats knock things OFF shelves, not onto them. Hmm."
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🔬 The 4 shelves each held 7 medicine bottles. How many bottles were there in total? (4 × 7 = ?)</div>
+
+      <button class="teach-tog" onclick="togT('t3')">
+        <span>📖 The 4 times table — the double-double trick!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t3">
+        <div class="teach-hd">🌟 Times 4 = double, then double again!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">4 × 7</span>: instead of memorising, use the double-double trick! 4 is just 2 × 2, so you can double twice.</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Start with 7. <span class="em">Double it</span>: 7 + 7 = 14. Then <span class="em">double again</span>: 14 + 14 = 28. Done!</div></div>
+        <div class="dd-vis" id="ddv3"></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">This works for ANY number! Want 4 × 8? Double 8 → 16, double again → 32. <span class="em">Always double twice!</span></div></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.3rem;">4 × 7 =</span>
+        <input class="ansin" id="a3" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="chkIn('a3',28,'fb3','✅ 28 bottles! Maya counts the empty spaces. At least 4 bottles are missing. Suspicious.','Try the double-double: 7 → double → 14 → double → ?','q3b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb3"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q3b">
+      <div class="maya-say" style="margin-bottom:10px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Maya photographs the paw prints. Then she spots another clue: a tiny muddy trail going along the 4 exam tables, <em>6 prints on each table.</em> <span class="joke">Whatever this is, it is VERY thorough.</span></div>
+      </div>
+      <div class="qlabel">🧮 4 tables × 6 paw prints each. What is 4 × 6? (Double-double!)</div>
+      <div class="opts" id="o3b">
+        <button class="opt" onclick="chkOp(this,'20','24','fb3b','✅ 24 prints! Double 6 = 12, double again = 24. The double-double works!','Double 6 first (6+6=12), then double that answer (12+12=?).',null,'nx3')">20</button>
+        <button class="opt" onclick="chkOp(this,'22','24','fb3b','✅ 24 prints! Double 6 = 12, double again = 24. The double-double works!','Double 6 first (6+6=12), then double that answer (12+12=?).',null,'nx3')">22</button>
+        <button class="opt" onclick="chkOp(this,'24','24','fb3b','✅ 24 prints! Double 6 = 12, double again = 24. The double-double works!','Double 6 first (6+6=12), then double that answer (12+12=?).',null,'nx3')">24</button>
+        <button class="opt" onclick="chkOp(this,'28','24','fb3b','✅ 24 prints! Double 6 = 12, double again = 24. The double-double works!','Double 6 first (6+6=12), then double that answer (12+12=?).',null,'nx3')">28</button>
+      </div>
+      <div class="fb" id="fb3b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h3')">💡 Quick Hint</button>
+    <div class="hint-box" id="h3">The ×4 trick: DOUBLE then DOUBLE AGAIN. For 4×7: 7+7=14, then 14+14=28. For 4×6: 6+6=12, then 12+12=24!</div>
+    <button class="btn btn-orange btn-next" id="nx3" onclick="goTo(4)">Check the medicine cabinet! →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 4 — MEDICINE CABINET — 5× ══════════ -->
+<div class="screen" id="s-4">
+  <div class="ccard">
+    <div class="loc-tag">💊 Medicine Cabinet — Clue 4 of 5</div>
+    <span class="cicon">🗄️</span>
+    <div class="ctitle">The Missing Boxes!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">The medicine cabinet has 5 sections — one for each type of animal medicine. Dr Chen explains that she always keeps <em>6 boxes of each medicine</em> in stock. Several boxes are missing, but Dr Chen can't remember exactly how many there should be.</div>
+    </div>
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt"><span class="hl">"Five sections. Six boxes in each. How many boxes total?"</span> Maya asks. <span class="joke">She is starting to enjoy this. Don't tell anyone.</span></div>
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">📦 5 sections × 6 boxes each. How many boxes in total? (5 × 6 = ?)</div>
+
+      <button class="teach-tog" onclick="togT('t4')">
+        <span>📖 The 5 times table — easiest trick ever!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t4">
+        <div class="teach-hd">🌟 Count in 5s — they always end in 0 or 5!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">5 × 6</span>: skip-count in 5s, six times. Every answer in the 5 times table ends in <span class="em">0 or 5</span>!</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Count: <span class="em">5, 10, 15, 20, 25, 30</span>. Six jumps of 5 lands on 30!</div></div>
+        <div class="skip-seq" id="sq4"></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Handy trick: for 5 × even number, halve it and add a zero. 5 × 6: half of 6 = 3, so the answer is <span class="em">30</span>!</div></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.3rem;">5 × 6 =</span>
+        <input class="ansin" id="a4" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="chkIn('a4',30,'fb4','✅ 30 boxes! But Maya counts only 22 in the cabinet. 8 boxes are missing. This is serious.','Count in 5s six times: 5, 10, 15, 20, 25, ...?','q4b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb4"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q4b">
+      <div class="maya-say" style="margin-bottom:10px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt">Maya finds a clump of fur caught on the cabinet door latch. <em>Brown fur. Very fluffy. Slightly banana-scented.</em> The thief has been identified as <span class="hl">a small, fluffy, banana-loving animal.</span> There is only one place left to check.</div>
+      </div>
+      <div class="qlabel">🧮 Maya counts 5 rows of animal cages in the garden area, with 8 cages per row. How many cages total? (5 × 8 = ?)</div>
+      <div class="opts" id="o4b">
+        <button class="opt" onclick="chkOp(this,'35','40','fb4b','✅ 40 cages! Count in 5s eight times: 5,10,15,20,25,30,35,40!','Count in 5s, eight times: 5, 10, 15, 20, 25, 30, 35, ...?',null,'nx4')">35</button>
+        <button class="opt" onclick="chkOp(this,'40','40','fb4b','✅ 40 cages! Count in 5s eight times: 5,10,15,20,25,30,35,40!','Count in 5s, eight times: 5, 10, 15, 20, 25, 30, 35, ...?',null,'nx4')">40</button>
+        <button class="opt" onclick="chkOp(this,'45','40','fb4b','✅ 40 cages! Count in 5s eight times: 5,10,15,20,25,30,35,40!','Count in 5s, eight times: 5, 10, 15, 20, 25, 30, 35, ...?',null,'nx4')">45</button>
+        <button class="opt" onclick="chkOp(this,'50','40','fb4b','✅ 40 cages! Count in 5s eight times: 5,10,15,20,25,30,35,40!','Count in 5s, eight times: 5, 10, 15, 20, 25, 30, 35, ...?',null,'nx4')">50</button>
+      </div>
+      <div class="fb" id="fb4b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h4')">💡 Quick Hint</button>
+    <div class="hint-box" id="h4">The ×5 table always ends in 0 or 5! Count in 5s: 5, 10, 15, 20, 25, 30. Six jumps of 5 = 30. Eight jumps of 5 = 40.</div>
+    <button class="btn btn-orange btn-next" id="nx4" onclick="goTo(5)">To the animal pens! →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 5 — THE GARDEN PENS — 6× ══════════ -->
+<div class="screen" id="s-5">
+  <div class="ccard">
+    <div class="loc-tag">🌿 The Garden Pens — Clue 5 of 5</div>
+    <span class="cicon">🐒</span>
+    <div class="ctitle">The Suspect in the Pen!</div>
+
+    <div class="maya-say">
+      <span class="maya-face">🧒‍♀️</span>
+      <div class="maya-txt">Maya heads to the garden pens. There are 6 rows of pens, with 4 pens in each row. The fur sample matches: <span class="hl">a capuchin monkey named Chester.</span> But which pen is he in? Maya calculates the total number of pens to work out the pen number.</div>
+    </div>
+    <div class="maya-think">
+      "Six rows. Four pens each. The pen number is the total. This thief literally hid in plain sight at the end of a multiplication problem."
+    </div>
+
+    <div class="qpanel">
+      <div class="qlabel">🔢 6 rows of pens × 4 pens per row. The culprit is in pen number [answer]! (6 × 4 = ?)</div>
+
+      <button class="teach-tog" onclick="togT('t5')">
+        <span>📖 The 6 times table — five-plus-one trick!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t5">
+        <div class="teach-hd">🌟 Six is just five plus one more!</div>
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t"><span class="em">6 × 4</span>: think of 6 as <span class="em">5 + 1</span>. Do 5 × 4 first (easy — it's 20!), then add one more 4.</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t"><span class="em">5 × 4 = 20</span>, plus <span class="em">1 × 4 = 4</span>. So 20 + 4 = <span class="em">24</span>!</div></div>
+        <div class="fpo-vis" id="fpov5"></div>
+        <div class="tstep"><div class="tstep-n">3</div><div class="tstep-t">Works for any 6× fact! 6 × 7: 5×7=35, plus 1×7=7, so 35+7=<span class="em">42</span>. Five-plus-one is your friend!</div></div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Fredoka',cursive;font-size:1.3rem;">6 × 4 =</span>
+        <input class="ansin" id="a5" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="chkIn('a5',24,'fb5','✅ Pen 24! Maya marches to pen 24. And there he is...','Try five-plus-one: 5×4=20, then add one more 4. 20+?','q5b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb5"></div>
+    </div>
+
+    <div class="qpanel hidden-q" id="q5b">
+      <div class="maya-say" style="margin-bottom:10px;">
+        <span class="maya-face">🧒‍♀️</span>
+        <div class="maya-txt"><span class="hl">Chester.</span> A small brown capuchin monkey, sitting in pen 24, surrounded by <em>every single box of banana-flavoured animal vitamins</em> the clinic owned. He has vitamin B on his nose. He looks, if anything, <span class="joke">slightly smug.</span></div>
+      </div>
+      <div class="maya-say right" style="margin-bottom:10px;">
+        <span class="maya-face">🐒</span>
+        <div class="maya-txt" style="text-align:right;"><span class="joke">"They're banana flavour. I couldn't help it. I regret nothing."</span></div>
+      </div>
+      <div class="qlabel">🏆 Final question: Chester stole medicine from 6 different shelves and took 7 items from each shelf. How many items total? (6 × 7 = ?)</div>
+      <button class="teach-tog" onclick="togT('t5b')">
+        <span>📖 6 × 7 — five-plus-one again!</span>
+        <span class="arr">▼</span>
+      </button>
+      <div class="teach-panel" id="t5b">
+        <div class="tstep"><div class="tstep-n">1</div><div class="tstep-t">6 × 7: use five-plus-one! <span class="em">5 × 7 = 35</span>, plus <span class="em">1 × 7 = 7</span>. Add: 35 + 7 = <span class="em">42</span>.</div></div>
+        <div class="tstep"><div class="tstep-n">2</div><div class="tstep-t">Or count in 6s: <span class="em">6, 12, 18, 24, 30, 36, 42</span>. Seven jumps of 6!</div></div>
+      </div>
+      <div class="opts" id="o5b">
+        <button class="opt" onclick="chkOp(this,'36','42','fb5b','✅ 42 stolen items! CASE CLOSED! Maya writes it all up.','Five-plus-one: 5×7=35, add one more 7. 35+7=?',null,'nx5')">36</button>
+        <button class="opt" onclick="chkOp(this,'42','42','fb5b','✅ 42 stolen items! CASE CLOSED! Maya writes it all up.','Five-plus-one: 5×7=35, add one more 7. 35+7=?',null,'nx5')">42</button>
+        <button class="opt" onclick="chkOp(this,'48','42','fb5b','✅ 42 stolen items! CASE CLOSED! Maya writes it all up.','Five-plus-one: 5×7=35, add one more 7. 35+7=?',null,'nx5')">48</button>
+        <button class="opt" onclick="chkOp(this,'54','42','fb5b','✅ 42 stolen items! CASE CLOSED! Maya writes it all up.','Five-plus-one: 5×7=35, add one more 7. 35+7=?',null,'nx5')">54</button>
+      </div>
+      <div class="fb" id="fb5b"></div>
+    </div>
+
+    <button class="hint-tog" onclick="togH('h5')">💡 Quick Hint</button>
+    <div class="hint-box" id="h5">For 6×4: use five-plus-one. 5×4=20, plus 4 more = 24. For 6×7: 5×7=35, plus 7 more = 42!</div>
+    <button class="btn btn-blue btn-next" id="nx5" onclick="goTo('win')">🎉 Close the Case!</button>
+  </div>
+</div>
+
+<!-- ══════════ WIN ══════════ -->
+<div class="screen" id="s-win">
+  <span class="win-icon">🏥</span>
+  <div class="win-title">Case Closed!</div>
+  <div class="maya-say" style="max-width:540px;">
+    <span class="maya-face">🧒‍♀️</span>
+    <div class="maya-txt">Chester was given a formal caution and had his vitamin banana treats reduced to <em>two per day</em>. He is not pleased about this, but Dr Chen points out that 2 × 7 days per week is still 14 banana treats. <span class="joke">Maya calculated that for him. He perked up slightly. Then stole another vitamin. Maya pretended not to see.</span></div>
+  </div>
+  <div class="win-box">
+    <strong>Maya walked out into the car park feeling like a proper mathematician.</strong><br><br>
+    <em>"Times tables aren't hard facts to memorise — they're patterns. Double-double for ×4. Count in 5s for ×5. Five-plus-one for ×6. Once you see the pattern, the maths just... works."</em><br><br>
+    She checked her notepad. <span style="color:var(--blue)">Five cases. Five clues. Ten multiplication facts. All solved.</span> Not bad for a morning at the vet.
+  </div>
+  <div class="skill-row">
+    <span class="spill">✖️2 Double it!</span>
+    <span class="spill">✖️3 Skip in 3s</span>
+    <span class="spill">✖️4 Double-double</span>
+    <span class="spill">✖️5 Ends in 0 or 5</span>
+    <span class="spill">✖️6 Five-plus-one</span>
+  </div>
+  <button class="btn btn-blue" onclick="location.reload()">🔄 Solve it Again!</button>
+</div>
+
+<script>
+// ── NAV ────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var id = (n === 'win') ? 's-win' : 's-' + n;
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  var done = (n === 'win') ? 5 : (typeof n === 'number' ? n - 1 : 0);
+  document.getElementById('prog').style.width = (done / 5 * 100) + '%';
+  updTrail(done);
+  if (n === 1) { buildGvis('gv1', 9, 2, '🐾'); buildNL('nl1', 9, 2); }
+  if (n === 2) buildGvis('gv2', 3, 8, '💊');
+  if (n === 3) buildDD('ddv3', 7);
+  if (n === 4) buildSkipSeq('sq4', 5, 6);
+  if (n === 5) buildFPO('fpov5', 4);
+  if (n === 'win') celebrate();
+}
+
+function updTrail(done) {
+  for (var i = 0; i < 5; i++) {
+    var d = document.getElementById('td' + i);
+    d.className = 'tdot';
+    if (i < done) d.classList.add('done');
+    else if (i === done) d.classList.add('active');
+  }
+}
+
+// ── TEACH TOGGLE ───────────────────────────────
+function togT(id) {
+  var p = document.getElementById(id);
+  var b = p.previousElementSibling;
+  var open = p.classList.contains('show');
+  p.classList.toggle('show', !open);
+  b.classList.toggle('open', !open);
+}
+function togH(id) {
+  var el = document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// ── REVEAL ─────────────────────────────────────
+function reveal(id) {
+  if (!id) return;
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (el.classList.contains('hidden-q')) el.classList.remove('hidden-q');
+  else el.style.display = 'inline-block';
+}
+
+// ── CHECKERS ───────────────────────────────────
+function chkIn(inputId, correct, fbId, okMsg, badMsg, revealId, nextId) {
+  var val = parseInt(document.getElementById(inputId).value, 10);
+  var fb  = document.getElementById(fbId);
+  if (isNaN(val)) { fb.textContent = 'Type a number first!'; fb.className = 'fb bad'; return; }
+  if (val === correct) {
+    fb.textContent = okMsg; fb.className = 'fb ok';
+    document.getElementById(inputId).disabled = true;
+    spawnConf(5);
+    if (revealId) setTimeout(function() { reveal(revealId); }, 500);
+    if (nextId)   setTimeout(function() { reveal(nextId); }, 500);
+  } else {
+    fb.textContent = badMsg; fb.className = 'fb bad';
+  }
+}
+
+function chkOp(el, picked, correct, fbId, okMsg, badMsg, revealId, nextId) {
+  var sibs = el.parentNode.querySelectorAll('.opt');
+  sibs.forEach(function(b) { b.disabled = true; });
+  var fb = document.getElementById(fbId);
+  if (picked === correct) {
+    el.className = 'opt ok';
+    fb.textContent = okMsg || 'Correct!';
+    fb.className = 'fb ok';
+    spawnConf(6);
+    if (revealId) setTimeout(function() { reveal(revealId); }, 400);
+    if (nextId)   setTimeout(function() { reveal(nextId); }, 400);
+  } else {
+    el.className = 'opt bad';
+    fb.textContent = badMsg || 'Try again!';
+    fb.className = 'fb bad';
+    setTimeout(function() {
+      el.className = 'opt';
+      sibs.forEach(function(b) { b.disabled = false; });
+    }, 900);
+  }
+}
+
+// ── GROUPS VISUAL ──────────────────────────────
+function buildGvis(id, groups, perGroup, icon) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  for (var g = 0; g < groups; g++) {
+    (function(gi) {
+      var pod = document.createElement('div');
+      pod.className = 'gpod';
+      pod.setAttribute('data-l', 'Group ' + (gi + 1));
+      for (var i = 0; i < perGroup; i++) {
+        var sp = document.createElement('span');
+        sp.className = 'gi'; sp.textContent = icon;
+        pod.appendChild(sp);
+      }
+      el.appendChild(pod);
+      setTimeout(function() { pod.classList.add('pop'); }, gi * 160);
+    })(g);
+  }
+}
+
+// ── SKIP-COUNT SEQUENCE ────────────────────────
+function buildSkipSeq(id, step, count) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  for (var i = 1; i <= count; i++) {
+    if (i > 1) {
+      var arr = document.createElement('span');
+      arr.className = 'ss-arr'; arr.textContent = '→';
+      el.appendChild(arr);
+    }
+    var num = document.createElement('span');
+    num.className = 'ss-n' + (i === count ? ' hi' : '');
+    num.textContent = step * i;
+    (function(el2, delay) { setTimeout(function() { el2.style.opacity = '1'; }, delay); })(num, i * 150);
+    num.style.opacity = '0';
+    num.style.transition = 'opacity .4s';
+    el.appendChild(num);
+  }
+}
+
+// ── DOUBLE-DOUBLE VISUAL ───────────────────────
+function buildDD(id, n) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  var d1 = n * 2, d2 = n * 4;
+  var row1 = document.createElement('div'); row1.className = 'dd-row';
+  var b0 = document.createElement('div'); b0.className = 'dd-box'; b0.textContent = 'Start: ' + n;
+  var a1 = document.createElement('div'); a1.className = 'dd-arr'; a1.textContent = '× 2 ↓';
+  var b1 = document.createElement('div'); b1.className = 'dd-box'; b1.textContent = n + ' + ' + n + ' = ' + d1;
+  row1.appendChild(b0); row1.appendChild(a1); row1.appendChild(b1);
+  el.appendChild(row1);
+  var lbl1 = document.createElement('div'); lbl1.className = 'dd-lbl'; lbl1.textContent = '← First double';
+  el.appendChild(lbl1);
+  var row2 = document.createElement('div'); row2.className = 'dd-row';
+  var b1c = document.createElement('div'); b1c.className = 'dd-box'; b1c.textContent = d1;
+  var a2 = document.createElement('div'); a2.className = 'dd-arr'; a2.textContent = '× 2 again ↓';
+  var b2 = document.createElement('div'); b2.className = 'dd-box'; b2.style.background = '#c8e6c9'; b2.textContent = d1 + ' + ' + d1 + ' = ' + d2;
+  row2.appendChild(b1c); row2.appendChild(a2); row2.appendChild(b2);
+  el.appendChild(row2);
+  var lbl2 = document.createElement('div'); lbl2.className = 'dd-lbl'; lbl2.textContent = '← Second double → Answer: ' + d2;
+  el.appendChild(lbl2);
+}
+
+// ── FIVE-PLUS-ONE VISUAL ───────────────────────
+function buildFPO(id, n) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  var five = 5 * n, one = 1 * n, ans = 6 * n;
+  el.innerHTML =
+    '<div class="fpo-row">' +
+      '<div class="fpo-box five">5 × ' + n + ' = ' + five + '</div>' +
+      '<span style="font-size:1.4rem;font-weight:900;color:#1a1a2e">+</span>' +
+      '<div class="fpo-box one">1 × ' + n + ' = ' + one + '</div>' +
+      '<span style="font-size:1.4rem;font-weight:900;color:#1a1a2e">=</span>' +
+      '<div class="fpo-box ans">6 × ' + n + ' = ' + ans + '</div>' +
+    '</div>' +
+    '<div class="fpo-eq">Because 6 = 5 + 1 ✓</div>';
+}
+
+// ── NUMBER LINE ────────────────────────────────
+function buildNL(id, jumps, step) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  var total = jumps * step;
+  var wrap = document.createElement('div');
+  wrap.className = 'nl'; wrap.style.position = 'relative';
+  var base = document.createElement('div'); base.className = 'nl-base';
+  wrap.appendChild(base);
+  for (var i = 0; i <= total; i++) {
+    var tick = document.createElement('div'); tick.className = 'nltick';
+    if (i % step === 0 && i > 0) {
+      var mk = document.createElement('div'); mk.className = 'nlmark'; mk.textContent = i; tick.appendChild(mk);
+      var nb = document.createElement('div'); nb.className = 'nlnum'; nb.textContent = ''; tick.appendChild(nb);
+    } else {
+      var nb2 = document.createElement('div'); nb2.className = 'nlnum'; nb2.textContent = (i % step === 0) ? i : ''; tick.appendChild(nb2);
+    }
+    var bar = document.createElement('div'); bar.className = 'nlbar'; tick.appendChild(bar);
+    wrap.appendChild(tick);
+  }
+  for (var j = 0; j < jumps; j++) {
+    var hop = document.createElement('div'); hop.className = 'nlhop';
+    var s = j * step, e = (j + 1) * step;
+    hop.style.left  = 'calc(' + (s / total * 100) + '% + 22px)';
+    hop.style.width = 'calc(' + ((e - s) / total * 100) + '%)';
+    wrap.appendChild(hop);
+    var lbl = document.createElement('div'); lbl.className = 'nlhop-l';
+    lbl.textContent = '+' + step;
+    lbl.style.left = 'calc(' + ((s + (e - s) / 2) / total * 100) + '% + 22px)';
+    wrap.appendChild(lbl);
+  }
+  el.appendChild(wrap);
+}
+
+// ── CONFETTI ───────────────────────────────────
+function spawnConf(n) {
+  var cols = ['#e53935','#f57c00','#fdd835','#00897b','#1565c0','#6a1b9a','#fff'];
+  for (var i = 0; i < n; i++) {
+    (function() {
+      var p = document.createElement('div'); p.className = 'conf';
+      p.style.left   = Math.random() * 100 + 'vw';
+      p.style.width  = (7 + Math.random() * 7) + 'px';
+      p.style.height = (8 + Math.random() * 12) + 'px';
+      p.style.background = cols[Math.floor(Math.random() * cols.length)];
+      p.style.setProperty('--cd',   (1.2 + Math.random() * 1.4) + 's');
+      p.style.setProperty('--cdel', (Math.random() * 0.6) + 's');
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+      document.body.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 3000);
+    })();
+  }
+}
+
+function celebrate() {
+  for (var i = 0; i < 7; i++) {
+    (function(d) { setTimeout(function() { spawnConf(16); }, d); })(i * 220);
+  }
+}
+
+// ── INIT ───────────────────────────────────────
+updTrail(0);
+</script>
+</body>
+</html>
