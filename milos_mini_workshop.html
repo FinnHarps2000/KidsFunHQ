@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milo's Mini Workshop – Build a Rocket!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B2B;
+    --yellow: #FFD700;
+    --blue:   #1A73E8;
+    --dark:   #1C1C2E;
+    --steel:  #4A5568;
+    --green:  #22C55E;
+    --red:    #EF4444;
+    --cream:  #FFF8ED;
+    --panel:  #2D3748;
+    --purple: #9333ea;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Nunito',sans-serif; background:var(--dark); min-height:100vh; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+  .bg { position:fixed; inset:0; z-index:0; background:linear-gradient(160deg,#1C1C2E 0%,#0a1a3a 50%,#0d1f2e 100%); overflow:hidden; }
+  .bg::before { content:''; position:absolute; inset:0; background-image: radial-gradient(circle at 20% 80%,rgba(255,107,43,0.1) 0%,transparent 50%), radial-gradient(circle at 80% 20%,rgba(26,115,232,0.1) 0%,transparent 50%); }
+  .star-bg { position:absolute; border-radius:50%; background:white; opacity:0; animation:twinkle var(--td,3s) var(--dd,0s) ease-in-out infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:var(--op,0.6)} }
+
+  #game { position:relative; z-index:10; width:min(680px,96vw); max-height:96vh; display:flex; flex-direction:column; }
+
+  .header { background:linear-gradient(135deg,var(--orange),#ff9500); border-radius:20px 20px 0 0; padding:14px 20px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 20px rgba(255,107,43,0.4); }
+  .header h1 { font-family:'Fredoka One',cursive; color:white; font-size:clamp(1.1rem,4vw,1.6rem); text-shadow:2px 2px 0 rgba(0,0,0,0.2); flex:1; }
+  .header .emoji { font-size:2rem; }
+  .score-box { background:rgba(0,0,0,0.2); border-radius:12px; padding:6px 14px; color:white; font-weight:800; font-size:1rem; display:flex; align-items:center; gap:6px; }
+
+  .progress-bar  { height:8px; background:rgba(255,255,255,0.2); }
+  .progress-fill { height:100%; background:var(--yellow); transition:width .6s ease; box-shadow:0 0 8px var(--yellow); }
+
+  .panel { background:var(--cream); padding:20px 24px; flex:1; overflow-y:auto; border-radius:0 0 20px 20px; border:3px solid var(--orange); border-top:none; }
+
+  /* STORY BOX */
+  .story { background:linear-gradient(135deg,#fff3e0,#ffe8c0); border-left:5px solid var(--orange); border-radius:12px; padding:14px 16px; margin-bottom:16px; display:flex; gap:12px; align-items:flex-start; box-shadow:0 2px 10px rgba(255,107,43,0.15); }
+  .milo-face { font-size:2.5rem; flex-shrink:0; animation:bop 2s infinite ease-in-out; }
+  @keyframes bop { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+  .story p { color:#5a3e00; font-size:clamp(0.9rem,3vw,1.05rem); font-weight:700; line-height:1.5; }
+
+  /* ROCKET PROGRESS */
+  .rocket-row { display:flex; justify-content:center; align-items:flex-end; gap:6px; margin-bottom:14px; }
+  .rpart { font-size:1.8rem; filter:grayscale(1) opacity(0.25); transition:all .4s; }
+  .rpart.built { filter:none; animation:rPop .5s ease; }
+  @keyframes rPop { 0%{transform:scale(0) rotate(-20deg)} 70%{transform:scale(1.2) rotate(5deg)} 100%{transform:scale(1) rotate(0)} }
+
+  /* BADGE */
+  .badge { display:inline-flex; align-items:center; gap:6px; border-radius:20px; padding:4px 14px; font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; border:2px solid rgba(0,0,0,0.12); }
+  .badge.counting  { background:#dcfce7; color:#166534; }
+  .badge.shapes    { background:#dbeafe; color:#1e40af; }
+  .badge.colors    { background:#fce7f3; color:#9d174d; }
+  .badge.patterns  { background:#f3e8ff; color:#6b21a8; }
+  .badge.adding    { background:#ffedd5; color:#c2410c; }
+
+  /* QUESTION TEXT */
+  .question-text { font-family:'Fredoka One',cursive; color:var(--dark); font-size:clamp(1.3rem,5vw,1.9rem); text-align:center; margin-bottom:14px; line-height:1.3; }
+
+  /* VISUAL DISPLAY */
+  .visual-area { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; padding:12px; background:#fff; border-radius:14px; border:3px solid #e8c9a0; min-height:64px; }
+  .count-item { font-size:2.2rem; line-height:1; }
+  .pattern-item { font-size:2rem; line-height:1; }
+  .pattern-item.blank { font-size:2rem; background:#e2e8f0; border-radius:8px; width:46px; height:46px; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-family:'Fredoka One',cursive; }
+  .add-group { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; padding:8px; background:#f0fdf4; border-radius:10px; border:2px solid #86efac; }
+  .add-item { font-size:2rem; }
+  .add-plus { font-family:'Fredoka One',cursive; font-size:2.5rem; color:var(--orange); align-self:center; }
+
+  /* ANSWER GRID */
+  .answer-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .answer-btn { background:white; border:3px solid #ddd; border-radius:16px; padding:14px 10px; font-family:'Fredoka One',cursive; font-size:clamp(1.1rem,4vw,1.4rem); color:var(--dark); cursor:pointer; transition:all .18s; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 0 #ddd; position:relative; top:0; min-height:64px; }
+  .answer-btn:hover { border-color:var(--orange); background:#fff3e0; transform:translateY(-3px); box-shadow:0 7px 0 rgba(255,107,43,0.3); }
+  .answer-btn:active { top:4px; box-shadow:0 0 0 #ddd; }
+  .answer-btn.correct { border-color:var(--green)!important; background:#f0fdf4!important; animation:popIn .4s ease; }
+  .answer-btn.wrong   { border-color:var(--red)!important; background:#fef2f2!important; animation:shake .4s ease; }
+  @keyframes popIn { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
+  @keyframes shake  { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  /* SHAPE BUTTONS */
+  .shape-btn { flex-direction:column; padding:12px 8px; }
+  .shape-svg { width:56px; height:56px; }
+
+  /* COLOR BUTTONS */
+  .color-btn { flex-direction:column; gap:6px; }
+  .color-circle { width:52px; height:52px; border-radius:50%; border:3px solid rgba(0,0,0,0.15); box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+
+  /* FEEDBACK */
+  .feedback { text-align:center; font-family:'Fredoka One',cursive; font-size:1.3rem; min-height:36px; padding:6px; border-radius:10px; margin-bottom:10px; transition:all .3s; }
+  .feedback.correct { color:var(--green); background:#f0fdf4; }
+  .feedback.wrong   { color:var(--red);   background:#fef2f2; }
+
+  /* NEXT BUTTON */
+  .next-btn { display:none; width:100%; background:linear-gradient(135deg,var(--orange),#ff9500); border:none; border-radius:14px; padding:14px; font-family:'Fredoka One',cursive; font-size:1.3rem; color:white; cursor:pointer; box-shadow:0 5px 0 #c45000; transition:all .15s; position:relative; top:0; }
+  .next-btn:hover { transform:translateY(-3px); box-shadow:0 8px 0 #c45000; }
+  .next-btn:active { top:5px; box-shadow:0 0 0 #c45000; }
+  .next-btn.visible { display:block; }
+
+  /* INTRO / END */
+  .intro-screen, .end-screen { text-align:center; padding:10px 0; }
+  .intro-screen h2, .end-screen h2 { font-family:'Fredoka One',cursive; font-size:clamp(1.5rem,5vw,2.2rem); color:var(--dark); margin-bottom:10px; }
+  .big-milo { font-size:5rem; margin:10px 0; display:block; animation:bop 2s infinite; }
+  .intro-screen p { color:#555; font-weight:700; font-size:1rem; margin-bottom:20px; line-height:1.6; }
+  .end-screen .big-emoji { font-size:4rem; margin:12px 0; display:block; animation:bop 1.5s infinite; }
+  .end-screen p { font-size:1.1rem; color:#555; font-weight:700; margin-bottom:16px; }
+  .start-btn { background:linear-gradient(135deg,var(--green),#16a34a); border:none; border-radius:14px; padding:16px 50px; font-family:'Fredoka One',cursive; font-size:1.6rem; color:white; cursor:pointer; box-shadow:0 5px 0 #166534; transition:all .15s; }
+  .start-btn:hover { transform:translateY(-3px); box-shadow:0 8px 0 #166534; }
+  .restart-btn { background:linear-gradient(135deg,var(--blue),#0052cc); border:none; border-radius:14px; padding:16px 40px; font-family:'Fredoka One',cursive; font-size:1.4rem; color:white; cursor:pointer; box-shadow:0 5px 0 #003a99; transition:all .15s; }
+  .restart-btn:hover { transform:translateY(-3px); box-shadow:0 8px 0 #003a99; }
+  .stars-row { display:flex; justify-content:center; gap:6px; margin-bottom:12px; }
+  .star { font-size:1.6rem; filter:grayscale(1) opacity(0.3); transition:all .3s; }
+  .star.lit { filter:none; animation:starPop .4s ease; }
+  @keyframes starPop { 0%{transform:scale(0)} 70%{transform:scale(1.3)} 100%{transform:scale(1)} }
+  .rocket-complete { font-size:3rem; display:flex; gap:4px; justify-content:center; margin:12px 0; animation:rlaunch 1.5s ease-in-out infinite; }
+  @keyframes rlaunch { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+</style>
+</head>
+<body>
+
+<div class="bg" id="bg"></div>
+
+<div id="game">
+  <div class="header">
+    <span class="emoji">🚀</span>
+    <h1>Milo's Mini Workshop</h1>
+    <div class="score-box">⭐ <span id="scoreDisplay">0</span></div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="panel" id="panel"></div>
+</div>
+
+<script>
+// ── SHAPE SVGs ─────────────────────────────────
+function shapeSVG(name) {
+  var color = { circle:'#1A73E8', square:'#FF6B2B', triangle:'#22C55E', rectangle:'#9333ea' }[name] || '#888';
+  if (name === 'circle')    return '<svg class="shape-svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="' + color + '" stroke="#1a1a2e" stroke-width="3"/></svg>';
+  if (name === 'square')    return '<svg class="shape-svg" viewBox="0 0 60 60"><rect x="8" y="8" width="44" height="44" rx="3" fill="' + color + '" stroke="#1a1a2e" stroke-width="3"/></svg>';
+  if (name === 'triangle')  return '<svg class="shape-svg" viewBox="0 0 60 60"><polygon points="30,6 56,54 4,54" fill="' + color + '" stroke="#1a1a2e" stroke-width="3" stroke-linejoin="round"/></svg>';
+  if (name === 'rectangle') return '<svg class="shape-svg" viewBox="0 0 80 50"><rect x="5" y="8" width="70" height="34" rx="3" fill="' + color + '" stroke="#1a1a2e" stroke-width="3"/></svg>';
+  return '';
+}
+
+// ── QUESTIONS ──────────────────────────────────
+var questions = [
+  // MISSION 1 — COUNTING
+  {
+    category:'counting', badge:'🔢 Counting',
+    mission:'Mission 1: Count the Parts!',
+    story:"Luna the penguin needs rocket fuel canisters! Count the canisters so Milo knows how many he has.",
+    visual:{ type:'count', items:['🛢️','🛢️','🛢️','🛢️','🛢️','🛢️'] },
+    question:'How many canisters?',
+    answers:['5','6','7','8'], correct:1
+  },
+  {
+    category:'counting', badge:'🔢 Counting',
+    mission:'Mission 1: Count the Parts!',
+    story:"Milo has some rocket boosters ready! Count them all.",
+    visual:{ type:'count', items:['🔥','🔥','🔥','🔥'] },
+    question:'How many boosters?',
+    answers:['3','4','5','6'], correct:1
+  },
+  // MISSION 2 — SHAPES
+  {
+    category:'shapes', badge:'🔺 Shapes',
+    mission:'Mission 2: Find the Right Shape!',
+    story:"The rocket window needs to be a CIRCLE shape! Help Milo find the right one.",
+    visual:{ type:'text', text:'👇 Which shape is a circle?' },
+    question:'Tap the CIRCLE!',
+    answerType:'shape',
+    answers:['circle','square','triangle','rectangle'], correct:0
+  },
+  {
+    category:'shapes', badge:'🔺 Shapes',
+    mission:'Mission 2: Find the Right Shape!',
+    story:"The rocket nose cone is a TRIANGLE! Which shape should Milo use?",
+    visual:{ type:'text', text:'👇 Which shape is a triangle?' },
+    question:'Tap the TRIANGLE!',
+    answerType:'shape',
+    answers:['rectangle','circle','triangle','square'], correct:2
+  },
+  // MISSION 3 — COLOURS
+  {
+    category:'colors', badge:'🎨 Colours',
+    mission:'Mission 3: Pick the Right Colour!',
+    story:"Luna wants the rocket painted YELLOW like the sun! Find the yellow button.",
+    visual:{ type:'text', text:'🌟 Tap the YELLOW colour!' },
+    question:'Which one is YELLOW?',
+    answerType:'color',
+    answers:['#FFD700','#EF4444','#1A73E8','#22C55E'], correct:0
+  },
+  {
+    category:'colors', badge:'🎨 Colours',
+    mission:'Mission 3: Pick the Right Colour!',
+    story:"The rocket engine needs to be BLUE to match the sky! Find the blue colour.",
+    visual:{ type:'text', text:'🌀 Tap the BLUE colour!' },
+    question:'Which one is BLUE?',
+    answerType:'color',
+    answers:['#22C55E','#FF6B2B','#1A73E8','#FFD700'], correct:2
+  },
+  // MISSION 4 — PATTERNS
+  {
+    category:'patterns', badge:'🔄 Patterns',
+    mission:'Mission 4: Complete the Pattern!',
+    story:"Milo is decorating the rocket with a pattern of stickers! What comes next?",
+    visual:{ type:'pattern', items:['🚀','🌙','🚀','🌙','🚀','❓'] },
+    question:'What comes next?',
+    answers:['🚀','🌙','⭐','🌟'], correct:1
+  },
+  {
+    category:'patterns', badge:'🔄 Patterns',
+    mission:'Mission 4: Complete the Pattern!',
+    story:"Luna is adding penguin and snowflake stickers in a pattern! What comes next?",
+    visual:{ type:'pattern', items:['🐧','❄️','🐧','❄️','🐧','❓'] },
+    question:'What comes next?',
+    answers:['🐧','🌙','❄️','⭐'], correct:2
+  },
+  // MISSION 5 — ADDING
+  {
+    category:'adding', badge:'➕ Adding',
+    mission:'Mission 5: Help with the Sums!',
+    story:"Milo has 3 small nuts in one hand and 2 more in the other. How many nuts altogether?",
+    visual:{ type:'add', left:['🔩','🔩','🔩'], right:['🔩','🔩'] },
+    question:'3 + 2 = ?',
+    answers:['4','5','6','7'], correct:1
+  },
+  {
+    category:'adding', badge:'➕ Adding',
+    mission:'Mission 5: Help with the Sums!',
+    story:"Luna puts 4 stars on the left wing and 3 stars on the right wing. How many stars on the rocket?",
+    visual:{ type:'add', left:['⭐','⭐','⭐','⭐'], right:['⭐','⭐','⭐'] },
+    question:'4 + 3 = ?',
+    answers:['5','6','7','8'], correct:2
+  }
+];
+
+var ROCKET_PARTS = ['🔧','🪛','⚙️','🔩','🛠️','🔋','💡','🚀'];
+
+// ── STATE ──────────────────────────────────────
+var current = 0, score = 0, answered = false, builtParts = [];
+
+// ── RENDER INTRO ───────────────────────────────
+function renderIntro() {
+  document.getElementById('panel').innerHTML =
+    '<div class="intro-screen">' +
+      '<span class="big-milo">👨‍🔧</span>' +
+      '<h2>Help Milo Build a Rocket!</h2>' +
+      '<p>Luna the penguin wants to fly to the moon!<br>' +
+      'Milo needs your help to build her rocket.<br>' +
+      'Count things, find shapes, pick colours,<br>spot patterns and do sums to build each part! 🚀🌙</p>' +
+      '<button class="start-btn" onclick="startGame()">Let\'s Build! 🔧</button>' +
+    '</div>';
+}
+
+function startGame() {
+  current = 0; score = 0; answered = false; builtParts = [];
+  document.getElementById('scoreDisplay').textContent = '0';
+  renderQuestion();
+}
+
+// ── RENDER QUESTION ────────────────────────────
+function renderQuestion() {
+  answered = false;
+  var q = questions[current];
+  document.getElementById('progressFill').style.width = Math.round((current / questions.length) * 100) + '%';
+
+  var rocketHtml = ROCKET_PARTS.map(function(p, i) {
+    return '<span class="rpart ' + (i < builtParts.length ? 'built' : '') + '">' + p + '</span>';
+  }).join('');
+
+  document.getElementById('panel').innerHTML =
+    '<div class="rocket-row">' + rocketHtml + '</div>' +
+    '<div class="story"><div class="milo-face">👨‍🔧</div><p>' + q.story + '</p></div>' +
+    '<div><span class="badge ' + q.category + '">' + q.badge + '</span></div>' +
+    renderVisual(q) +
+    '<div class="question-text">' + q.question + '</div>' +
+    '<div class="answer-grid" id="answerGrid">' + renderAnswers(q) + '</div>' +
+    '<div class="feedback" id="feedback"></div>' +
+    '<button class="next-btn" id="nextBtn" onclick="nextQuestion()">' +
+      (current === questions.length - 1 ? '🚀 Launch the Rocket!' : 'Next Step →') +
+    '</button>';
+}
+
+function renderVisual(q) {
+  var v = q.visual;
+  if (!v) return '';
+  if (v.type === 'count') {
+    return '<div class="visual-area">' + v.items.map(function(i) { return '<span class="count-item">' + i + '</span>'; }).join('') + '</div>';
+  }
+  if (v.type === 'pattern') {
+    return '<div class="visual-area">' + v.items.map(function(item) {
+      if (item === '❓') return '<div class="pattern-item blank">?</div>';
+      return '<span class="pattern-item">' + item + '</span>';
+    }).join('') + '</div>';
+  }
+  if (v.type === 'add') {
+    return '<div class="visual-area">' +
+      '<div class="add-group">' + v.left.map(function(i) { return '<span class="add-item">' + i + '</span>'; }).join('') + '</div>' +
+      '<div class="add-plus">+</div>' +
+      '<div class="add-group">' + v.right.map(function(i) { return '<span class="add-item">' + i + '</span>'; }).join('') + '</div>' +
+    '</div>';
+  }
+  if (v.type === 'text') {
+    return '<div class="visual-area" style="font-family:\'Fredoka One\',cursive;font-size:1.2rem;color:#555;">' + v.text + '</div>';
+  }
+  return '';
+}
+
+function renderAnswers(q) {
+  return q.answers.map(function(a, i) {
+    if (q.answerType === 'shape') {
+      return '<button class="answer-btn shape-btn" onclick="checkAnswer(' + i + ')" id="btn' + i + '">' + shapeSVG(a) + '</button>';
+    }
+    if (q.answerType === 'color') {
+      return '<button class="answer-btn color-btn" onclick="checkAnswer(' + i + ')" id="btn' + i + '"><div class="color-circle" style="background:' + a + '"></div></button>';
+    }
+    return '<button class="answer-btn" onclick="checkAnswer(' + i + ')" id="btn' + i + '">' + a + '</button>';
+  }).join('');
+}
+
+// ── CHECK ANSWER ───────────────────────────────
+function checkAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  var q = questions[current];
+  var fb = document.getElementById('feedback');
+  var btn = document.getElementById('btn' + idx);
+  var nextBtn = document.getElementById('nextBtn');
+
+  if (idx === q.correct) {
+    btn.classList.add('correct');
+    score++;
+    builtParts.push(ROCKET_PARTS[current]);
+    document.getElementById('scoreDisplay').textContent = score;
+    fb.textContent = ['🎉 Amazing! Great job!', '✅ Brilliant! You helped Milo!', '🌟 Fantastic work!', '🚀 Well done!'][Math.floor(Math.random()*4)];
+    fb.className = 'feedback correct';
+    spawnConf(6);
+  } else {
+    btn.classList.add('wrong');
+    document.getElementById('btn' + q.correct).classList.add('correct');
+    fb.textContent = '❌ Nearly! The right answer is in green!';
+    fb.className = 'feedback wrong';
+  }
+
+  document.querySelectorAll('.answer-btn').forEach(function(b) { b.style.pointerEvents = 'none'; });
+  nextBtn.classList.add('visible');
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) renderEnd();
+  else renderQuestion();
+}
+
+// ── END SCREEN ─────────────────────────────────
+function renderEnd() {
+  document.getElementById('progressFill').style.width = '100%';
+  var pct = Math.round((score / questions.length) * 100);
+  var msg, emoji;
+  if (pct === 100) { msg = "Perfect! You built the whole rocket!"; emoji = '🏆'; }
+  else if (pct >= 70) { msg = "Amazing work! The rocket is nearly ready!"; emoji = '🌟'; }
+  else { msg = "Good trying! Milo needs more practice — want to try again?"; emoji = '😊'; }
+  var stars = Math.ceil((score / questions.length) * 5);
+  var starHtml = Array.from({length:5}, function(_, i) { return '<span class="star ' + (i < stars ? 'lit' : '') + '">⭐</span>'; }).join('');
+  document.getElementById('panel').innerHTML =
+    '<div class="end-screen">' +
+      '<div class="rocket-complete">🚀💨🌙</div>' +
+      '<h2>Rocket Launched!</h2>' +
+      '<div class="stars-row">' + starHtml + '</div>' +
+      '<span class="big-emoji">' + emoji + '</span>' +
+      '<p>You got <strong>' + score + ' out of ' + questions.length + '</strong>!<br>' + msg + '</p>' +
+      '<p style="font-size:1.5rem;margin-bottom:20px;">Luna says: 🐧 <em style="font-style:normal">Thank you! The moon is beautiful!</em></p>' +
+      '<button class="restart-btn" onclick="renderIntro()">Play Again! 🔄</button>' +
+    '</div>';
+  celebrate();
+}
+
+// ── CONFETTI ───────────────────────────────────
+function spawnConf(n) {
+  var cols = ['#FF6B2B','#FFD700','#1A73E8','#22C55E','#9333ea','#fff'];
+  for (var i = 0; i < n; i++) {
+    (function() {
+      var p = document.createElement('div');
+      p.style.cssText = 'position:fixed;top:-18px;pointer-events:none;z-index:999;border-radius:3px;';
+      p.style.left   = Math.random() * 100 + 'vw';
+      p.style.width  = (7 + Math.random() * 7) + 'px';
+      p.style.height = (8 + Math.random() * 12) + 'px';
+      p.style.background = cols[Math.floor(Math.random() * cols.length)];
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+      var dur = (1.2 + Math.random() * 1.4), del = Math.random() * 0.5;
+      p.style.animation = 'cfall ' + dur + 's ' + del + 's ease-in forwards';
+      document.body.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, (dur + del) * 1000 + 200);
+    })();
+  }
+}
+
+function celebrate() {
+  for (var i = 0; i < 8; i++) {
+    (function(d) { setTimeout(function() { spawnConf(14); }, d); })(i * 200);
+  }
+}
+
+// ── STAR BACKGROUND ────────────────────────────
+var bg = document.getElementById('bg');
+for (var i = 0; i < 60; i++) {
+  var s = document.createElement('div');
+  s.className = 'star-bg';
+  var sz = 1 + Math.random() * 3;
+  s.style.cssText = 'width:' + sz + 'px;height:' + sz + 'px;left:' + (Math.random()*100) + '%;top:' + (Math.random()*100) + '%;';
+  s.style.setProperty('--td', (2 + Math.random() * 4) + 's');
+  s.style.setProperty('--dd', (Math.random() * 4) + 's');
+  s.style.setProperty('--op', (0.4 + Math.random() * 0.6).toFixed(2));
+  bg.appendChild(s);
+}
+
+// Add confetti keyframes dynamically
+var ks = document.createElement('style');
+ks.textContent = '@keyframes cfall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}';
+document.head.appendChild(ks);
+
+renderIntro();
+</script>
+</body>
+</html>

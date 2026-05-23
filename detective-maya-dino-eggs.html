@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detective Maya – The Case of the Disappearing Dino Eggs</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   FOSSIL / MUSEUM AESTHETIC
+   Warm stone, deep teal, amber accents
+   Textured, earthy, adventurous
+═══════════════════════════════════════════ */
+:root {
+  --stone:  #f5efe6;
+  --sand:   #e8d5b0;
+  --amber:  #d4860a;
+  --amber2: #f0a830;
+  --teal:   #1a6b5a;
+  --teal2:  #27a082;
+  --red:    #c0392b;
+  --bone:   #fff8ee;
+  --ink:    #2c1810;
+  --muted:  #8a7060;
+  --green:  #27ae60;
+  --blue:   #2471a3;
+  --panel:  #fffdf8;
+  --r: 14px;
+  --border: 2.5px solid var(--ink);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--stone);
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c4a882' fill-opacity='0.12'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  min-height: 100vh;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* PROGRESS */
+.prog-rail { position:fixed;top:0;left:0;width:100%;height:7px;background:var(--sand);z-index:200; }
+.prog-fill { height:100%;background:linear-gradient(90deg,var(--teal),var(--amber2));transition:width .6s ease; }
+
+/* SCREENS */
+.screen { display:none;position:relative;z-index:1;min-height:100vh;padding:26px 14px 44px;flex-direction:column;align-items:center;justify-content:center;gap:16px; }
+.screen.active { display:flex; }
+
+/* ── TITLE ──────────────────────────────── */
+#s-title { text-align:center; gap:18px; }
+.dino-bounce { font-size:80px;display:block;animation:dinoBounce 1.6s ease-in-out infinite;filter:drop-shadow(4px 4px 0 var(--ink)); }
+@keyframes dinoBounce { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-14px) rotate(4deg)} }
+
+h1.title-main { font-family:'Righteous',cursive;font-size:clamp(2.4rem,6vw,4.2rem);color:var(--teal);line-height:1.05;text-shadow:3px 3px 0 var(--ink); }
+h2.title-sub  { font-family:'Righteous',cursive;font-size:clamp(1.1rem,3vw,1.7rem);color:var(--amber); }
+
+.intro-box { max-width:530px;background:var(--panel);border:var(--border);border-radius:var(--r);padding:18px 22px;box-shadow:5px 5px 0 var(--ink);font-size:1rem;line-height:1.75;font-weight:700; }
+.intro-box strong { color:var(--teal); }
+
+/* CLUE DOTS */
+.trail { display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center; }
+.tdot { width:44px;height:44px;border-radius:50%;border:var(--border);background:var(--stone);display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#aaa;box-shadow:3px 3px 0 var(--ink);transition:all .3s; }
+.tdot.done   { background:var(--teal);color:#fff; }
+.tdot.active { background:var(--amber2);color:var(--ink);animation:tdotPulse 1.1s ease-in-out infinite; }
+@keyframes tdotPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+/* ── BUTTONS ────────────────────────────── */
+.btn { font-family:'Righteous',cursive;font-size:1.3rem;padding:12px 30px;border:var(--border);border-radius:50px;cursor:pointer;box-shadow:4px 4px 0 var(--ink);transition:all .12s;letter-spacing:.5px; }
+.btn:hover  { transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink); }
+.btn:active { transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink); }
+.btn-amber { background:var(--amber2);color:var(--ink); }
+.btn-teal  { background:var(--teal);color:#fff; }
+.btn-red   { background:var(--red);color:#fff; }
+.btn-sm    { font-size:1rem;padding:8px 18px; }
+.btn-next  { display:none;margin-top:14px; }
+.btn-ghost { background:var(--panel);color:var(--ink); }
+
+/* ── CLUE CARD ──────────────────────────── */
+.ccard { background:var(--panel);border:var(--border);border-radius:var(--r);box-shadow:6px 6px 0 var(--ink);padding:22px 18px;max-width:720px;width:100%;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1);text-align:center; }
+@keyframes cardIn { from{opacity:0;transform:translateY(28px) scale(.96)} to{opacity:1;transform:none} }
+
+.loc-tag { display:inline-block;background:var(--teal);color:#fff;font-family:'Righteous',cursive;font-size:.82rem;letter-spacing:2px;padding:4px 14px;border:var(--border);border-radius:6px;box-shadow:3px 3px 0 var(--ink);margin-bottom:10px;text-transform:uppercase; }
+.cicon  { font-size:3.5rem;display:block;margin:6px 0;filter:drop-shadow(3px 3px 0 var(--ink)); }
+.ctitle { font-family:'Righteous',cursive;font-size:1.9rem;color:var(--teal);margin-bottom:6px;letter-spacing:1px; }
+.story  { font-size:1rem;line-height:1.75;font-weight:700;margin-bottom:12px; }
+.story .hl { color:var(--teal);text-decoration:underline wavy var(--amber); }
+
+/* Q PANEL */
+.qpanel { background:var(--bone);border:var(--border);border-radius:var(--r);box-shadow:3px 3px 0 var(--ink);padding:14px 16px;margin:12px 0;text-align:left; }
+.qlabel { font-weight:900;font-size:1rem;color:var(--ink);margin-bottom:10px; }
+
+/* FEEDBACK */
+.fb { font-family:'Righteous',cursive;font-size:1.2rem;min-height:28px;margin-top:8px;letter-spacing:.5px; }
+.fb.ok  { color:var(--green);animation:fbPop .4s ease; }
+.fb.bad { color:var(--red);  animation:fbShake .4s ease; }
+@keyframes fbPop   { 0%{transform:scale(.7)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
+@keyframes fbShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+
+/* OPTIONS */
+.opts { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0; }
+.opt { font-family:'Righteous',cursive;font-size:1.25rem;padding:10px 22px;border:var(--border);border-radius:var(--r);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:all .13s;letter-spacing:.5px; }
+.opt:hover  { transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink);background:var(--sand); }
+.opt.ok  { background:var(--green);color:#fff;pointer-events:none;transform:none; }
+.opt.bad { background:var(--red);color:#fff;animation:fbShake .4s; }
+
+/* ANS INPUT */
+.ansin { font-family:'Righteous',cursive;font-size:2rem;width:110px;padding:6px 12px;text-align:center;border:var(--border);border-radius:var(--r);background:var(--bone);color:var(--ink);box-shadow:3px 3px 0 var(--ink);outline:none;letter-spacing:2px; }
+
+/* ═══════════════════════════════════════════
+   TEACHING / SCAFFOLD COMPONENTS
+═══════════════════════════════════════════ */
+
+/* TEACH TOGGLE BUTTON */
+.teach-toggle { display:flex;align-items:center;gap:8px;background:var(--amber2);border:var(--border);border-radius:var(--r);box-shadow:3px 3px 0 var(--ink);padding:9px 16px;cursor:pointer;font-family:'Righteous',cursive;font-size:1rem;letter-spacing:.5px;color:var(--ink);transition:all .13s;width:100%;justify-content:space-between;margin-bottom:2px; }
+.teach-toggle:hover { transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink); }
+.teach-toggle .arrow { transition:transform .3s; }
+.teach-toggle.open .arrow { transform:rotate(180deg); }
+
+/* TEACH PANEL */
+.teach-panel { display:none;background:linear-gradient(135deg,#e8f5f0,#f0faf7);border:var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;box-shadow:3px 3px 0 var(--ink);text-align:left; }
+.teach-panel.show { display:block;animation:cardIn .3s ease; }
+
+.teach-title { font-family:'Righteous',cursive;font-size:1rem;color:var(--teal);letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+.teach-step  { display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding:8px 10px;background:#fff;border-radius:10px;border:2px solid var(--sand); }
+.step-num    { width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;font-family:'Righteous',cursive;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.step-txt    { font-size:.92rem;font-weight:700;line-height:1.5;color:var(--ink); }
+.step-txt .em { color:var(--teal);font-size:1.1em; }
+
+/* GROUPS VISUAL */
+.groups-vis { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.group-circle { border:3px solid var(--teal);border-radius:14px;padding:8px;background:#e8f5f0;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;min-width:50px;position:relative; }
+.group-circle::after { content:attr(data-label);position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'Righteous',cursive;font-size:.7rem;background:var(--teal);color:#fff;padding:1px 7px;border-radius:6px;white-space:nowrap; }
+.gitem { font-size:1.5rem; }
+
+/* NUMBER LINE */
+.numline-wrap { overflow-x:auto;padding:10px 4px;margin:10px 0; }
+.numline { display:flex;align-items:flex-end;gap:0;position:relative;min-width:fit-content; }
+.nl-tick { display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0; }
+.nl-num  { font-family:'Righteous',cursive;font-size:.9rem;margin-bottom:4px; }
+.nl-bar  { width:2px;height:14px;background:var(--ink); }
+.nl-line { position:absolute;bottom:14px;left:22px;right:22px;height:3px;background:var(--ink); }
+.nl-hop  { position:absolute;border:none;border-top:3px solid var(--amber);height:30px;top:-28px;border-radius:50% 50% 0 0; }
+.nl-hop-label { position:absolute;top:-46px;font-family:'Righteous',cursive;font-size:.7rem;color:var(--amber);transform:translateX(-50%); }
+.nl-marker { width:36px;height:36px;border-radius:50%;background:var(--teal);border:var(--border);display:flex;align-items:center;justify-content:center;font-family:'Righteous',cursive;font-size:.85rem;color:#fff;box-shadow:2px 2px 0 var(--ink);margin-bottom:2px; }
+
+/* SHARING VISUAL */
+.share-vis { margin:10px 0; }
+.share-items { display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px; }
+.share-item { font-size:1.6rem;transition:all .4s;filter:drop-shadow(2px 2px 0 var(--ink)); }
+.share-buckets { display:flex;gap:14px;justify-content:center;flex-wrap:wrap; }
+.share-bucket { border:3px solid var(--teal);border-radius:0 0 16px 16px;background:#e8f5f0;min-width:70px;min-height:80px;display:flex;flex-direction:column;align-items:center;padding:8px 6px;gap:4px;position:relative; }
+.share-bucket::before { content:attr(data-n);position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-family:'Righteous',cursive;font-size:.8rem;background:var(--teal);color:#fff;padding:2px 8px;border-radius:6px;box-shadow:2px 2px 0 var(--ink); }
+.sb-item { font-size:1.4rem;opacity:0;transform:translateY(-10px);transition:all .3s; }
+.sb-item.placed { opacity:1;transform:none; }
+
+/* BOX / AREA METHOD */
+.box-method { border:3px solid var(--ink);border-radius:8px;overflow:hidden;margin:10px auto;max-width:320px; }
+.box-top    { background:var(--amber2);padding:6px;text-align:center;font-family:'Righteous',cursive;font-size:1rem;border-bottom:3px solid var(--ink); }
+.box-row    { display:flex;border-bottom:2px solid var(--sand); }
+.box-row:last-child { border-bottom:none; }
+.box-left   { background:var(--amber2);width:50px;padding:6px;display:flex;align-items:center;justify-content:center;font-family:'Righteous',cursive;font-size:1rem;border-right:3px solid var(--ink); }
+.box-cell   { flex:1;padding:8px;display:flex;align-items:center;justify-content:center;font-family:'Righteous',cursive;font-size:1.2rem;background:#fff;gap:4px; }
+.box-sum    { background:var(--teal);color:#fff;padding:8px;text-align:center;font-family:'Righteous',cursive;font-size:1.1rem; }
+
+/* FACT FAMILY TRIANGLE */
+.fact-tri { margin:10px auto;max-width:280px;text-align:center; }
+.tri-svg { overflow:visible; }
+.tri-node { fill:var(--amber2);stroke:var(--ink);stroke-width:3; }
+.tri-node-top { fill:var(--teal); }
+.tri-num  { font-family:'Righteous',cursive;font-size:1rem;fill:#fff; }
+.tri-num-top { fill:#fff; }
+.tri-line { stroke:var(--ink);stroke-width:2.5;fill:none; }
+.tri-label { font-family:'Righteous',cursive;font-size:.75rem;fill:var(--muted); }
+.fact-fam-list { display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px; }
+.ffl-item { background:var(--bone);border:var(--border);border-radius:8px;padding:6px 14px;font-family:'Righteous',cursive;font-size:1rem;box-shadow:2px 2px 0 var(--ink); }
+.ffl-item.mult { color:var(--teal); }
+.ffl-item.div  { color:var(--red); }
+
+/* REMAINDER VIS */
+.rem-vis { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0; }
+.rem-group { border:3px solid var(--teal);border-radius:10px;padding:8px;background:#e8f5f0;display:flex;gap:4px; }
+.rem-leftover { border:3px dashed var(--red);border-radius:10px;padding:8px;background:#ffeaea;display:flex;gap:4px;position:relative; }
+.rem-leftover::after { content:'Remainder!';position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:'Righteous',cursive;font-size:.7rem;color:var(--red);white-space:nowrap;background:#fff;padding:1px 6px;border:2px solid var(--red);border-radius:6px; }
+
+/* HINT */
+.hint-tog { font-size:.88rem;font-weight:800;border:var(--border);border-radius:20px;background:var(--bone);color:var(--muted);padding:5px 16px;cursor:pointer;margin-top:6px;box-shadow:2px 2px 0 var(--ink);transition:all .15s; }
+.hint-tog:hover { background:var(--sand);color:var(--ink); }
+.hint-box { display:none;background:var(--sand);border:var(--border);border-radius:var(--r);padding:10px 14px;font-size:.9rem;font-weight:700;color:var(--ink);margin-top:8px;box-shadow:3px 3px 0 var(--ink);text-align:left;animation:cardIn .3s ease; }
+
+/* ANIM HELPERS */
+.hidden-panel { opacity:.3;pointer-events:none;transition:opacity .4s; }
+
+/* ── WIN ────────────────────────────────── */
+#s-win { text-align:center;gap:20px; }
+.egg-bounce { font-size:80px;display:inline-block;animation:dinoBounce 1.4s ease-in-out infinite;filter:drop-shadow(4px 4px 0 var(--ink)); }
+.win-title  { font-family:'Righteous',cursive;font-size:clamp(2rem,5vw,3.5rem);color:var(--teal);text-shadow:3px 3px 0 var(--ink); }
+.win-box    { max-width:540px;background:var(--panel);border:var(--border);border-radius:var(--r);box-shadow:6px 6px 0 var(--ink);padding:18px 22px;font-size:1rem;line-height:1.75;font-weight:700; }
+.skill-row  { display:flex;gap:10px;flex-wrap:wrap;justify-content:center; }
+.skill-pill { font-family:'Righteous',cursive;font-size:.95rem;background:var(--teal);color:#fff;border:var(--border);border-radius:30px;padding:6px 16px;box-shadow:3px 3px 0 var(--ink); }
+
+/* CONFETTI */
+.conf { position:fixed;top:-18px;pointer-events:none;z-index:999;border-radius:3px;animation:confDrop var(--cd,2s) var(--cdel,0s) ease-in forwards; }
+@keyframes confDrop { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+</style>
+</head>
+<body>
+
+<div class="prog-rail"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<!-- ══════════ TITLE ══════════ -->
+<div class="screen active" id="s-title">
+  <span class="dino-bounce">🦕</span>
+  <h1 class="title-main">Detective Maya</h1>
+  <h2 class="title-sub">The Case of the Disappearing Dino Eggs</h2>
+  <div class="intro-box">
+    Three precious <strong>dinosaur eggs</strong> have vanished from the Natural History Museum overnight! Maya arrives at the crack of dawn. The eggs left a trail of maths clues through <strong>5 different rooms</strong>. Crack each puzzle to track down the eggs before opening time!
+  </div>
+  <div class="trail">
+    <div class="tdot active" id="td0">🛍️</div>
+    <div style="color:var(--muted);font-size:1.2rem;">▶</div>
+    <div class="tdot" id="td1">🦴</div>
+    <div style="color:var(--muted);font-size:1.2rem;">▶</div>
+    <div class="tdot" id="td2">🦖</div>
+    <div style="color:var(--muted);font-size:1.2rem;">▶</div>
+    <div class="tdot" id="td3">☕</div>
+    <div style="color:var(--muted);font-size:1.2rem;">▶</div>
+    <div class="tdot" id="td4">📦</div>
+  </div>
+  <button class="btn btn-teal" onclick="goTo(1)">🔍 Start Investigating!</button>
+</div>
+
+<!-- ══════════ CLUE 1 — GIFT SHOP — MULTIPLICATION ══════════ -->
+<div class="screen" id="s-1">
+  <div class="ccard">
+    <div class="loc-tag">🛍️ The Gift Shop — Clue 1 of 5</div>
+    <span class="cicon">🛍️</span>
+    <div class="ctitle">Dino Merch!</div>
+    <p class="story">BOLT the museum robot was restocking the gift shop shelves when the eggs were taken! The manager says: <span class="hl">"BOLT put 4 dino toys on each of 6 shelves."</span> Maya must work out the total to find what's missing from the stock list.</p>
+
+    <!-- TEACH BLOCK 1A -->
+    <div class="qpanel">
+      <div class="qlabel">🧮 What is 6 × 4? (How many dino toys in total?)</div>
+
+      <button class="teach-toggle" onclick="toggleTeach('t1a')">
+        <span>📖 How does multiplication work? Show me!</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t1a">
+        <div class="teach-title">🌟 Multiplication means "groups of"</div>
+        <div class="teach-step">
+          <div class="step-num">1</div>
+          <div class="step-txt">We have <span class="em">6 shelves</span>, and each shelf has <span class="em">4 toys</span>. That means 6 <em>groups</em> of 4.</div>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">2</div>
+          <div class="step-txt">Here are the 6 groups of 4 toys. Count them all up!</div>
+        </div>
+        <div class="groups-vis" id="gv1a"></div>
+        <div class="teach-step">
+          <div class="step-num">3</div>
+          <div class="step-txt">We can also <em>skip count</em> by 4: <span class="em">4 → 8 → 12 → 16 → 20 → 24</span>. That is 6 jumps of 4!</div>
+        </div>
+        <div class="numline-wrap" id="nl1a"></div>
+        <div class="teach-step">
+          <div class="step-num">4</div>
+          <div class="step-txt">So 6 × 4 = <span class="em">24</span>. Now you try!</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Righteous',cursive;font-size:1.3rem;">6 × 4 =</span>
+        <input class="ansin" id="a1a" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-amber btn-sm" onclick="chkInput('a1a',24,'fb1a','✅ 24 toys! 6 groups of 4 = 24!','Try again — use the groups picture above to help!','div1b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb1a"></div>
+    </div>
+
+    <!-- Q1B -->
+    <div class="qpanel hidden-panel" id="div1b">
+      <div class="qlabel">🎯 Bonus: Each toy costs $3. Maya buys 5 toys. How much does she spend? (5 × 3 = ?)</div>
+      <button class="teach-toggle" onclick="toggleTeach('t1b')">
+        <span>📖 Using a number line to multiply</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t1b">
+        <div class="teach-title">🌟 Jump along the number line!</div>
+        <div class="teach-step">
+          <div class="step-num">1</div>
+          <div class="step-txt">5 × 3 means <span class="em">5 jumps of 3</span> starting from 0.</div>
+        </div>
+        <div class="numline-wrap" id="nl1b"></div>
+        <div class="teach-step">
+          <div class="step-num">2</div>
+          <div class="step-txt">Each jump lands on: <span class="em">3, 6, 9, 12, 15</span>. Five jumps lands on <span class="em">15</span>!</div>
+        </div>
+      </div>
+      <div class="opts" id="o1b">
+        <button class="opt" onclick="chkOpt(this,'12','15','fb1b','💰 $15! 5 × 3 = 15.','Try again! Count 5 groups of $3.','nx1',null)">$12</button>
+        <button class="opt" onclick="chkOpt(this,'15','15','fb1b','💰 $15! 5 × 3 = 15.','Try again! Count 5 groups of $3.','nx1',null)">$15</button>
+        <button class="opt" onclick="chkOpt(this,'18','15','fb1b','💰 $15! 5 × 3 = 15.','Try again! Count 5 groups of $3.','nx1',null)">$18</button>
+        <button class="opt" onclick="chkOpt(this,'20','15','fb1b','💰 $15! 5 × 3 = 15.','Try again! Count 5 groups of $3.','nx1',null)">$20</button>
+      </div>
+      <div class="fb" id="fb1b"></div>
+    </div>
+    <button class="hint-tog" onclick="togHint('h1')">💡 Quick Hint</button>
+    <div class="hint-box" id="h1">For 6×4: count 4, 8, 12, 16, 20, 24 (six jumps of 4). For 5×3: think of 5 piles of 3 things!</div>
+    <button class="btn btn-teal btn-next" id="nx1" onclick="goTo(2)">Next Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 2 — FOSSIL ROOM — DIVISION ══════════ -->
+<div class="screen" id="s-2">
+  <div class="ccard">
+    <div class="loc-tag">🦴 The Fossil Room — Clue 2 of 5</div>
+    <span class="cicon">🦴</span>
+    <div class="ctitle">Fossil Sharing!</div>
+    <p class="story">Maya finds 20 fossil tiles scattered on the floor — the eggs rolled over them! A sign says the tiles usually sit in <span class="hl">4 equal display cases.</span> How many tiles per case?</p>
+
+    <div class="qpanel">
+      <div class="qlabel">🧮 20 ÷ 4 = ? (How many tiles in each case?)</div>
+
+      <button class="teach-toggle" onclick="toggleTeach('t2a')">
+        <span>📖 How does division work? Show me!</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t2a">
+        <div class="teach-title">🌟 Division means sharing equally</div>
+        <div class="teach-step">
+          <div class="step-num">1</div>
+          <div class="step-txt">We have <span class="em">20 tiles</span> to share into <span class="em">4 cases</span>. Give one tile to each case, one at a time.</div>
+        </div>
+        <div class="share-vis">
+          <div class="share-items" id="sv2-items"></div>
+          <div class="share-buckets" id="sv2-buckets"></div>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">2</div>
+          <div class="step-txt">Each case gets exactly <span class="em">5 tiles</span>. No tiles left over — it divides perfectly!</div>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">3</div>
+          <div class="step-txt">The <em>multiplication link</em>: <span class="em">4 × 5 = 20</span>, so <span class="em">20 ÷ 4 = 5</span>. Division is the reverse of multiplication!</div>
+        </div>
+        <div class="fact-fam-list">
+          <span class="ffl-item mult">4 × 5 = 20</span>
+          <span class="ffl-item mult">5 × 4 = 20</span>
+          <span class="ffl-item div">20 ÷ 4 = 5</span>
+          <span class="ffl-item div">20 ÷ 5 = 4</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Righteous',cursive;font-size:1.3rem;">20 ÷ 4 =</span>
+        <input class="ansin" id="a2a" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-amber btn-sm" onclick="chkInput('a2a',5,'fb2a','✅ 5 tiles each! 20 ÷ 4 = 5.','Not quite. Think: 4 × ? = 20.','div2b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb2a"></div>
+    </div>
+
+    <div class="qpanel hidden-panel" id="div2b">
+      <div class="qlabel">🎯 The fact family triangle: fill in the missing number!</div>
+      <button class="teach-toggle" onclick="toggleTeach('t2b')">
+        <span>📖 The Fact Family Triangle</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t2b">
+        <div class="teach-title">🌟 × and ÷ are a family!</div>
+        <div class="teach-step">
+          <div class="step-num">1</div>
+          <div class="step-txt">Three numbers that work together are called a <em>fact family</em>. The <span class="em">big number</span> always goes at the top.</div>
+        </div>
+        <div class="fact-tri">
+          <svg class="tri-svg" width="220" height="160" viewBox="0 0 220 160">
+            <polygon points="110,10 10,150 210,150" fill="none" stroke="var(--ink)" stroke-width="3"/>
+            <circle class="tri-node tri-node-top" cx="110" cy="15" r="22"/>
+            <text class="tri-num" x="110" y="20" text-anchor="middle" dominant-baseline="middle">30</text>
+            <circle class="tri-node" cx="18" cy="150" r="22"/>
+            <text class="tri-num" x="18" y="150" text-anchor="middle" dominant-baseline="middle" style="fill:var(--ink)">5</text>
+            <circle class="tri-node" cx="202" cy="150" r="22"/>
+            <text class="tri-num" x="202" y="150" text-anchor="middle" dominant-baseline="middle" style="fill:var(--ink)">?</text>
+            <text class="tri-label" x="55"  y="95" text-anchor="middle">÷ or ×</text>
+            <text class="tri-label" x="168" y="95" text-anchor="middle">÷ or ×</text>
+            <text class="tri-label" x="110" y="168" text-anchor="middle">× or ÷</text>
+          </svg>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">2</div>
+          <div class="step-txt">The big number is 30. One small number is 5. So: <span class="em">30 ÷ 5 = ?</span> or <span class="em">5 × ? = 30</span>. Think — what times 5 makes 30?</div>
+        </div>
+      </div>
+      <div class="qlabel">30 ÷ 5 = ?</div>
+      <div class="opts" id="o2b">
+        <button class="opt" onclick="chkOpt(this,'5','6','fb2b','✅ 30 ÷ 5 = 6! The fact family works!','Try: 5 × ? = 30. Count in 5s!','nx2',null)">5</button>
+        <button class="opt" onclick="chkOpt(this,'6','6','fb2b','✅ 30 ÷ 5 = 6! The fact family works!','Try: 5 × ? = 30. Count in 5s!','nx2',null)">6</button>
+        <button class="opt" onclick="chkOpt(this,'7','6','fb2b','✅ 30 ÷ 5 = 6! The fact family works!','Try: 5 × ? = 30. Count in 5s!','nx2',null)">7</button>
+        <button class="opt" onclick="chkOpt(this,'25','6','fb2b','✅ 30 ÷ 5 = 6! The fact family works!','Try: 5 × ? = 30. Count in 5s!','nx2',null)">25</button>
+      </div>
+      <div class="fb" id="fb2b"></div>
+    </div>
+    <button class="hint-tog" onclick="togHint('h2')">💡 Quick Hint</button>
+    <div class="hint-box" id="h2">Think backwards from multiplication! If 4 × 5 = 20, then 20 ÷ 4 must equal 5. The triangle shows all four facts that go together.</div>
+    <button class="btn btn-teal btn-next" id="nx2" onclick="goTo(3)">Next Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 3 — DINO HALL — BOX METHOD ══════════ -->
+<div class="screen" id="s-3">
+  <div class="ccard">
+    <div class="loc-tag">🦖 The Dino Hall — Clue 3 of 5</div>
+    <span class="cicon">🦖</span>
+    <div class="ctitle">Big Multiplications!</div>
+    <p class="story">The Dino Hall has a huge mosaic floor. The eggs left tracks across <span class="hl">7 rows of 8 tiles</span> each. How many tiles did they cross? And next to the triceratops, Maya sees <span class="hl">6 rows of 9 rocks.</span></p>
+
+    <div class="qpanel">
+      <div class="qlabel">🧮 7 × 8 = ? (How many tiles?)</div>
+      <button class="teach-toggle" onclick="toggleTeach('t3a')">
+        <span>📖 The Box Method — split it up!</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t3a">
+        <div class="teach-title">🌟 Break big multiplications into smaller, easier ones!</div>
+        <div class="teach-step">
+          <div class="step-num">1</div>
+          <div class="step-txt">7 × 8 feels big. Split 8 into <span class="em">5 + 3</span> because those are easier to work with.</div>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">2</div>
+          <div class="step-txt">Now use the box: <span class="em">7 × 5 = 35</span> and <span class="em">7 × 3 = 21</span>. Then add: 35 + 21 = <span class="em">56</span>!</div>
+        </div>
+        <div class="box-method">
+          <div class="box-top">8 = 5 + 3</div>
+          <div class="box-row">
+            <div class="box-left">× 7</div>
+            <div class="box-cell">7 × 5 = <b>35</b></div>
+            <div class="box-cell">7 × 3 = <b>21</b></div>
+          </div>
+          <div class="box-sum">35 + 21 = 56</div>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">3</div>
+          <div class="step-txt">This is called the <em>distributive property</em> — a fancy way of saying you can split one number to make multiplying easier!</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Righteous',cursive;font-size:1.3rem;">7 × 8 =</span>
+        <input class="ansin" id="a3a" type="number" placeholder="?" min="0" max="999">
+        <button class="btn btn-amber btn-sm" onclick="chkInput('a3a',56,'fb3a','✅ 56 tiles! 7 × 8 = 56!','Not quite. Try the box method: 7×5 + 7×3.','div3b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb3a"></div>
+    </div>
+
+    <div class="qpanel hidden-panel" id="div3b">
+      <div class="qlabel">🎯 Now try: 6 × 9 = ? Try the box method yourself!</div>
+      <button class="teach-toggle" onclick="toggleTeach('t3b')">
+        <span>📖 Hint: split 9 into 5 + 4</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t3b">
+        <div class="box-method">
+          <div class="box-top">9 = 5 + 4</div>
+          <div class="box-row">
+            <div class="box-left">× 6</div>
+            <div class="box-cell">6 × 5 = <b>30</b></div>
+            <div class="box-cell">6 × 4 = <b>24</b></div>
+          </div>
+          <div class="box-sum">30 + 24 = ?</div>
+        </div>
+      </div>
+      <div class="opts" id="o3b">
+        <button class="opt" onclick="chkOpt(this,'48','54','fb3b','✅ 54! 6 × 9 = 54. 30 + 24 = 54!','Try the box: 6×5=30, 6×4=24, add them!','nx3',null)">48</button>
+        <button class="opt" onclick="chkOpt(this,'54','54','fb3b','✅ 54! 6 × 9 = 54. 30 + 24 = 54!','Try the box: 6×5=30, 6×4=24, add them!','nx3',null)">54</button>
+        <button class="opt" onclick="chkOpt(this,'56','54','fb3b','✅ 54! 6 × 9 = 54. 30 + 24 = 54!','Try the box: 6×5=30, 6×4=24, add them!','nx3',null)">56</button>
+        <button class="opt" onclick="chkOpt(this,'63','54','fb3b','✅ 54! 6 × 9 = 54. 30 + 24 = 54!','Try the box: 6×5=30, 6×4=24, add them!','nx3',null)">63</button>
+      </div>
+      <div class="fb" id="fb3b"></div>
+    </div>
+    <button class="hint-tog" onclick="togHint('h3')">💡 Quick Hint</button>
+    <div class="hint-box" id="h3">For 7×8: split 8 into 5+3. Work out 7×5=35 and 7×3=21. Then add: 35+21=56! For 6×9: split 9 into 5+4.</div>
+    <button class="btn btn-teal btn-next" id="nx3" onclick="goTo(4)">Next Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 4 — CAFÉ — REMAINDERS ══════════ -->
+<div class="screen" id="s-4">
+  <div class="ccard">
+    <div class="loc-tag">☕ The Museum Café — Clue 4 of 5</div>
+    <span class="cicon">☕</span>
+    <div class="ctitle">Leftover Cookies!</div>
+    <p class="story">The café chef baked cookies and tried to put them in boxes, but there were some <span class="hl">left over</span>. Maya can tell the eggs came through here because of the crumbs! Solve the sharing puzzle to find the clue under the right table.</p>
+
+    <div class="qpanel">
+      <div class="qlabel">🧮 22 cookies shared into groups of 5. How many full groups? How many left over?</div>
+      <button class="teach-toggle" onclick="toggleTeach('t4a')">
+        <span>📖 What is a remainder?</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t4a">
+        <div class="teach-title">🌟 Sometimes things don't share perfectly!</div>
+        <div class="teach-step">
+          <div class="step-num">1</div>
+          <div class="step-txt">Put 5 cookies into each group. Keep going until you don't have enough for a full group.</div>
+        </div>
+        <div class="rem-vis" id="rv4a"></div>
+        <div class="teach-step">
+          <div class="step-num">2</div>
+          <div class="step-txt">We can fill <span class="em">4 full groups of 5</span> (that's 20 cookies). We have <span class="em">2 left over</span>. The leftover is called the <span class="em">remainder</span>!</div>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">3</div>
+          <div class="step-txt">We write this as: <span class="em">22 ÷ 5 = 4 remainder 2</span>. Check: (4 × 5) + 2 = 20 + 2 = 22 ✅</div>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">4</div>
+          <div class="step-txt">To find remainder: multiply the answer by the divisor, subtract from the original. 22 - 20 = <span class="em">2</span>!</div>
+        </div>
+      </div>
+      <div class="qlabel" style="margin-top:8px;">22 ÷ 5 = ? remainder ?</div>
+      <div class="opts" id="o4a">
+        <button class="opt" onclick="chkOpt(this,'3r2','4r2','fb4a','✅ 4 remainder 2! 4 groups of 5 = 20, plus 2 left over!','Think: how many 5s fit into 22? 5,10,15,20 = 4 groups!','div4b',null)">3 remainder 2</button>
+        <button class="opt" onclick="chkOpt(this,'4r2','4r2','fb4a','✅ 4 remainder 2! 4 groups of 5 = 20, plus 2 left over!','Think: how many 5s fit into 22? 5,10,15,20 = 4 groups!','div4b',null)">4 remainder 2</button>
+        <button class="opt" onclick="chkOpt(this,'4r3','4r2','fb4a','✅ 4 remainder 2! 4 groups of 5 = 20, plus 2 left over!','Think: how many 5s fit into 22? 5,10,15,20 = 4 groups!','div4b',null)">4 remainder 3</button>
+        <button class="opt" onclick="chkOpt(this,'5r2','4r2','fb4a','✅ 4 remainder 2! 4 groups of 5 = 20, plus 2 left over!','Think: how many 5s fit into 22? 5,10,15,20 = 4 groups!','div4b',null)">5 remainder 2</button>
+      </div>
+      <div class="fb" id="fb4a"></div>
+    </div>
+
+    <div class="qpanel hidden-panel" id="div4b">
+      <div class="qlabel">🎯 Now try: 17 ÷ 3 = ? remainder ?</div>
+      <button class="teach-toggle" onclick="toggleTeach('t4b')">
+        <span>📖 Step-by-step method</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t4b">
+        <div class="teach-title">🌟 The checklist method</div>
+        <div class="teach-step"><div class="step-num">1</div><div class="step-txt">How many 3s fit in 17? Count up: <span class="em">3, 6, 9, 12, 15</span> — that is 5 groups. (6 groups would be 18, too many!)</div></div>
+        <div class="teach-step"><div class="step-num">2</div><div class="step-txt">5 groups of 3 = <span class="em">15</span>. Subtract: 17 - 15 = <span class="em">2</span>. So remainder is 2!</div></div>
+        <div class="teach-step"><div class="step-num">3</div><div class="step-txt">Check: (5 × 3) + 2 = 15 + 2 = <span class="em">17</span> ✅</div></div>
+      </div>
+      <div class="opts" id="o4b">
+        <button class="opt" onclick="chkOpt(this,'4r5','5r2','fb4b','✅ 17 ÷ 3 = 5 remainder 2!','Remember: (answer × 3) + remainder must equal 17!','nx4',null)">4 remainder 5</button>
+        <button class="opt" onclick="chkOpt(this,'5r2','5r2','fb4b','✅ 17 ÷ 3 = 5 remainder 2!','Remember: (answer × 3) + remainder must equal 17!','nx4',null)">5 remainder 2</button>
+        <button class="opt" onclick="chkOpt(this,'6r1','5r2','fb4b','✅ 17 ÷ 3 = 5 remainder 2!','Remember: (answer × 3) + remainder must equal 17!','nx4',null)">6 remainder 1</button>
+        <button class="opt" onclick="chkOpt(this,'5r3','5r2','fb4b','✅ 17 ÷ 3 = 5 remainder 2!','Remember: (answer × 3) + remainder must equal 17!','nx4',null)">5 remainder 3</button>
+      </div>
+      <div class="fb" id="fb4b"></div>
+    </div>
+    <button class="hint-tog" onclick="togHint('h4')">💡 Quick Hint</button>
+    <div class="hint-box" id="h4">Count how many full groups fit: for 22 ÷ 5, count 5, 10, 15, 20 — that is 4 groups. 22 - 20 = 2 left over (remainder 2).</div>
+    <button class="btn btn-teal btn-next" id="nx4" onclick="goTo(5)">Final Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 5 — STORAGE — FACT FAMILIES ══════════ -->
+<div class="screen" id="s-5">
+  <div class="ccard">
+    <div class="loc-tag">📦 The Storage Room — Clue 5 of 5</div>
+    <span class="cicon">📦</span>
+    <div class="ctitle">The Fact Family Vault!</div>
+    <p class="story">Maya finds the storage room locked with a <span class="hl">fact family code</span>! The door says: "Multiplication and division are the same family. Prove you know how they connect — then enter!" The eggs must be inside!</p>
+
+    <div class="qpanel">
+      <div class="qlabel">🧮 The fact family for 3, 8 and 24 — what are all 4 number sentences?</div>
+      <button class="teach-toggle" onclick="toggleTeach('t5a')">
+        <span>📖 How the Fact Family Triangle works</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t5a">
+        <div class="teach-title">🌟 One triangle — four facts!</div>
+        <div class="teach-step">
+          <div class="step-num">1</div>
+          <div class="step-txt">Put the <em>biggest number</em> at the top. The two smaller numbers go at the bottom corners.</div>
+        </div>
+        <div class="fact-tri">
+          <svg class="tri-svg" width="220" height="170" viewBox="0 0 220 170">
+            <polygon points="110,12 10,158 210,158" fill="#e8f5f0" stroke="var(--ink)" stroke-width="3"/>
+            <circle cx="110" cy="16" r="24" fill="var(--teal)" stroke="var(--ink)" stroke-width="3"/>
+            <text font-family="Righteous,cursive" font-size="15" fill="#fff" x="110" y="21" text-anchor="middle" dominant-baseline="middle">24</text>
+            <circle cx="18"  cy="158" r="20" fill="var(--amber2)" stroke="var(--ink)" stroke-width="3"/>
+            <text font-family="Righteous,cursive" font-size="15" fill="var(--ink)" x="18" y="163" text-anchor="middle" dominant-baseline="middle">3</text>
+            <circle cx="202" cy="158" r="20" fill="var(--amber2)" stroke="var(--ink)" stroke-width="3"/>
+            <text font-family="Righteous,cursive" font-size="15" fill="var(--ink)" x="202" y="163" text-anchor="middle" dominant-baseline="middle">8</text>
+            <text font-family="Righteous,cursive" font-size="11" fill="var(--teal)" x="50"  y="100" text-anchor="middle">24 ÷ 3</text>
+            <text font-family="Righteous,cursive" font-size="11" fill="var(--teal)" x="170" y="100" text-anchor="middle">24 ÷ 8</text>
+            <text font-family="Righteous,cursive" font-size="11" fill="var(--teal)" x="110" y="175" text-anchor="middle">3 × 8</text>
+          </svg>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">2</div>
+          <div class="step-txt">From this triangle, we get four facts — two multiplication, two division:</div>
+        </div>
+        <div class="fact-fam-list">
+          <span class="ffl-item mult">3 × 8 = 24</span>
+          <span class="ffl-item mult">8 × 3 = 24</span>
+          <span class="ffl-item div">24 ÷ 3 = 8</span>
+          <span class="ffl-item div">24 ÷ 8 = 3</span>
+        </div>
+        <div class="teach-step">
+          <div class="step-num">3</div>
+          <div class="step-txt">The key rule: <span class="em">top ÷ bottom-left = bottom-right</span> and <span class="em">bottom-left × bottom-right = top</span>!</div>
+        </div>
+      </div>
+      <div class="qlabel" style="margin-top:8px;">Using the fact family 3, 8, 24 — what is 24 ÷ 8?</div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <span style="font-family:'Righteous',cursive;font-size:1.3rem;">24 ÷ 8 =</span>
+        <input class="ansin" id="a5a" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-amber btn-sm" onclick="chkInput('a5a',3,'fb5a','✅ 3! The triangle shows 24 ÷ 8 = 3.','Look at the triangle — what is the other small number?','div5b',null)">Check!</button>
+      </div>
+      <div class="fb" id="fb5a"></div>
+    </div>
+
+    <div class="qpanel hidden-panel" id="div5b">
+      <div class="qlabel">🔐 Final Code! Build the fact family for 4, 7 and 28. What is 28 ÷ 4?</div>
+      <button class="teach-toggle" onclick="toggleTeach('t5b')">
+        <span>📖 Draw the triangle yourself!</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="teach-panel" id="t5b">
+        <div class="teach-title">🌟 Try building it step by step</div>
+        <div class="teach-step"><div class="step-num">1</div><div class="step-txt">Which is the biggest number? <span class="em">28</span> goes at the top.</div></div>
+        <div class="teach-step"><div class="step-num">2</div><div class="step-txt">The two smaller numbers are <span class="em">4</span> and <span class="em">7</span> at the bottom corners.</div></div>
+        <div class="teach-step"><div class="step-num">3</div><div class="step-txt">The four facts: 4×7=28, 7×4=28, 28÷4=<span class="em">?</span>, 28÷7=<span class="em">4</span>.</div></div>
+        <div class="teach-step"><div class="step-num">4</div><div class="step-txt">Check: if 4 × 7 = 28, then 28 ÷ 4 must equal <span class="em">7</span>!</div></div>
+      </div>
+      <div class="opts" id="o5b">
+        <button class="opt" onclick="chkOpt(this,'4','7','fb5b','🥚 7! The vault opens — EGGS FOUND!','Think: 4 × ? = 28. Count in 4s!','nx5',null)">4</button>
+        <button class="opt" onclick="chkOpt(this,'7','7','fb5b','🥚 7! The vault opens — EGGS FOUND!','Think: 4 × ? = 28. Count in 4s!','nx5',null)">7</button>
+        <button class="opt" onclick="chkOpt(this,'6','7','fb5b','🥚 7! The vault opens — EGGS FOUND!','Think: 4 × ? = 28. Count in 4s!','nx5',null)">6</button>
+        <button class="opt" onclick="chkOpt(this,'8','7','fb5b','🥚 7! The vault opens — EGGS FOUND!','Think: 4 × ? = 28. Count in 4s!','nx5',null)">8</button>
+      </div>
+      <div class="fb" id="fb5b"></div>
+    </div>
+    <button class="hint-tog" onclick="togHint('h5')">💡 Quick Hint</button>
+    <div class="hint-box" id="h5">Fact family shortcut: if you know 4 × 7 = 28, you automatically know 28 ÷ 4 = 7 and 28 ÷ 7 = 4. They are the same family!</div>
+    <button class="btn btn-red btn-next" id="nx5" onclick="goTo('win')">🥚 Unlock the Vault!</button>
+  </div>
+</div>
+
+<!-- ══════════ WIN ══════════ -->
+<div class="screen" id="s-win">
+  <span class="egg-bounce">🥚</span>
+  <div class="win-title">Eggs Found!</div>
+  <div class="win-box">
+    Maya unlocked the storage room vault and found all <strong>three dinosaur eggs</strong> safe and sound — still warm from the museum heating system! 🦕🥚🥚🥚<br><br>
+    The eggs had simply <strong>rolled off the display stand</strong> down a sloped corridor and bumped the vault door shut behind them. No thief at all — just a very smooth floor!<br><br>
+    The museum director gave Maya a <strong>lifetime free pass</strong> to the museum. 🏛️🎉
+  </div>
+  <div class="skill-row">
+    <span class="skill-pill">✖️ Multiplication</span>
+    <span class="skill-pill">📖 Groups of</span>
+    <span class="skill-pill">➗ Division</span>
+    <span class="skill-pill">📦 Box Method</span>
+    <span class="skill-pill">🔢 Remainders</span>
+    <span class="skill-pill">🔺 Fact Families</span>
+  </div>
+  <button class="btn btn-teal" onclick="location.reload()">🔄 Play Again!</button>
+</div>
+
+<script>
+// ── NAV ───────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var id = (n === 'win') ? 's-win' : 's-' + n;
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  var done = (n === 'win') ? 5 : (typeof n === 'number' ? n - 1 : 0);
+  document.getElementById('prog').style.width = (done / 5 * 100) + '%';
+  updateTrail(done);
+  if (n === 1) { buildGroups('gv1a', 6, 4, '🦕'); buildNumLine('nl1a', 6, 4); buildNumLine('nl1b', 5, 3); }
+  if (n === 2) { buildShareVis(); }
+  if (n === 4) { buildRemainderVis(); }
+  if (n === 'win') { celebrate(); }
+}
+
+function updateTrail(done) {
+  for (var i = 0; i < 5; i++) {
+    var d = document.getElementById('td' + i);
+    d.className = 'tdot';
+    if (i < done) d.classList.add('done');
+    else if (i === done) d.classList.add('active');
+  }
+}
+
+// ── TEACH PANEL TOGGLE ───────────────────────
+function toggleTeach(id) {
+  var panel = document.getElementById(id);
+  var btn   = panel.previousElementSibling;
+  var isOpen = panel.classList.contains('show');
+  panel.classList.toggle('show', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+function togHint(id) {
+  var el = document.getElementById(id);
+  el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+
+function unlock(id) {
+  if (!id) return;
+  var el = document.getElementById(id);
+  if (el) { el.classList.remove('hidden-panel'); }
+}
+
+function showNext(id) {
+  if (!id) return;
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'inline-block';
+}
+
+// ── ANSWER CHECKERS ──────────────────────────
+function chkInput(inputId, correct, fbId, okMsg, badMsg, unlockId, nextId) {
+  var val = parseInt(document.getElementById(inputId).value, 10);
+  var fb  = document.getElementById(fbId);
+  if (isNaN(val)) { fb.textContent = 'Enter a number first!'; fb.className = 'fb bad'; return; }
+  if (val === correct) {
+    fb.textContent = okMsg; fb.className = 'fb ok';
+    document.getElementById(inputId).disabled = true;
+    spawnConf(5);
+    if (unlockId) setTimeout(function() { unlock(unlockId); }, 500);
+    if (nextId)   setTimeout(function() { showNext(nextId); }, 500);
+  } else {
+    fb.textContent = badMsg; fb.className = 'fb bad';
+  }
+}
+
+function chkOpt(el, picked, correct, fbId, okMsg, badMsg, nextId, unlockId) {
+  var siblings = el.parentNode.querySelectorAll('.opt');
+  siblings.forEach(function(b) { b.disabled = true; });
+  var fb = document.getElementById(fbId);
+  if (picked === correct) {
+    el.className = 'opt ok';
+    fb.textContent = okMsg; fb.className = 'fb ok';
+    spawnConf(6);
+    if (nextId)   setTimeout(function() { showNext(nextId); }, 400);
+    if (unlockId) setTimeout(function() { unlock(unlockId); }, 400);
+  } else {
+    el.className = 'opt bad';
+    fb.textContent = badMsg; fb.className = 'fb bad';
+    setTimeout(function() {
+      el.className = 'opt';
+      siblings.forEach(function(b) { b.disabled = false; });
+    }, 900);
+  }
+}
+
+// ── VISUAL BUILDERS ──────────────────────────
+
+// Groups visual
+function buildGroups(containerId, groups, perGroup, icon) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  for (var g = 0; g < groups; g++) {
+    var pod = document.createElement('div');
+    pod.className = 'group-circle';
+    pod.setAttribute('data-label', 'Group ' + (g + 1));
+    for (var i = 0; i < perGroup; i++) {
+      var span = document.createElement('span');
+      span.className = 'gitem';
+      span.textContent = icon;
+      pod.appendChild(span);
+    }
+    el.appendChild(pod);
+    (function(p, delay) {
+      setTimeout(function() { p.style.opacity = '0'; p.style.transform = 'scale(0)'; p.style.transition = 'all .3s'; setTimeout(function() { p.style.opacity = '1'; p.style.transform = 'scale(1)'; }, 10); }, delay);
+    })(pod, g * 160);
+  }
+}
+
+// Number line
+function buildNumLine(containerId, jumps, step) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  var total = jumps * step;
+  var wrap  = document.createElement('div');
+  wrap.className = 'numline';
+  wrap.style.position = 'relative';
+  // Base line
+  var line = document.createElement('div');
+  line.className = 'nl-line';
+  wrap.appendChild(line);
+  // Ticks
+  for (var i = 0; i <= total; i++) {
+    var tick = document.createElement('div');
+    tick.className = 'nl-tick';
+    var num = document.createElement('div');
+    num.className = 'nl-num';
+    num.textContent = i;
+    if (i % step === 0) {
+      num.style.color = 'var(--teal)';
+      num.style.fontWeight = '900';
+      var marker = document.createElement('div');
+      marker.className = 'nl-marker';
+      marker.textContent = i;
+      num.textContent = '';
+      tick.appendChild(marker);
+    }
+    tick.appendChild(num);
+    var bar = document.createElement('div');
+    bar.className = 'nl-bar';
+    tick.appendChild(bar);
+    wrap.appendChild(tick);
+  }
+  // Hop arcs (CSS trick: use spans positioned absolutely)
+  for (var j = 0; j < jumps; j++) {
+    var hop = document.createElement('div');
+    hop.className = 'nl-hop';
+    var startPct = (j * step) / total;
+    var endPct   = ((j + 1) * step) / total;
+    hop.style.left  = 'calc(' + (startPct * 100) + '% + 22px)';
+    hop.style.width = 'calc(' + ((endPct - startPct) * 100) + '% - 0px)';
+    wrap.appendChild(hop);
+    var lbl = document.createElement('div');
+    lbl.className = 'nl-hop-label';
+    lbl.textContent = '+' + step;
+    lbl.style.left = 'calc(' + ((startPct + (endPct - startPct) / 2) * 100) + '% + 22px)';
+    wrap.appendChild(lbl);
+  }
+  el.appendChild(wrap);
+}
+
+// Sharing visual (clue 2)
+function buildShareVis() {
+  var itemsEl   = document.getElementById('sv2-items');
+  var bucketsEl = document.getElementById('sv2-buckets');
+  if (!itemsEl || !bucketsEl) return;
+  itemsEl.innerHTML = ''; bucketsEl.innerHTML = '';
+  // Items
+  for (var i = 0; i < 20; i++) {
+    var sp = document.createElement('span');
+    sp.className = 'share-item'; sp.textContent = '🪨';
+    sp.id = 'si' + i;
+    itemsEl.appendChild(sp);
+  }
+  // Buckets
+  for (var b = 0; b < 4; b++) {
+    var bk = document.createElement('div');
+    bk.className = 'share-bucket'; bk.setAttribute('data-n', 'Case ' + (b + 1));
+    for (var k = 0; k < 5; k++) {
+      var it = document.createElement('span');
+      it.className = 'sb-item'; it.textContent = '🪨';
+      bk.appendChild(it);
+    }
+    bucketsEl.appendChild(bk);
+    // Animate items dropping in
+    (function(bucket, bIdx) {
+      var items = bucket.querySelectorAll('.sb-item');
+      items.forEach(function(item, iIdx) {
+        setTimeout(function() { item.classList.add('placed'); }, (bIdx * 5 + iIdx) * 120 + 400);
+      });
+    })(bk, b);
+  }
+  // Fade out original items as they get placed
+  for (var x = 0; x < 20; x++) {
+    (function(idx) {
+      setTimeout(function() {
+        var el = document.getElementById('si' + idx);
+        if (el) el.style.opacity = '0.2';
+      }, idx * 120 + 400);
+    })(x);
+  }
+}
+
+// Remainder visual (clue 4)
+function buildRemainderVis() {
+  var el = document.getElementById('rv4a');
+  if (!el) return;
+  el.innerHTML = '';
+  // 4 groups of 5
+  for (var g = 0; g < 4; g++) {
+    var grp = document.createElement('div');
+    grp.className = 'rem-group';
+    for (var i = 0; i < 5; i++) {
+      var sp = document.createElement('span');
+      sp.style.fontSize = '1.4rem'; sp.textContent = '🍪';
+      grp.appendChild(sp);
+    }
+    el.appendChild(grp);
+  }
+  // Remainder 2
+  var rem = document.createElement('div');
+  rem.className = 'rem-leftover';
+  for (var r = 0; r < 2; r++) {
+    var sr = document.createElement('span');
+    sr.style.fontSize = '1.4rem'; sr.textContent = '🍪';
+    rem.appendChild(sr);
+  }
+  el.appendChild(rem);
+}
+
+// ── CONFETTI ─────────────────────────────────
+function spawnConf(n) {
+  var cols = ['#d4860a','#f0a830','#1a6b5a','#27a082','#c0392b','#fff','#27ae60','#2471a3'];
+  for (var i = 0; i < n; i++) {
+    (function() {
+      var p = document.createElement('div');
+      p.className = 'conf';
+      p.style.left   = (Math.random() * 100) + 'vw';
+      p.style.width  = (7 + Math.random() * 7) + 'px';
+      p.style.height = (8 + Math.random() * 12) + 'px';
+      p.style.background = cols[Math.floor(Math.random() * cols.length)];
+      p.style.setProperty('--cd',   (1.2 + Math.random() * 1.4) + 's');
+      p.style.setProperty('--cdel', (Math.random() * 0.7) + 's');
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+      document.body.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 3000);
+    })();
+  }
+}
+
+function celebrate() {
+  for (var i = 0; i < 7; i++) {
+    (function(d) { setTimeout(function() { spawnConf(16); }, d); })(i * 220);
+  }
+}
+
+// ── INIT ─────────────────────────────────────
+updateTrail(0);
+</script>
+</body>
+</html>

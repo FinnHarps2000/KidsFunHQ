@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic 100 Words ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky:    #E8F4FF;
+  --gold:   #FFB800;
+  --red:    #FF4F4F;
+  --blue:   #2B8EFF;
+  --green:  #18C96A;
+  --orange: #FF7A1A;
+  --indigo: #7B5CF0;
+  --violet: #C344E8;
+  --ink:    #1A1A2E;
+  --white:  #FFFFFF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--sky);
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  overflow-x: hidden;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* BG SHAPES */
+.bg-shapes { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.shape { position: absolute; border-radius: 50%; opacity: 0.1; animation: floatShape 10s ease-in-out infinite; }
+@keyframes floatShape { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-28px) scale(1.05);} }
+
+/* HEADER */
+header { position: relative; z-index: 10; text-align: center; padding: 20px 16px 8px; width: 100%; }
+.title-wrap {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--white); border-radius: 999px; padding: 10px 28px;
+  border: 4px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); margin-bottom: 10px;
+}
+header h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.5rem, 5vw, 2.4rem); color: var(--ink); }
+.star-emoji { font-size: 1.6rem; }
+.top-bar { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.top-pill {
+  background: var(--white); border: 3px solid var(--ink); border-radius: 999px;
+  padding: 5px 18px; font-family: 'Fredoka One', cursive; font-size: 1rem;
+  color: var(--ink); box-shadow: 3px 3px 0 var(--ink); cursor: pointer;
+  transition: all 0.14s;
+}
+.top-pill:hover { transform: translateY(-1px); box-shadow: 4px 4px 0 var(--ink); }
+.top-pill.gold-pill { background: #FFF8DC; }
+
+/* PROGRESS */
+.progress-wrap {
+  position: relative; z-index: 10; width: min(600px, 92vw); margin-bottom: 6px;
+  background: var(--white); border: 3px solid var(--ink); border-radius: 999px;
+  padding: 4px; box-shadow: 3px 3px 0 var(--ink);
+}
+.progress-fill {
+  height: 20px; background: linear-gradient(90deg, #FFB800, #FF7A1A);
+  border-radius: 999px; transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  min-width: 4px; position: relative;
+}
+.progress-fill::after {
+  content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; background: var(--white); border: 3px solid var(--ink); border-radius: 50%;
+}
+.progress-label { text-align: center; font-family: 'Fredoka One', cursive; font-size: 0.88rem; color: var(--ink); opacity: 0.55; margin-bottom: 12px; position: relative; z-index: 10; }
+
+/* LEVEL TABS */
+.level-tabs {
+  position: relative; z-index: 10; display: flex; gap: 7px; flex-wrap: wrap;
+  justify-content: center; padding: 0 12px; margin-bottom: 14px; width: min(780px, 100vw);
+}
+.level-tab {
+  border: 3px solid var(--ink); border-radius: 999px; padding: 6px 14px;
+  font-family: 'Fredoka One', cursive; font-size: 0.82rem; cursor: pointer;
+  background: var(--white); color: var(--ink);
+  transition: all 0.15s; opacity: 0.52; box-shadow: 3px 3px 0 var(--ink);
+}
+.level-tab:hover { opacity: 0.8; }
+.level-tab.active { opacity: 1; transform: translateY(-3px); box-shadow: 4px 5px 0 var(--ink); }
+
+/* LEVEL HEADER */
+.level-header {
+  position: relative; z-index: 10; width: min(780px, 92vw);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.level-pill {
+  font-family: 'Fredoka One', cursive; font-size: 0.95rem;
+  border: 3px solid var(--ink); border-radius: 999px; padding: 5px 16px; box-shadow: 3px 3px 0 var(--ink);
+}
+.level-count { font-family: 'Fredoka One', cursive; font-size: 0.82rem; color: var(--ink); opacity: 0.5; }
+
+/* WORD GRID */
+.word-grid {
+  position: relative; z-index: 10;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 10px; width: min(780px, 92vw); padding-bottom: 30px;
+}
+.word-card {
+  background: var(--white); border: 3px solid var(--ink); border-radius: 16px;
+  padding: 12px 6px 10px; text-align: center; cursor: pointer;
+  transition: all 0.15s; box-shadow: 4px 4px 0 var(--ink); position: relative;
+}
+.word-card:hover { transform: translateY(-3px); box-shadow: 5px 7px 0 var(--ink); }
+.word-card:active { transform: translateY(2px); box-shadow: 2px 2px 0 var(--ink); }
+.word-card.done { opacity: 0.42; background: #f4f4f4; }
+.word-card.done::after { content: '⭐'; position: absolute; top: -10px; right: -8px; font-size: 1rem; }
+.word-num { font-family: 'Fredoka One', cursive; font-size: 0.6rem; color: var(--ink); opacity: 0.3; margin-bottom: 3px; }
+.word-text { font-family: 'Fredoka One', cursive; font-size: clamp(1.05rem, 3.2vw, 1.45rem); color: var(--ink); line-height: 1; }
+.word-card .lvbar { height: 4px; border-radius: 999px; margin: 6px auto 0; width: 55%; }
+
+/* ====== MODAL ====== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(26,26,46,0.65); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; padding: 12px;
+}
+.modal-overlay.open { display: flex; }
+.flashcard {
+  background: var(--white); border: 4px solid var(--ink); border-radius: 28px;
+  width: min(420px, 96vw); max-height: 92vh; overflow-y: auto;
+  box-shadow: 8px 8px 0 var(--ink);
+  animation: cardPop 0.28s cubic-bezier(0.34,1.56,0.64,1); position: relative;
+}
+@keyframes cardPop { from{transform:scale(0.78) translateY(28px);opacity:0;} to{transform:scale(1) translateY(0);opacity:1;} }
+.fc-close {
+  position: absolute; top: 12px; right: 14px; z-index: 5;
+  background: #f0f0f0; border: 2px solid var(--ink); border-radius: 50%;
+  width: 32px; height: 32px; font-size: 1rem; color: var(--ink); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 2px 2px 0 var(--ink); transition: all 0.12s;
+}
+.fc-close:hover { transform: scale(1.1); }
+.fc-band { height: 14px; width: 100%; }
+.fc-badge {
+  display: inline-block; font-family: 'Fredoka One', cursive; font-size: 0.78rem;
+  border: 2px solid var(--ink); border-radius: 999px; padding: 3px 14px;
+  margin: 10px 0 6px; box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* THE BIG WORD */
+.fc-word {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(4.5rem, 17vw, 7rem);
+  line-height: 1; letter-spacing: -1px;
+  padding: 4px 24px 8px; text-align: center;
+}
+.fc-wordnum { font-family: 'Fredoka One', cursive; font-size: 0.72rem; color: var(--ink); opacity: 0.32; text-align: center; margin-bottom: 14px; }
+
+/* LISTEN BUTTON — main action */
+.btn-listen {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: calc(100% - 36px); margin: 0 18px 12px;
+  background: var(--blue); color: var(--white);
+  border: 3px solid var(--ink); border-radius: 18px; padding: 16px;
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--ink);
+  transition: all 0.14s; position: relative; top: 0;
+}
+.btn-listen:hover { transform: translateY(-2px); box-shadow: 5px 6px 0 var(--ink); }
+.btn-listen:active { top: 3px; box-shadow: 1px 1px 0 var(--ink); }
+.btn-listen.listening {
+  background: var(--red);
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{box-shadow:4px 4px 0 var(--ink);} 50%{box-shadow:4px 4px 0 var(--ink), 0 0 0 8px rgba(255,79,79,0.2);} }
+
+/* MIC ICON */
+.mic-icon { font-size: 1.4rem; }
+
+/* HEARD TEXT */
+.heard-box {
+  margin: 0 18px 10px;
+  background: #f7f7f7; border: 2px solid #ddd; border-radius: 14px;
+  padding: 10px 14px; text-align: center; min-height: 44px;
+  font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #666;
+  display: none;
+}
+.heard-box.show { display: block; }
+
+/* PARENT CONFIRM */
+.parent-confirm {
+  display: none; margin: 0 18px 12px;
+  background: #FFF8E6; border: 3px solid var(--gold); border-radius: 16px;
+  padding: 14px 16px; text-align: center;
+}
+.parent-confirm.show { display: block; }
+.parent-confirm p {
+  font-family: 'Fredoka One', cursive; font-size: 0.95rem;
+  color: var(--ink); margin-bottom: 10px; opacity: 0.8;
+}
+.parent-btn-row { display: flex; gap: 8px; }
+.btn-parent-yes {
+  flex: 1; background: var(--green); color: white;
+  border: 3px solid var(--ink); border-radius: 13px; padding: 12px;
+  font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+  cursor: pointer; box-shadow: 3px 3px 0 var(--ink); transition: all 0.13s;
+}
+.btn-parent-yes:hover { transform: translateY(-2px); }
+.btn-parent-no {
+  flex: 1; background: var(--red); color: white;
+  border: 3px solid var(--ink); border-radius: 13px; padding: 12px;
+  font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+  cursor: pointer; box-shadow: 3px 3px 0 var(--ink); transition: all 0.13s;
+}
+.btn-parent-no:hover { transform: translateY(-2px); }
+
+/* HINT BUTTON */
+.btn-hint {
+  display: block; margin: 0 auto 12px;
+  background: white; border: 2px dashed #aaa; border-radius: 999px;
+  padding: 5px 20px; font-family: 'Fredoka One', cursive; font-size: 0.88rem;
+  color: #888; cursor: pointer; transition: all 0.14s;
+}
+.btn-hint:hover { border-color: var(--ink); color: var(--ink); }
+
+/* SOUND BUBBLES (hint mode) */
+.hint-zone {
+  display: none; margin: 0 18px 12px;
+  background: var(--sky); border: 3px solid var(--ink); border-radius: 18px;
+  padding: 14px 14px 12px;
+}
+.hint-zone.show { display: block; }
+.hint-zone-title { font-family: 'Fredoka One', cursive; font-size: 0.8rem; color: var(--ink); opacity: 0.5; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.sound-bubbles { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.sound-bubble {
+  background: var(--white); border: 3px solid var(--ink); border-radius: 12px;
+  padding: 9px 14px; font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.2rem, 5vw, 1.6rem); color: var(--ink);
+  cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+  transition: all 0.13s; user-select: none; min-width: 48px; text-align: center;
+}
+.sound-bubble:hover { transform: translateY(-2px); box-shadow: 4px 5px 0 var(--ink); }
+.sound-bubble.popped { color: var(--white); transform: translateY(-3px); }
+.bubble-plus { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--ink); opacity: 0.2; align-self: center; }
+
+/* NAV + BOTTOM BUTTONS */
+.fc-nav { display: flex; gap: 10px; justify-content: center; padding: 0 18px 10px; }
+.nav-btn {
+  background: var(--white); border: 2px solid var(--ink); border-radius: 12px;
+  padding: 7px 20px; font-family: 'Fredoka One', cursive; font-size: 0.9rem;
+  color: var(--ink); cursor: pointer; box-shadow: 2px 2px 0 var(--ink); transition: all 0.12s;
+}
+.nav-btn:hover { transform: translateY(-1px); box-shadow: 3px 3px 0 var(--ink); }
+.nav-btn:disabled { opacity: 0.22; cursor: default; transform: none; box-shadow: none; }
+
+/* ====== STICKER CHART OVERLAY ====== */
+.sticker-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(26,26,46,0.7); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center; padding: 16px;
+}
+.sticker-overlay.open { display: flex; }
+.sticker-panel {
+  background: var(--white); border: 4px solid var(--ink); border-radius: 28px;
+  width: min(500px, 96vw); max-height: 88vh; overflow-y: auto;
+  box-shadow: 8px 8px 0 var(--ink); padding: 24px 22px 20px;
+  animation: cardPop 0.28s cubic-bezier(0.34,1.56,0.64,1);
+}
+.sticker-panel h2 {
+  font-family: 'Fredoka One', cursive; font-size: 1.8rem; text-align: center;
+  color: var(--ink); margin-bottom: 6px;
+}
+.sticker-panel .subtitle {
+  font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: var(--ink);
+  opacity: 0.5; text-align: center; margin-bottom: 16px;
+}
+.sticker-grid {
+  display: grid; grid-template-columns: repeat(10, 1fr);
+  gap: 6px; margin-bottom: 18px;
+}
+.sticker-cell {
+  aspect-ratio: 1; border: 2px solid #e0e0e0; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(1rem, 3.5vw, 1.4rem);
+  background: #fafafa; transition: all 0.2s;
+  position: relative;
+}
+.sticker-cell.earned { background: #FFF8DC; border-color: var(--gold); animation: stickerPop 0.4s ease; }
+.sticker-cell .cell-num {
+  position: absolute; bottom: 1px; right: 3px;
+  font-family: 'Fredoka One', cursive; font-size: 0.45rem; color: #ccc;
+}
+@keyframes stickerPop { 0%{transform:scale(0) rotate(-20deg);} 70%{transform:scale(1.2) rotate(5deg);} 100%{transform:scale(1) rotate(0);} }
+.sticker-close-btn {
+  display: block; width: 100%;
+  background: var(--gold); border: 3px solid var(--ink); border-radius: 14px;
+  padding: 13px; font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+  color: var(--ink); cursor: pointer; box-shadow: 4px 4px 0 var(--ink); transition: all 0.14s;
+}
+.sticker-close-btn:hover { transform: translateY(-2px); box-shadow: 5px 6px 0 var(--ink); }
+.sticker-milestone {
+  text-align: center; font-family: 'Fredoka One', cursive;
+  font-size: 1rem; color: var(--indigo); margin-bottom: 14px;
+}
+
+/* CONFETTI */
+.confetti-piece {
+  position: fixed; pointer-events: none; z-index: 999; border-radius: 3px;
+  animation: cfall 1.5s ease-in forwards;
+}
+@keyframes cfall { 0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1;} 80%{opacity:1;} 100%{transform:translateY(110vh) rotate(900deg) scale(0.5);opacity:0;} }
+
+/* STARBURST */
+.starburst { position: fixed; z-index: 300; pointer-events: none; font-size: 3rem; animation: burstOut 0.6s ease-out forwards; }
+@keyframes burstOut { 0%{transform:scale(0);opacity:1;} 60%{transform:scale(1.5);opacity:1;} 100%{transform:scale(2);opacity:0;} }
+
+/* ALL DONE */
+.all-done {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: var(--sky); background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px); background-size: 28px 28px;
+  align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 28px;
+}
+.all-done.show { display: flex; }
+.all-done .trophy { font-size: 6rem; animation: bounce 1s ease-in-out infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-18px);} }
+.all-done h2 { font-family: 'Fredoka One', cursive; font-size: clamp(2rem, 8vw, 3.8rem); color: var(--ink); margin: 12px 0 6px; }
+.all-done p { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--ink); opacity: 0.65; margin-bottom: 22px; }
+.btn-reset {
+  background: var(--gold); border: 4px solid var(--ink); border-radius: 999px;
+  padding: 14px 42px; font-family: 'Fredoka One', cursive; font-size: 1.4rem;
+  color: var(--ink); cursor: pointer; box-shadow: 5px 5px 0 var(--ink); transition: all 0.14s;
+}
+.btn-reset:hover { transform: translateY(-3px); box-shadow: 7px 7px 0 var(--ink); }
+
+/* No-mic notice */
+.no-mic-note { font-family: 'Fredoka One', cursive; font-size: 0.8rem; text-align: center; color: #aaa; margin: 0 18px 10px; }
+</style>
+</head>
+<body>
+<div class="bg-shapes" id="bgShapes"></div>
+
+<header>
+  <div style="text-align:center;">
+    <div class="title-wrap">
+      <span class="star-emoji">⭐</span>
+      <h1>Magic 100 Words</h1>
+      <span class="star-emoji">⭐</span>
+    </div>
+  </div>
+  <div class="top-bar">
+    <div class="top-pill gold-pill">⭐ <span id="starsCount">0</span> stars!</div>
+    <button class="top-pill" onclick="openStickerChart()">🏆 My Sticker Chart</button>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-fill" id="progressFill" style="width:0%"></div>
+</div>
+<div class="progress-label" id="progressLabel">0 out of 100 words learnt</div>
+
+<div class="level-tabs" id="levelTabs"></div>
+<div class="level-header" id="levelHeader"></div>
+<div class="word-grid" id="wordGrid"></div>
+
+<!-- ===== FLASHCARD MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeOutside(event)">
+  <div class="flashcard" id="flashcard">
+    <button class="fc-close" onclick="closeModal()">✕</button>
+    <div class="fc-band" id="fcBand"></div>
+    <div style="text-align:center;"><div class="fc-badge" id="fcBadge"></div></div>
+
+    <!-- BIG WORD -->
+    <div class="fc-word" id="fcWord"></div>
+    <div class="fc-wordnum" id="fcNum"></div>
+
+    <!-- MIC BUTTON -->
+    <button class="btn-listen" id="btnListen" onclick="startListening()">
+      <span class="mic-icon" id="micIcon">🎤</span>
+      <span id="listenLabel">Say the word!</span>
+    </button>
+
+    <!-- WHAT WE HEARD -->
+    <div class="heard-box" id="heardBox">I heard: "<span id="heardText"></span>"</div>
+
+    <!-- PARENT CONFIRM (shown when unsure or no-mic) -->
+    <div class="parent-confirm" id="parentConfirm">
+      <p>👨‍👧 Did they say it correctly?</p>
+      <div class="parent-btn-row">
+        <button class="btn-parent-yes" onclick="parentSay(true)">✅ Yes!</button>
+        <button class="btn-parent-no"  onclick="parentSay(false)">❌ Not yet</button>
+      </div>
+    </div>
+
+    <!-- HINT TOGGLE -->
+    <button class="btn-hint" id="btnHint" onclick="toggleHint()">💡 Show me the sounds</button>
+
+    <!-- SOUND BUBBLES (hint) -->
+    <div class="hint-zone" id="hintZone">
+      <div class="hint-zone-title">👆 Tap each sound!</div>
+      <div class="sound-bubbles" id="soundBubbles"></div>
+      <div style="font-family:'Fredoka One',cursive;font-size:0.85rem;color:#888;text-align:center;margin-top:8px;" id="fcHint"></div>
+      <div style="text-align:center;margin-top:6px;" id="trickyWrap"></div>
+    </div>
+
+    <div id="noMicNote" class="no-mic-note" style="display:none;">🎤 No microphone found — use the parent buttons below</div>
+
+    <div class="fc-nav">
+      <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Back</button>
+      <button class="nav-btn" id="btnNext" onclick="navigate(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STICKER CHART ===== -->
+<div class="sticker-overlay" id="stickerOverlay" onclick="closeStickerOutside(event)">
+  <div class="sticker-panel" id="stickerPanel">
+    <h2>🏆 My Sticker Chart!</h2>
+    <div class="subtitle" id="stickerSubtitle"></div>
+    <div class="sticker-milestone" id="stickerMilestone"></div>
+    <div class="sticker-grid" id="stickerGrid"></div>
+    <button class="sticker-close-btn" onclick="closeStickerChart()">Back to words! 📚</button>
+  </div>
+</div>
+
+<!-- ===== ALL DONE ===== -->
+<div class="all-done" id="allDone">
+  <div class="trophy">🏆</div>
+  <h2>You did it!</h2>
+  <p>All 100 Magic Words learnt!<br>You're a reading superstar! ⭐</p>
+  <button class="btn-reset" onclick="resetAll()">Play Again! 🎉</button>
+</div>
+
+<script>
+// =====================================================
+// LEVELS — official Magic 100 Words list & order
+// =====================================================
+const LEVELS = [
+  { id:'gold',   name:'Gold',   color:'#FFB800', bg:'#FFF8DC',
+    words:['a','I','it','the','and','in','of','to','be','is','that','was'] },
+  { id:'red',    name:'Red',    color:'#FF4F4F', bg:'#FFE8E8',
+    words:['all','but','he','on','they','are','for','her','one','we','as','had','his','said','with','at','have','not','so','you'] },
+  { id:'blue',   name:'Blue',   color:'#2B8EFF', bg:'#E4F0FF',
+    words:['an','do','if','my','or','by','go','me','no','up'] },
+  { id:'green',  name:'Green',  color:'#18C96A', bg:'#DFFAED',
+    words:['big','has','off','see','can','him','old','she','did','new','our','two','get','now','out','who'] },
+  { id:'orange', name:'Orange', color:'#FF7A1A', bg:'#FFF0E0',
+    words:['back','from','made','this','been','into','much','well','came','just','over','went','down','like','them','when'] },
+  { id:'indigo', name:'Indigo', color:'#7B5CF0', bg:'#F0ECFF',
+    words:['call','make','some','what','come','must','then','will','here','only','were','your'] },
+  { id:'violet', name:'Violet', color:'#C344E8', bg:'#F9E8FF',
+    words:['about','could','little','more','right','where','before','first','look','other','their','want','which','there'] }
+];
+const WORDS = LEVELS.flatMap(lv => lv.words);
+const getLv = w => LEVELS.find(lv => lv.words.includes(w)) || LEVELS[0];
+
+// =====================================================
+// PHONICS DATA
+// =====================================================
+const PHON = {
+  'a':    { p:['a'],            labels:['aaa'],           h:'"a" — like in ant! 🐜',              tricky:false },
+  'I':    { p:['I'],            labels:['eye'],           h:'"I" — say eye! 👁️',                 tricky:false },
+  'it':   { p:['i','t'],        labels:['ih','t'],        h:'"i" then "t"',                        tricky:false },
+  'the':  { p:['th','uh'],      labels:['th','uh'],       h:'Say th then uh 🌍',                  tricky:true  },
+  'and':  { p:['a','n','d'],    labels:['aaa','n','d'],   h:'a - n - d',                           tricky:false },
+  'in':   { p:['i','n'],        labels:['ih','n'],        h:'"i" then "n"',                        tricky:false },
+  'of':   { p:['o','v'],        labels:['o','v'],         h:'Spelt "of" — sounds like ov! 🤔',    tricky:true  },
+  'to':   { p:['t','oo'],       labels:['t','oo'],        h:'"t" then oo — like blue!',           tricky:true  },
+  'be':   { p:['b','ee'],       labels:['b','ee'],        h:'"b" then ee — like a bee! 🐝',       tricky:false },
+  'is':   { p:['i','z'],        labels:['ih','zz'],       h:'"i" then z — izz!',                  tricky:false },
+  'that': { p:['th','a','t'],   labels:['th','aaa','t'],  h:'th - a - t',                         tricky:false },
+  'was':  { p:['w','o','z'],    labels:['w','o','z'],     h:'Spelt "was" — sounds like woz!',     tricky:true  },
+  'all':  { p:['aw','l'],       labels:['aw','l'],        h:'aw then l — rhymes with tall!',      tricky:false },
+  'but':  { p:['b','u','t'],    labels:['b','uh','t'],    h:'b - u - t — rhymes with cut!',       tricky:false },
+  'he':   { p:['h','ee'],       labels:['h','ee'],        h:'"h" then ee — rhymes with bee!',     tricky:false },
+  'on':   { p:['o','n'],        labels:['o','n'],         h:'"o" then n',                          tricky:false },
+  'they': { p:['th','ay'],      labels:['th','ay'],       h:'th then ay — rhymes with day!',      tricky:true  },
+  'are':  { p:['ar'],           labels:['ar'],            h:'Just say ar — like a pirate! 🏴‍☠️',  tricky:true  },
+  'for':  { p:['f','or'],       labels:['f','or'],        h:'"f" then or — rhymes with door!',    tricky:false },
+  'her':  { p:['h','er'],       labels:['h','er'],        h:'"h" then soft er',                   tricky:false },
+  'one':  { p:['w','u','n'],    labels:['w','uh','n'],    h:'Spelt "one" — sounds like wun! 1️⃣', tricky:true  },
+  'we':   { p:['w','ee'],       labels:['w','ee'],        h:'"w" then ee — rhymes with bee!',     tricky:false },
+  'as':   { p:['a','z'],        labels:['aaa','zz'],      h:'"a" then z sound',                   tricky:false },
+  'had':  { p:['h','a','d'],    labels:['h','aaa','d'],   h:'h - a - d',                          tricky:false },
+  'his':  { p:['h','i','z'],    labels:['h','ih','zz'],   h:'h - i - z',                          tricky:false },
+  'said': { p:['s','e','d'],    labels:['s','eh','d'],    h:'Spelt "said" — sounds like sed!',    tricky:true  },
+  'with': { p:['w','i','th'],   labels:['w','ih','th'],   h:'w - i - th',                         tricky:false },
+  'at':   { p:['a','t'],        labels:['aaa','t'],       h:'"a" then t',                         tricky:false },
+  'have': { p:['h','a','v'],    labels:['h','aaa','v'],   h:'h - a - v — the e is silent!',      tricky:true  },
+  'not':  { p:['n','o','t'],    labels:['n','o','t'],     h:'n - o - t — rhymes with hot!',       tricky:false },
+  'so':   { p:['s','oh'],       labels:['s','oh'],        h:'"s" then oh — rhymes with go!',      tricky:false },
+  'you':  { p:['y','oo'],       labels:['y','oo'],        h:'"y" then oo',                        tricky:true  },
+  'an':   { p:['a','n'],        labels:['aaa','n'],       h:'"a" then n',                         tricky:false },
+  'do':   { p:['d','oo'],       labels:['d','oo'],        h:'"d" then oo — rhymes with blue!',   tricky:true  },
+  'if':   { p:['i','f'],        labels:['ih','f'],        h:'"i" then f',                         tricky:false },
+  'my':   { p:['m','i'],        labels:['m','eye'],       h:'"m" then i — rhymes with by!',      tricky:false },
+  'or':   { p:['or'],           labels:['or'],            h:'Just or — rhymes with door!',        tricky:false },
+  'by':   { p:['b','i'],        labels:['b','eye'],       h:'"b" then i — rhymes with my!',      tricky:false },
+  'go':   { p:['g','oh'],       labels:['g','oh'],        h:'"g" then oh — rhymes with so!',     tricky:false },
+  'me':   { p:['m','ee'],       labels:['m','ee'],        h:'"m" then ee',                        tricky:false },
+  'no':   { p:['n','oh'],       labels:['n','oh'],        h:'"n" then oh',                        tricky:false },
+  'up':   { p:['u','p'],        labels:['uh','p'],        h:'"u" then p',                         tricky:false },
+  'big':  { p:['b','i','g'],    labels:['b','ih','g'],    h:'b - i - g — rhymes with pig!',      tricky:false },
+  'has':  { p:['h','a','z'],    labels:['h','aaa','zz'],  h:'h - a - z',                          tricky:false },
+  'off':  { p:['o','ff'],       labels:['o','ff'],        h:'"o" then ff',                        tricky:false },
+  'see':  { p:['s','ee'],       labels:['s','ee'],        h:'"s" then ee',                        tricky:false },
+  'can':  { p:['c','a','n'],    labels:['k','aaa','n'],   h:'c - a - n — rhymes with man!',      tricky:false },
+  'him':  { p:['h','i','m'],    labels:['h','ih','m'],    h:'h - i - m',                          tricky:false },
+  'old':  { p:['oh','l','d'],   labels:['oh','l','d'],    h:'oh - l - d — rhymes with cold!',    tricky:false },
+  'she':  { p:['sh','ee'],      labels:['sh','ee'],       h:'sh then ee',                         tricky:false },
+  'did':  { p:['d','i','d'],    labels:['d','ih','d'],    h:'d - i - d',                          tricky:false },
+  'new':  { p:['n','yoo'],      labels:['n','yoo'],       h:'"n" then yoo — rhymes with blue!',  tricky:false },
+  'our':  { p:['ow','er'],      labels:['ow','er'],       h:'ow then er — like flower!',          tricky:false },
+  'two':  { p:['t','oo'],       labels:['t','oo'],        h:'Spelt "two" — sounds like too! 2️⃣', tricky:true  },
+  'get':  { p:['g','e','t'],    labels:['g','eh','t'],    h:'g - e - t',                          tricky:false },
+  'now':  { p:['n','ow'],       labels:['n','ow'],        h:'"n" then ow — rhymes with cow!',    tricky:false },
+  'out':  { p:['ow','t'],       labels:['ow','t'],        h:'ow then t — rhymes with shout!',    tricky:false },
+  'who':  { p:['h','oo'],       labels:['h','oo'],        h:'"wh" says h — say hoo! 🦉',         tricky:true  },
+  'back': { p:['b','a','ck'],   labels:['b','aaa','ck'],  h:'b - a - ck',                         tricky:false },
+  'from': { p:['fr','o','m'],   labels:['fr','o','m'],    h:'fr - o - m',                         tricky:false },
+  'made': { p:['m','ay','d'],   labels:['m','ay','d'],    h:'m - ay - d — e is silent!',          tricky:false },
+  'this': { p:['th','i','s'],   labels:['th','ih','s'],   h:'th - i - s',                         tricky:false },
+  'been': { p:['b','ee','n'],   labels:['b','ee','n'],    h:'b - ee - n',                         tricky:false },
+  'into': { p:['in','too'],     labels:['in','too'],      h:'in + too = into!',                   tricky:false },
+  'much': { p:['m','u','ch'],   labels:['m','uh','ch'],   h:'m - u - ch',                         tricky:false },
+  'well': { p:['w','e','ll'],   labels:['w','eh','ll'],   h:'w - e - ll',                         tricky:false },
+  'came': { p:['c','ay','m'],   labels:['k','ay','m'],    h:'c - ay - m — e is silent!',          tricky:false },
+  'just': { p:['j','u','st'],   labels:['j','uh','st'],   h:'j - u - st',                         tricky:false },
+  'over': { p:['oh','v','er'],  labels:['oh','v','er'],   h:'oh - v - er',                        tricky:false },
+  'went': { p:['w','e','nt'],   labels:['w','eh','nt'],   h:'w - e - nt',                         tricky:false },
+  'down': { p:['d','ow','n'],   labels:['d','ow','n'],    h:'d - ow - n — rhymes with town!',    tricky:false },
+  'like': { p:['l','i','k'],    labels:['l','eye','k'],   h:'l - i - k — e is silent!',           tricky:false },
+  'them': { p:['th','e','m'],   labels:['th','eh','m'],   h:'th - e - m',                         tricky:false },
+  'when': { p:['wh','e','n'],   labels:['wh','eh','n'],   h:'wh - e - n',                         tricky:false },
+  'call': { p:['c','aw','l'],   labels:['k','aw','l'],    h:'c - aw - l — rhymes with tall!',    tricky:false },
+  'make': { p:['m','ay','k'],   labels:['m','ay','k'],    h:'m - ay - k — e is silent!',          tricky:false },
+  'some': { p:['s','u','m'],    labels:['s','uh','m'],    h:'Spelt "some" — sounds like sum!',   tricky:true  },
+  'what': { p:['wh','o','t'],   labels:['wh','o','t'],    h:'Spelt "what" — sounds like wot!',   tricky:true  },
+  'come': { p:['c','u','m'],    labels:['k','uh','m'],    h:'Spelt "come" — sounds like cum!',   tricky:true  },
+  'must': { p:['m','u','st'],   labels:['m','uh','st'],   h:'m - u - st',                         tricky:false },
+  'then': { p:['th','e','n'],   labels:['th','eh','n'],   h:'th - e - n',                         tricky:false },
+  'will': { p:['w','i','ll'],   labels:['w','ih','ll'],   h:'w - i - ll — rhymes with hill!',    tricky:false },
+  'here': { p:['h','ee','r'],   labels:['h','ee','r'],    h:'h - ee - r',                         tricky:false },
+  'only': { p:['oh','n','lee'], labels:['oh','n','lee'],  h:'oh - n - lee',                       tricky:false },
+  'were': { p:['w','er'],       labels:['w','er'],        h:'Spelt "were" — sounds like wer!',   tricky:true  },
+  'your': { p:['y','or'],       labels:['y','or'],        h:'Spelt "your" — sounds like yor!',   tricky:true  },
+  'about':  { p:['a','b','ow','t'], labels:['a','b','ow','t'], h:'a - b - owt',                   tricky:false },
+  'could':  { p:['c','oo','d'],     labels:['k','oo','d'],     h:'L is silent — sounds like cood!', tricky:true },
+  'little': { p:['li','t','ul'],    labels:['li','t','ul'],    h:'lit - ul — soft ending!',        tricky:false },
+  'more':   { p:['m','or'],         labels:['m','or'],         h:'"m" then or',                    tricky:false },
+  'right':  { p:['r','i','t'],      labels:['r','eye','t'],    h:'gh is silent — sounds like rite!', tricky:true },
+  'where':  { p:['wh','air'],       labels:['wh','air'],       h:'Sounds like whair!',             tricky:true  },
+  'before': { p:['be','for'],       labels:['be','for'],       h:'be - fore',                      tricky:false },
+  'first':  { p:['f','er','st'],    labels:['f','er','st'],    h:'f - er - st',                    tricky:false },
+  'look':   { p:['l','oo','k'],     labels:['l','oo','k'],     h:'l - oo - k — rhymes with book!', tricky:false },
+  'other':  { p:['u','th','er'],    labels:['uh','th','er'],   h:'u - ther',                       tricky:false },
+  'their':  { p:['th','air'],       labels:['th','air'],       h:'Sounds like thair!',             tricky:true  },
+  'want':   { p:['w','on','t'],     labels:['w','on','t'],     h:'a sounds like o — wont!',        tricky:true  },
+  'which':  { p:['wh','i','ch'],    labels:['wh','ih','ch'],   h:'wh - i - ch — like witch!',     tricky:false },
+  'there':  { p:['th','air'],       labels:['th','air'],       h:'Same sound as their — thair!',   tricky:true  },
+};
+function getPh(w) {
+  return PHON[w] || { p:w.split(''), labels:w.split(''), h:`Sound it out!`, tricky:false };
+}
+
+// =====================================================
+// STICKERS  — 10 rotating emoji stickers
+// =====================================================
+const STICKER_EMOJIS = ['🌟','🦋','🎈','🌈','🦄','🍭','🌺','🚀','🐬','🎉'];
+const MILESTONES = {10:'Amazing — 10 words! 🎊', 25:'Wow — 25 words! 🏅', 50:'Half way! 50 words! 🎯', 75:'Almost there! 75 words! 💪', 100:'ALL 100 WORDS! 🏆'};
+
+// =====================================================
+// SPEECH — TTS
+// =====================================================
+function speak(text, opts={}) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang   = 'en-AU';
+  utt.rate   = opts.rate  ?? 0.78;
+  utt.pitch  = opts.pitch ?? 1.1;
+  utt.volume = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const v = voices.find(v=>v.lang.startsWith('en-AU')) || voices.find(v=>v.lang.startsWith('en-GB')) || voices.find(v=>v.lang.startsWith('en'));
+  if (v) utt.voice = v;
+  window.speechSynthesis.speak(utt);
+}
+
+const SPEAK_MAP = {
+  'aaa':'add','ih':'it','eh':'egg','o':'odd','uh':'up',
+  'ee':'eel','oo':'oom','ay':'ape','oh':'oak','eye':'ice','ow':'owl',
+  'ar':'arm','or':'ore','er':'earn','air':'air','eer':'ear',
+  'b':'buh','c':'kuh','k':'kuh','d':'duh','f':'fff','ff':'fff',
+  'g':'guh','h':'huh','j':'juh','l':'lll','ll':'lll','m':'mmm',
+  'n':'nnn','nn':'nnn','p':'puh','r':'rrr','s':'sss','ss':'sss',
+  't':'tuh','v':'vvv','w':'wuh','y':'yuh','z':'zzz','zz':'zzz',
+  'th':'thhh','sh':'shhh','ch':'chuh','wh':'wuh','ck':'kuh',
+  'fr':'frrr','in':'in','nt':'nt','st':'sst','nd':'nnd','aw':'awe',
+  'yoo':'you','be':'beh','for':'fore','lee':'lee','ul':'ul','li':'lih',
+  'a':'add','e':'egg','i':'it','u':'up',
+};
+function speakPhoneme(label) {
+  const tts = SPEAK_MAP[label.toLowerCase().trim()] || label;
+  speak(tts, { rate:0.65, pitch:1.15 });
+}
+
+// =====================================================
+// SPEECH RECOGNITION
+// =====================================================
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let micAvailable = false;
+
+if (SpeechRecognition) {
+  try {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-AU';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 5;
+    micAvailable = true;
+  } catch(e) { micAvailable = false; }
+}
+
+let isListening = false;
+
+function startListening() {
+  if (isListening) { stopListening(); return; }
+
+  const w = filteredWords[currentIdx];
+
+  if (!micAvailable || !recognition) {
+    // No mic — go straight to parent confirm
+    showParentConfirm();
+    speak(w, { rate:0.72 });
+    return;
+  }
+
+  isListening = true;
+  const btn = document.getElementById('btnListen');
+  btn.classList.add('listening');
+  document.getElementById('listenLabel').textContent = 'Listening... 👂';
+  document.getElementById('micIcon').textContent = '🔴';
+  document.getElementById('heardBox').classList.remove('show');
+  document.getElementById('parentConfirm').classList.remove('show');
+
+  recognition.onresult = (e) => {
+    const alternatives = Array.from(e.results[0]).map(r => r.transcript.trim().toLowerCase());
+    const target = w.toLowerCase();
+    const matched = alternatives.some(a => a === target || a.includes(target) || target.includes(a));
+
+    stopListening();
+    showHeard(alternatives[0]);
+
+    if (matched) {
+      handleCorrect();
+    } else {
+      // Show parent confirm — they can override
+      showParentConfirm(alternatives[0]);
+    }
+  };
+
+  recognition.onerror = (e) => {
+    stopListening();
+    if (e.error === 'no-speech' || e.error === 'audio-capture') {
+      showParentConfirm();
+    } else {
+      showParentConfirm();
+    }
+  };
+
+  recognition.onend = () => { if (isListening) stopListening(); };
+
+  try { recognition.start(); } catch(e) { stopListening(); showParentConfirm(); }
+}
+
+function stopListening() {
+  isListening = false;
+  if (recognition) { try { recognition.stop(); } catch(e){} }
+  const btn = document.getElementById('btnListen');
+  btn.classList.remove('listening');
+  document.getElementById('listenLabel').textContent = 'Say the word!';
+  document.getElementById('micIcon').textContent = '🎤';
+}
+
+function showHeard(text) {
+  if (!text) return;
+  document.getElementById('heardText').textContent = text;
+  document.getElementById('heardBox').classList.add('show');
+}
+
+function showParentConfirm(heard) {
+  if (heard) showHeard(heard);
+  document.getElementById('parentConfirm').classList.add('show');
+}
+
+function parentSay(correct) {
+  document.getElementById('parentConfirm').classList.remove('show');
+  document.getElementById('heardBox').classList.remove('show');
+  if (correct) {
+    handleCorrect();
+  } else {
+    // Speak the word again so they can try
+    speak(filteredWords[currentIdx], { rate:0.72 });
+  }
+}
+
+function handleCorrect() {
+  const w = filteredWords[currentIdx];
+  done.add(w);
+  saveProg();
+  burst();
+  confetti();
+  updateProgress();
+  renderTabs();
+  renderGrid();
+  speak(w, { rate:0.75 });
+
+  // Check milestone
+  const ms = MILESTONES[done.size];
+
+  if (done.size === WORDS.length) {
+    setTimeout(() => { closeModal(); document.getElementById('allDone').classList.add('show'); bigConfetti(); }, 800);
+    return;
+  }
+  // Auto-advance after short delay
+  setTimeout(() => {
+    if (ms) { closeModal(); openStickerChart(ms); }
+    else if (currentIdx < filteredWords.length - 1) { navigate(1); }
+    else { closeModal(); }
+  }, 900);
+}
+
+// =====================================================
+// HINT TOGGLE
+// =====================================================
+let hintShown = false;
+function toggleHint() {
+  hintShown = !hintShown;
+  document.getElementById('hintZone').classList.toggle('show', hintShown);
+  document.getElementById('btnHint').textContent = hintShown ? '🙈 Hide the sounds' : '💡 Show me the sounds';
+}
+
+// =====================================================
+// SOUND BUBBLES
+// =====================================================
+let poppedBubbles = new Set();
+function renderBubbles() {
+  const w  = filteredWords[currentIdx];
+  const lv = getLv(w);
+  const ph = getPh(w);
+  const bubbleColors = [lv.color, '#2B8EFF', '#18C96A', '#FF7A1A'];
+  let html = '';
+  ph.p.forEach((sound, i) => {
+    if (i>0) html += `<span class="bubble-plus">+</span>`;
+    const col = bubbleColors[i%bubbleColors.length];
+    const popped = poppedBubbles.has(i);
+    html += `<button class="sound-bubble ${popped?'popped':''}"
+      style="${popped?`background:${col};border-color:${col};`:''}"
+      onclick="popBubble(${i},'${col.replace(/'/g,"\\'")}')">
+      ${sound}</button>`;
+  });
+  document.getElementById('soundBubbles').innerHTML = html;
+  const ph2 = getPh(w);
+  document.getElementById('fcHint').innerHTML = ph2.h;
+  document.getElementById('trickyWrap').innerHTML = ph2.tricky
+    ? `<span style="display:inline-block;background:#FFF0D4;border:2px solid #FF9900;border-radius:8px;padding:3px 10px;font-family:'Fredoka One',cursive;font-size:0.78rem;color:#CC6600;margin-top:4px;">⭐ Tricky word! Some letters sound different</span>`
+    : '';
+}
+function popBubble(idx, color) {
+  speakPhoneme(getPh(filteredWords[currentIdx]).labels[idx]);
+  poppedBubbles.has(idx) ? poppedBubbles.delete(idx) : poppedBubbles.add(idx);
+  renderBubbles();
+}
+
+// =====================================================
+// STATE
+// =====================================================
+let done = new Set(JSON.parse(localStorage.getItem('m100v4') || '[]'));
+let currentFilter = 'all';
+let currentIdx = 0;
+let filteredWords = [];
+
+// =====================================================
+// TABS
+// =====================================================
+function renderTabs() {
+  const tabs = document.getElementById('levelTabs');
+  tabs.innerHTML = `<button class="level-tab ${currentFilter==='all'?'active':''}"
+    onclick="filterLevel('all')">⭐ All (${done.size}/${WORDS.length})</button>`;
+  for (const lv of LEVELS) {
+    const lvDone = lv.words.filter(w=>done.has(w)).length;
+    tabs.innerHTML += `<button class="level-tab ${currentFilter===lv.id?'active':''}"
+      style="background:${lv.bg};color:${lv.color};"
+      onclick="filterLevel('${lv.id}')">${lv.name} (${lvDone}/${lv.words.length})</button>`;
+  }
+}
+
+// =====================================================
+// GRID
+// =====================================================
+function filterLevel(id) { currentFilter=id; renderTabs(); renderGrid(); }
+
+function renderGrid() {
+  const grid = document.getElementById('wordGrid');
+  const hdr  = document.getElementById('levelHeader');
+  if (currentFilter==='all') {
+    filteredWords = [...WORDS];
+    hdr.innerHTML = `<span class="level-pill" style="background:#fff;color:var(--ink);">All 100 Magic Words</span>
+      <span class="level-count">${done.size} / ${WORDS.length} learnt</span>`;
+  } else {
+    const lv = LEVELS.find(l=>l.id===currentFilter);
+    filteredWords = [...lv.words];
+    hdr.innerHTML = `<span class="level-pill" style="background:${lv.bg};color:${lv.color};">${lv.name} Words</span>
+      <span class="level-count">${filteredWords.filter(w=>done.has(w)).length} / ${filteredWords.length} learnt</span>`;
+  }
+  grid.innerHTML = filteredWords.map((w,i) => {
+    const lv = getLv(w);
+    return `<div class="word-card ${done.has(w)?'done':''}" onclick="openModal(${i})">
+      <div class="word-num">#${WORDS.indexOf(w)+1}</div>
+      <div class="word-text">${w}</div>
+      <div class="lvbar" style="background:${lv.color};"></div>
+    </div>`;
+  }).join('');
+}
+
+// =====================================================
+// MODAL
+// =====================================================
+function openModal(idx) {
+  currentIdx = idx;
+  poppedBubbles = new Set();
+  hintShown = false;
+  renderCard();
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Speak the word once after animation
+  setTimeout(() => speak(filteredWords[idx], { rate:0.75 }), 380);
+}
+
+function renderCard() {
+  const w  = filteredWords[currentIdx];
+  const lv = getLv(w);
+  const globalIdx = WORDS.indexOf(w);
+
+  document.getElementById('fcBand').style.background = lv.color;
+  const badge = document.getElementById('fcBadge');
+  badge.textContent = lv.name + ' Word';
+  badge.style.cssText = `background:${lv.bg};color:${lv.color};border-color:${lv.color};`;
+  document.getElementById('fcWord').textContent = w;
+  document.getElementById('fcWord').style.color = lv.color;
+  document.getElementById('fcNum').textContent = `word ${globalIdx+1} of 100`;
+
+  // Reset state
+  document.getElementById('heardBox').classList.remove('show');
+  document.getElementById('parentConfirm').classList.remove('show');
+  document.getElementById('hintZone').classList.remove('show');
+  document.getElementById('btnHint').textContent = '💡 Show me the sounds';
+  document.getElementById('noMicNote').style.display = micAvailable ? 'none' : 'block';
+
+  renderBubbles();
+
+  document.getElementById('btnPrev').disabled = currentIdx === 0;
+  document.getElementById('btnNext').disabled = currentIdx === filteredWords.length - 1;
+}
+
+function navigate(dir) {
+  stopListening();
+  currentIdx = Math.max(0, Math.min(filteredWords.length-1, currentIdx+dir));
+  poppedBubbles = new Set();
+  hintShown = false;
+  renderCard();
+  setTimeout(() => speak(filteredWords[currentIdx], { rate:0.75 }), 200);
+}
+
+function closeModal() {
+  stopListening();
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeOutside(e) { if (e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+// =====================================================
+// STICKER CHART
+// =====================================================
+let pendingMilestone = null;
+
+function openStickerChart(milestone) {
+  pendingMilestone = milestone || null;
+  renderStickerChart();
+  document.getElementById('stickerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (milestone) { confetti(true); }
+}
+
+function renderStickerChart() {
+  const total = 100;
+  const grid = document.getElementById('stickerGrid');
+  const sub  = document.getElementById('stickerSubtitle');
+  const ms   = document.getElementById('stickerMilestone');
+
+  sub.textContent = `${done.size} out of 100 words learnt!`;
+  ms.textContent  = pendingMilestone || '';
+
+  let html = '';
+  for (let i=1; i<=total; i++) {
+    const word = WORDS[i-1];
+    const earned = done.has(word);
+    const emoji  = earned ? STICKER_EMOJIS[(i-1) % STICKER_EMOJIS.length] : '';
+    html += `<div class="sticker-cell ${earned?'earned':''}">
+      ${emoji}
+      <span class="cell-num">${i}</span>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function closeStickerChart() {
+  pendingMilestone = null;
+  document.getElementById('stickerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeStickerOutside(e) { if (e.target===document.getElementById('stickerOverlay')) closeStickerChart(); }
+
+// =====================================================
+// PROGRESS
+// =====================================================
+function updateProgress() {
+  const pct = (done.size/WORDS.length)*100;
+  document.getElementById('progressFill').style.width = Math.max(pct,1)+'%';
+  document.getElementById('progressLabel').textContent = `${done.size} out of 100 words learnt`;
+  document.getElementById('starsCount').textContent = done.size;
+}
+function saveProg() { localStorage.setItem('m100v4', JSON.stringify([...done])); }
+function resetAll() {
+  done = new Set(); localStorage.removeItem('m100v4');
+  document.getElementById('allDone').classList.remove('show');
+  updateProgress(); renderTabs(); renderGrid();
+}
+
+// =====================================================
+// FX
+// =====================================================
+function burst() {
+  const fc = document.getElementById('flashcard');
+  const r  = fc.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'starburst'; el.textContent = '⭐';
+  el.style.cssText = `left:${r.left+r.width/2-24}px;top:${r.top+r.height/2-24}px;`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 700);
+}
+function confetti(big=false) {
+  const num = big ? 55 : 18;
+  const cols = ['#FFB800','#FF4F4F','#2B8EFF','#18C96A','#FF7A1A','#7B5CF0','#C344E8'];
+  for (let i=0;i<num;i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const s = 6+Math.random()*8;
+    el.style.cssText = `width:${s}px;height:${s}px;
+      left:${15+Math.random()*70}%;top:${10+Math.random()*40}%;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      animation-delay:${Math.random()*0.4}s;
+      animation-duration:${1.2+Math.random()*0.8}s;
+      border-radius:${Math.random()>.4?'50%':'3px'};`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2200);
+  }
+}
+function bigConfetti() { confetti(true); setTimeout(()=>confetti(true), 500); }
+
+// =====================================================
+// BG SHAPES
+// =====================================================
+(function() {
+  const bg = document.getElementById('bgShapes');
+  const cols = ['#FFB800','#FF4F4F','#2B8EFF','#18C96A','#FF7A1A','#7B5CF0','#C344E8'];
+  for (let i=0;i<8;i++) {
+    const el = document.createElement('div'); el.className='shape';
+    const s = 90+Math.random()*120;
+    el.style.cssText=`width:${s}px;height:${s}px;background:${cols[i%cols.length]};
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      animation-delay:${Math.random()*8}s;animation-duration:${8+Math.random()*6}s;`;
+    bg.appendChild(el);
+  }
+})();
+
+// =====================================================
+// INIT
+// =====================================================
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+renderTabs();
+renderGrid();
+updateProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detective Maya – The Case of the Runaway Robot</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   RETRO COMIC-BOOK SCHOOL AESTHETIC
+   Dominant: cream/yellow · Ink: black · Pops: red, blue, green
+═══════════════════════════════════════════════ */
+:root {
+  --ink:    #1a1a1a;
+  --cream:  #fdf6e3;
+  --yellow: #ffe135;
+  --red:    #e63329;
+  --blue:   #1a5fa8;
+  --green:  #2a9d3f;
+  --orange: #f4831f;
+  --panel:  #ffffff;
+  --rule:   4px solid var(--ink);
+  --sh:     5px 5px 0 var(--ink);
+  --r:      12px;
+}
+
+/* HALFTONE BACKGROUND TEXTURE */
+body {
+  font-family: 'Comic Neue', cursive;
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(circle, #00000012 1px, transparent 1px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* COMIC PANEL BORDER UTILITY */
+.panel {
+  background: var(--panel);
+  border: var(--rule);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+}
+
+/* SPEED LINES top-right decoration */
+.speed-lines {
+  position: fixed; top: 0; right: 0;
+  width: 260px; height: 260px;
+  pointer-events: none; z-index: 0; opacity: .07;
+  background: repeating-conic-gradient(from 0deg at 100% 0%, #000 0deg 2deg, transparent 2deg 8deg);
+}
+
+/* PROGRESS */
+.prog-rail {
+  position: fixed; top: 0; left: 0; width: 100%; height: 8px;
+  background: var(--ink); z-index: 200;
+}
+.prog-fill {
+  height: 100%;
+  background: repeating-linear-gradient(90deg, var(--yellow) 0px, var(--yellow) 24px, var(--red) 24px, var(--red) 48px);
+  transition: width .5s ease;
+}
+
+/* SCREENS */
+.screen {
+  display: none; position: relative; z-index: 1;
+  min-height: 100vh; padding: 28px 14px 40px;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px;
+}
+.screen.active { display: flex; }
+
+/* ── TITLE ──────────────────────────────────── */
+#s-title { text-align: center; }
+
+.comic-burst {
+  display: inline-block;
+  background: var(--yellow);
+  border: var(--rule);
+  box-shadow: var(--sh);
+  padding: 10px 24px;
+  clip-path: polygon(4% 0%,96% 0%,100% 4%,100% 96%,96% 100%,4% 100%,0% 96%,0% 4%);
+  margin-bottom: 6px;
+  animation: burstPulse 1.8s ease-in-out infinite;
+}
+@keyframes burstPulse {
+  0%,100% { transform: scale(1) rotate(-1deg); }
+  50%      { transform: scale(1.04) rotate(1deg); }
+}
+
+.robot-anim {
+  font-size: 76px; display: block;
+  animation: robotWalk 1s steps(2) infinite;
+  filter: drop-shadow(4px 4px 0 var(--ink));
+}
+@keyframes robotWalk {
+  0%   { transform: translateY(0) rotate(-4deg); }
+  50%  { transform: translateY(-10px) rotate(4deg); }
+  100% { transform: translateY(0) rotate(-4deg); }
+}
+
+h1.title-main {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(2.6rem, 7vw, 5rem);
+  letter-spacing: 3px;
+  color: var(--red);
+  -webkit-text-stroke: 2px var(--ink);
+  text-shadow: 5px 5px 0 var(--ink);
+  line-height: 1;
+}
+h2.title-sub {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  letter-spacing: 2px;
+  color: var(--blue);
+  -webkit-text-stroke: 1px var(--ink);
+}
+
+.speech-bubble {
+  position: relative;
+  background: var(--panel);
+  border: var(--rule);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  padding: 16px 20px;
+  max-width: 520px;
+  font-size: 1rem; line-height: 1.7;
+  font-weight: 700;
+}
+.speech-bubble::before {
+  content: '';
+  position: absolute; top: -22px; left: 40px;
+  border: 11px solid transparent;
+  border-bottom-color: var(--ink);
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute; top: -14px; left: 42px;
+  border: 9px solid transparent;
+  border-bottom-color: var(--panel);
+}
+.speech-bubble .hl { color: var(--red); font-style: italic; }
+
+/* LOCATION DOTS */
+.loc-strip {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;
+}
+.loc-dot {
+  width: 46px; height: 46px; border-radius: 50%;
+  border: var(--rule); background: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; font-weight: 900; color: #aaa;
+  transition: all .3s; box-shadow: 3px 3px 0 var(--ink);
+}
+.loc-dot.done   { background: var(--green); color: #fff; }
+.loc-dot.active { background: var(--yellow); color: var(--ink); animation: locPulse 1s ease-in-out infinite; }
+@keyframes locPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+.loc-arrow { font-size: 1.2rem; color: var(--ink); font-weight: 900; }
+
+/* ── BUTTONS ────────────────────────────────── */
+.btn {
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem; letter-spacing: 1px;
+  padding: 12px 34px; border: var(--rule);
+  border-radius: var(--r); cursor: pointer;
+  box-shadow: var(--sh); transition: all .12s;
+  display: inline-block;
+}
+.btn:hover  { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--ink); }
+.btn:active { transform: translate(3px,3px);   box-shadow: 2px 2px 0 var(--ink); }
+.btn-yellow { background: var(--yellow); color: var(--ink); }
+.btn-red    { background: var(--red);    color: #fff; }
+.btn-blue   { background: var(--blue);   color: #fff; }
+.btn-green  { background: var(--green);  color: #fff; }
+.btn-sm     { font-size: 1.1rem; padding: 8px 20px; }
+.btn-next   { display: none; margin-top: 14px; }
+
+/* ── CLUE CARD ──────────────────────────────── */
+.clue-card {
+  background: var(--panel);
+  border: var(--rule);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  padding: 24px 20px;
+  max-width: 700px; width: 100%;
+  animation: cardBounce .4s cubic-bezier(.34,1.56,.64,1);
+  text-align: center;
+}
+@keyframes cardBounce { from{opacity:0;transform:scale(.9) rotate(-1deg)} to{opacity:1;transform:none} }
+
+.location-tag {
+  display: inline-block;
+  background: var(--blue); color: #fff;
+  font-family: 'Bangers', cursive; font-size: .9rem;
+  letter-spacing: 2px; padding: 4px 14px;
+  border: 3px solid var(--ink); border-radius: 6px;
+  box-shadow: 3px 3px 0 var(--ink);
+  margin-bottom: 10px;
+}
+.clue-icon  { font-size: 3.5rem; display: block; margin: 6px 0; filter: drop-shadow(3px 3px 0 var(--ink)); }
+.clue-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem; letter-spacing: 2px;
+  color: var(--red); -webkit-text-stroke: 1px var(--ink);
+  margin-bottom: 6px;
+}
+.story-txt  { font-size: 1rem; line-height: 1.7; font-weight: 700; margin-bottom: 14px; color: var(--ink); }
+.story-txt .hl { color: var(--blue); text-decoration: underline wavy var(--blue); }
+
+.q-panel {
+  background: var(--yellow);
+  border: var(--rule); border-radius: var(--r);
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 14px 16px; margin: 12px 0; text-align: left;
+}
+.q-panel .q { font-weight: 900; font-size: 1rem; color: var(--ink); margin-bottom: 10px; }
+
+/* FEEDBACK */
+.fb {
+  font-family: 'Bangers', cursive;
+  font-size: 1.3rem; letter-spacing: 1px;
+  min-height: 30px; margin-top: 8px;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.fb.ok  { color: var(--green); animation: popBig .4s ease; }
+.fb.bad { color: var(--red);   animation: comicShake .4s ease; }
+@keyframes popBig    { 0%{transform:scale(.7)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
+@keyframes comicShake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-12px)} 75%{transform:translateX(12px)} }
+
+/* HINT */
+.hint-btn {
+  font-family: 'Comic Neue', cursive; font-weight: 700;
+  font-size: .88rem; border: 3px solid var(--ink);
+  border-radius: 20px; background: var(--cream);
+  color: var(--ink); padding: 5px 16px;
+  cursor: pointer; margin-top: 8px;
+  box-shadow: 2px 2px 0 var(--ink); transition: all .15s;
+}
+.hint-btn:hover { background: var(--orange); }
+.hint-box {
+  display: none;
+  background: var(--orange); border: var(--rule);
+  border-radius: var(--r); padding: 10px 14px;
+  font-size: .9rem; font-weight: 700; color: var(--ink);
+  margin-top: 8px; text-align: left;
+  box-shadow: 3px 3px 0 var(--ink);
+  animation: cardBounce .3s ease;
+}
+
+/* OPTION BUTTONS */
+.opts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 8px 0; }
+.opt {
+  font-family: 'Bangers', cursive; font-size: 1.3rem;
+  padding: 10px 22px; border: var(--rule);
+  border-radius: var(--r); background: var(--panel);
+  color: var(--ink); cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink); transition: all .14s;
+  letter-spacing: 1px;
+}
+.opt:hover  { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--ink); background: var(--cream); }
+.opt:active { transform: translate(2px,2px);   box-shadow: 1px 1px 0 var(--ink); }
+.opt.opt-ok  { background: var(--green); color: #fff; pointer-events: none; cursor: default; box-shadow: 3px 3px 0 var(--ink); transform: none; }
+.opt.opt-bad { background: var(--red);   color: #fff; animation: comicShake .4s; }
+
+/* ANSWER INPUT */
+.ans-in {
+  font-family: 'Bangers', cursive; font-size: 2.2rem;
+  width: 110px; padding: 6px 12px; text-align: center;
+  border: var(--rule); border-radius: var(--r);
+  background: var(--cream); color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink); outline: none;
+  letter-spacing: 2px;
+}
+.ans-in:focus { background: #fffde7; }
+
+/* ── CLUE 1: DIVISION BUCKETS ───────────────── */
+.buckets-row {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 14px 0;
+}
+.bucket {
+  background: var(--blue);
+  border: var(--rule); border-radius: 0 0 14px 14px;
+  width: 80px; min-height: 90px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; padding: 8px 6px;
+  box-shadow: var(--sh); position: relative;
+  gap: 4px;
+}
+.bucket::before {
+  content: attr(data-label);
+  position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+  font-family: 'Bangers', cursive; font-size: 1rem;
+  background: var(--yellow); border: 3px solid var(--ink);
+  border-radius: 6px; padding: 2px 8px; white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.bucket-item {
+  font-size: 1.3rem; animation: dropIn .3s ease;
+  filter: drop-shadow(1px 1px 0 #fff);
+}
+@keyframes dropIn { from{transform:translateY(-20px);opacity:0} to{transform:none;opacity:1} }
+
+.item-pool {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: center; margin: 10px 0;
+}
+.pool-item {
+  font-size: 1.8rem; cursor: pointer;
+  transition: transform .15s;
+  filter: drop-shadow(2px 2px 0 var(--ink));
+  animation: slideIn .3s var(--sd, 0s) both ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+.pool-item:hover { transform: scale(1.25) rotate(-5deg); }
+
+/* ── CLUE 2: ARRAY ──────────────────────────── */
+.array-stage {
+  display: grid; gap: 6px; margin: 14px auto; width: fit-content;
+}
+.arr-cell {
+  width: 46px; height: 46px; border-radius: 8px;
+  border: 3px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  background: var(--cream);
+  opacity: 0; transform: scale(0);
+  transition: opacity .2s, transform .2s;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.arr-cell.show { opacity: 1; transform: scale(1); }
+
+/* ── CLUE 3: PERIMETER ──────────────────────── */
+.shape-svg-wrap {
+  display: flex; justify-content: center; margin: 14px 0;
+  filter: drop-shadow(4px 4px 0 var(--ink));
+}
+.side-label {
+  font-family: 'Bangers', cursive; font-size: 1rem;
+  fill: var(--ink); letter-spacing: 1px;
+}
+.shape-side { stroke: var(--ink); stroke-width: 4; fill: none; }
+.shape-fill { fill: var(--blue); opacity: .18; }
+
+.perim-chips {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 8px 0;
+}
+.perim-chip {
+  font-family: 'Bangers', cursive; font-size: 1.1rem;
+  background: var(--cream); border: 3px solid var(--ink);
+  border-radius: 8px; padding: 4px 12px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ── CLUE 4: SYMMETRY ───────────────────────── */
+.sym-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 12px; margin: 14px 0; max-width: 480px; width: 100%;
+}
+.sym-card {
+  background: var(--panel);
+  border: var(--rule); border-radius: var(--r);
+  padding: 14px 8px; text-align: center;
+  cursor: pointer; box-shadow: var(--sh); transition: all .15s;
+}
+.sym-card:hover { transform: translate(-2px,-3px); box-shadow: 7px 8px 0 var(--ink); }
+.sym-card .sym-icon { font-size: 3rem; display: block; margin-bottom: 6px; }
+.sym-card .sym-name { font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 1px; }
+.sym-card.sym-ok  { background: var(--green); color: #fff; pointer-events: none; }
+.sym-card.sym-bad { background: var(--red);   color: #fff; animation: comicShake .4s; }
+.sym-card.sym-rev { background: var(--green); color: #fff; pointer-events: none; }
+
+/* ── CLUE 5: CAPACITY DRAG ──────────────────── */
+.containers-row {
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin: 14px 0;
+}
+.container-card {
+  background: var(--panel); border: var(--rule); border-radius: var(--r);
+  width: 100px; padding: 10px 6px; text-align: center;
+  box-shadow: var(--sh); cursor: grab;
+  user-select: none; transition: transform .15s;
+}
+.container-card:hover { transform: scale(1.06) rotate(-2deg); }
+.container-card.dragging { opacity: .5; cursor: grabbing; }
+.container-icon { font-size: 2.4rem; display: block; }
+.container-name { font-family: 'Bangers', cursive; font-size: .9rem; letter-spacing: 1px; margin-top: 4px; }
+.container-ml   { font-size: .78rem; color: var(--blue); font-weight: 700; }
+
+.order-slots {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 10px 0;
+}
+.order-slot {
+  width: 100px; height: 110px;
+  border: 4px dashed var(--ink); border-radius: var(--r);
+  background: var(--cream);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Bangers', cursive; font-size: .95rem;
+  color: #aaa; transition: background .2s;
+  position: relative;
+}
+.order-slot.drag-over { background: var(--yellow); }
+.slot-label {
+  position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%);
+  font-family: 'Bangers', cursive; font-size: .85rem;
+  color: var(--ink); white-space: nowrap;
+  background: var(--cream); padding: 2px 8px;
+  border: 2px solid var(--ink); border-radius: 6px;
+}
+
+/* ── CONFETTI ───────────────────────────────── */
+.conf {
+  position: fixed; top: -18px; pointer-events: none; z-index: 999;
+  border-radius: 3px;
+  animation: confDrop var(--cd,2s) var(--cdel,0s) ease-in forwards;
+}
+@keyframes confDrop { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+
+/* ── WIN SCREEN ─────────────────────────────── */
+#s-win { text-align: center; gap: 20px; }
+.win-burst {
+  display: inline-block; font-size: 80px;
+  animation: winSpin 1.5s ease-in-out infinite;
+  filter: drop-shadow(5px 5px 0 var(--ink));
+}
+@keyframes winSpin { 0%,100%{transform:rotate(-8deg) scale(1)} 50%{transform:rotate(8deg) scale(1.1)} }
+.win-title {
+  font-family: 'Bangers', cursive;
+  font-size: clamp(2.2rem,6vw,4rem);
+  color: var(--red); letter-spacing: 3px;
+  -webkit-text-stroke: 2px var(--ink);
+  text-shadow: 5px 5px 0 var(--ink);
+}
+.win-panel {
+  max-width: 540px;
+  background: var(--yellow); border: var(--rule);
+  border-radius: var(--r); box-shadow: var(--sh);
+  padding: 18px 22px; font-size: 1rem; line-height: 1.75; font-weight: 700;
+}
+.skills-strip { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.skill-tag {
+  font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 1px;
+  background: var(--blue); color: #fff;
+  border: 3px solid var(--ink); border-radius: 8px;
+  padding: 5px 14px; box-shadow: 3px 3px 0 var(--ink);
+}
+</style>
+</head>
+<body>
+
+<div class="speed-lines"></div>
+<div class="prog-rail"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<!-- ══════════ TITLE ══════════ -->
+<div class="screen active" id="s-title">
+  <div class="comic-burst">
+    <span style="font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:2px;color:var(--red)">⚡ MATHS MYSTERY #3 ⚡</span>
+  </div>
+  <span class="robot-anim">🤖</span>
+  <h1 class="title-main">Detective Maya</h1>
+  <h2 class="title-sub">The Case of the Runaway Robot</h2>
+
+  <div style="margin-top:6px;">
+    <div class="speech-bubble">
+      <strong>Oh no!</strong> Maya built a <span class="hl">robot</span> for the school science fair — but it <span class="hl">escaped overnight!</span> It left maths clues in <span class="hl">5 rooms</span> around the school. Solve every puzzle to find BOLT before the judges arrive!
+    </div>
+  </div>
+
+  <div class="loc-strip">
+    <div class="loc-dot active"  id="ld0">📚</div>
+    <div class="loc-arrow">▶</div>
+    <div class="loc-dot"         id="ld1">🍽️</div>
+    <div class="loc-arrow">▶</div>
+    <div class="loc-dot"         id="ld2">🏃</div>
+    <div class="loc-arrow">▶</div>
+    <div class="loc-dot"         id="ld3">🎨</div>
+    <div class="loc-arrow">▶</div>
+    <div class="loc-dot"         id="ld4">🔬</div>
+  </div>
+
+  <button class="btn btn-red" onclick="goTo(1)">🤖 Find BOLT!</button>
+</div>
+
+<!-- ══════════ CLUE 1 – LIBRARY – DIVISION ══════════ -->
+<div class="screen" id="s-1">
+  <div class="clue-card">
+    <div class="location-tag">📚 THE LIBRARY — CLUE 1 OF 5</div>
+    <span class="clue-icon">📚</span>
+    <div class="clue-title">Sharing the Books</div>
+    <p class="story-txt">
+      BOLT snuck into the library and rearranged all the books! The librarian says: <span class="hl">"BOLT shared 20 books equally between 4 shelves."</span> Maya must figure out how many books are on each shelf to find the hidden note!
+    </p>
+
+    <div class="q-panel">
+      <div class="q">🤖 BOLT put 20 books equally onto 4 shelves. How many books on each shelf?</div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0;">
+        <span style="font-family:'Bangers',cursive;font-size:1.3rem;">20 ÷ 4 =</span>
+        <input class="ans-in" id="div-ans" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="checkDiv()">Check!</button>
+      </div>
+      <div class="fb" id="fb-div1"></div>
+    </div>
+
+    <div class="q-panel" id="div2-panel" style="opacity:.3;pointer-events:none;transition:opacity .4s">
+      <div class="q">📖 There are 30 pencils shared equally into 5 cups. How many in each cup?</div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0;">
+        <span style="font-family:'Bangers',cursive;font-size:1.3rem;">30 ÷ 5 =</span>
+        <input class="ans-in" id="div-ans2" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="checkDiv2()">Check!</button>
+      </div>
+      <div class="fb" id="fb-div2"></div>
+    </div>
+
+    <div class="q-panel" id="div3-panel" style="opacity:.3;pointer-events:none;transition:opacity .4s">
+      <div class="q">📝 BOLT hid 18 sticky notes equally in 3 spots. How many in each spot?</div>
+      <div class="opts" id="div3-opts">
+        <button class="opt" onclick="checkDiv3(this,'4')">4</button>
+        <button class="opt" onclick="checkDiv3(this,'5')">5</button>
+        <button class="opt" onclick="checkDiv3(this,'6')">6</button>
+        <button class="opt" onclick="checkDiv3(this,'9')">9</button>
+      </div>
+      <div class="fb" id="fb-div3"></div>
+    </div>
+
+    <button class="hint-btn" onclick="tog('h1')">💡 Hint</button>
+    <div class="hint-box" id="h1">Division means sharing equally! For 20 ÷ 4, imagine putting 1 book on each shelf at a time until all 20 are gone. Or think: 4 × ? = 20.</div>
+
+    <button class="btn btn-blue btn-next" id="nx1" onclick="goTo(2)">Next Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 2 – CANTEEN – ARRAYS ══════════ -->
+<div class="screen" id="s-2">
+  <div class="clue-card">
+    <div class="location-tag">🍽️ THE CANTEEN — CLUE 2 OF 5</div>
+    <span class="clue-icon">🍽️</span>
+    <div class="clue-title">Tray Trouble!</div>
+    <p class="story-txt">
+      BOLT rearranged ALL the lunch trays into a perfect rectangle! The canteen lady is upset. Maya counts the trays using an <span class="hl">array</span> — rows and columns — to work out the total.
+    </p>
+
+    <div class="q-panel">
+      <div class="q">🍱 BOLT made 3 rows of trays with 7 trays in each row. How many trays in total?</div>
+      <div style="font-family:'Bangers',cursive;font-size:1.2rem;margin-bottom:8px;color:var(--blue);">
+        3 rows × 7 trays each = ?
+      </div>
+      <div class="array-stage" id="arr1" style="grid-template-columns:repeat(7,46px);"></div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0;">
+        <input class="ans-in" id="arr-ans1" type="number" placeholder="?" min="0" max="99">
+        <button class="btn btn-yellow btn-sm" onclick="checkArr1()">Check!</button>
+      </div>
+      <div class="fb" id="fb-arr1"></div>
+    </div>
+
+    <div class="q-panel" id="arr2-panel" style="opacity:.3;pointer-events:none;transition:opacity .4s">
+      <div class="q">🥤 BOLT also lined up 4 rows of drink bottles, 6 in each row. How many bottles?</div>
+      <div style="font-family:'Bangers',cursive;font-size:1.2rem;margin-bottom:8px;color:var(--blue);">4 × 6 = ?</div>
+      <div class="array-stage" id="arr2" style="grid-template-columns:repeat(6,46px);"></div>
+      <div class="opts" id="arr2-opts">
+        <button class="opt" onclick="checkArr2(this,'20')">20</button>
+        <button class="opt" onclick="checkArr2(this,'22')">22</button>
+        <button class="opt" onclick="checkArr2(this,'24')">24</button>
+        <button class="opt" onclick="checkArr2(this,'18')">18</button>
+      </div>
+      <div class="fb" id="fb-arr2"></div>
+    </div>
+
+    <button class="hint-btn" onclick="tog('h2')">💡 Hint</button>
+    <div class="hint-box" id="h2">An array shows multiplication as rows and columns. Count the icons in ONE row, then add that many groups together. Or count all the icons one by one!</div>
+
+    <button class="btn btn-blue btn-next" id="nx2" onclick="goTo(3)">Next Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 3 – OVAL – PERIMETER ══════════ -->
+<div class="screen" id="s-3">
+  <div class="clue-card">
+    <div class="location-tag">🏃 THE OVAL — CLUE 3 OF 5</div>
+    <span class="clue-icon">🏃</span>
+    <div class="clue-title">Running the Perimeter!</div>
+    <p class="story-txt">
+      BOLT ran around the oval and left tyre tracks! To find where BOLT stopped, Maya must calculate the <span class="hl">perimeter</span> — the total distance around the outside — of two shapes.
+    </p>
+
+    <div class="q-panel">
+      <div class="q">📐 What is the perimeter of this rectangle?</div>
+      <div class="shape-svg-wrap">
+        <svg width="260" height="160" viewBox="0 0 260 160">
+          <rect class="shape-fill" x="30" y="20" width="200" height="120"/>
+          <rect class="shape-side" x="30" y="20" width="200" height="120"/>
+          <text class="side-label" x="125" y="15" text-anchor="middle">8 m</text>
+          <text class="side-label" x="125" y="155" text-anchor="middle">8 m</text>
+          <text class="side-label" x="14" y="85" text-anchor="middle">5 m</text>
+          <text class="side-label" x="250" y="85" text-anchor="middle">5 m</text>
+        </svg>
+      </div>
+      <div class="perim-chips">
+        <span class="perim-chip">8 m</span>
+        <span class="perim-chip" style="color:var(--blue)">+</span>
+        <span class="perim-chip">8 m</span>
+        <span class="perim-chip" style="color:var(--blue)">+</span>
+        <span class="perim-chip">5 m</span>
+        <span class="perim-chip" style="color:var(--blue)">+</span>
+        <span class="perim-chip">5 m</span>
+        <span class="perim-chip" style="color:var(--blue)">=</span>
+        <span class="perim-chip" style="background:var(--yellow);">?</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0;">
+        <input class="ans-in" id="per-ans1" type="number" placeholder="?" min="0" max="999">
+        <span style="font-family:'Bangers',cursive;font-size:1.2rem;">metres</span>
+        <button class="btn btn-yellow btn-sm" onclick="checkPer1()">Check!</button>
+      </div>
+      <div class="fb" id="fb-per1"></div>
+    </div>
+
+    <div class="q-panel" id="per2-panel" style="opacity:.3;pointer-events:none;transition:opacity .4s">
+      <div class="q">🔺 What is the perimeter of this triangle?</div>
+      <div class="shape-svg-wrap">
+        <svg width="220" height="175" viewBox="0 0 220 175">
+          <polygon class="shape-fill" points="110,15 10,165 210,165"/>
+          <polygon class="shape-side" points="110,15 10,165 210,165"/>
+          <text class="side-label" x="50"  y="110" text-anchor="middle" transform="rotate(-54,50,110)">7 m</text>
+          <text class="side-label" x="168" y="110" text-anchor="middle" transform="rotate(54,168,110)">7 m</text>
+          <text class="side-label" x="110" y="180" text-anchor="middle">6 m</text>
+        </svg>
+      </div>
+      <div class="opts" id="per2-opts">
+        <button class="opt" onclick="checkPer2(this,'18')">18 m</button>
+        <button class="opt" onclick="checkPer2(this,'20')">20 m</button>
+        <button class="opt" onclick="checkPer2(this,'21')">21 m</button>
+        <button class="opt" onclick="checkPer2(this,'14')">14 m</button>
+      </div>
+      <div class="fb" id="fb-per2"></div>
+    </div>
+
+    <button class="hint-btn" onclick="tog('h3')">💡 Hint</button>
+    <div class="hint-box" id="h3">Perimeter = add ALL the sides together. For the rectangle: top + bottom + left + right. For the triangle: add all 3 sides!</div>
+
+    <button class="btn btn-blue btn-next" id="nx3" onclick="goTo(4)">Next Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 4 – ART ROOM – SYMMETRY ══════════ -->
+<div class="screen" id="s-4">
+  <div class="clue-card">
+    <div class="location-tag">🎨 THE ART ROOM — CLUE 4 OF 5</div>
+    <span class="clue-icon">🎨</span>
+    <div class="clue-title">Mirror, Mirror!</div>
+    <p class="story-txt">
+      BOLT painted mysterious shapes on the art room wall! The art teacher says BOLT left a message: <span class="hl">"Find the shapes that have a line of symmetry."</span> A shape has symmetry if you can fold it in half and both sides match perfectly!
+    </p>
+
+    <div class="q-panel">
+      <div class="q">🪞 Tap ALL the shapes that have at least one line of symmetry. There are 4 correct answers!</div>
+      <div class="sym-grid" id="sym-grid">
+        <div class="sym-card" data-sym="yes" onclick="pickSym(this)">
+          <span class="sym-icon">🔴</span>
+          <div class="sym-name">Circle</div>
+        </div>
+        <div class="sym-card" data-sym="no" onclick="pickSym(this)">
+          <span class="sym-icon">⚡</span>
+          <div class="sym-name">Lightning Bolt</div>
+        </div>
+        <div class="sym-card" data-sym="yes" onclick="pickSym(this)">
+          <span class="sym-icon">🔷</span>
+          <div class="sym-name">Square</div>
+        </div>
+        <div class="sym-card" data-sym="yes" onclick="pickSym(this)">
+          <span class="sym-icon">🔺</span>
+          <div class="sym-name">Equilateral Triangle</div>
+        </div>
+        <div class="sym-card" data-sym="no" onclick="pickSym(this)">
+          <span class="sym-icon">🌀</span>
+          <div class="sym-name">Spiral</div>
+        </div>
+        <div class="sym-card" data-sym="yes" onclick="pickSym(this)">
+          <span class="sym-icon">⬛</span>
+          <div class="sym-name">Rectangle</div>
+        </div>
+      </div>
+      <div class="fb" id="fb-sym"></div>
+      <div id="sym-score" style="font-family:'Bangers',cursive;font-size:1.1rem;color:var(--blue);margin-top:6px;"></div>
+    </div>
+
+    <button class="hint-btn" onclick="tog('h4')">💡 Hint</button>
+    <div class="hint-box" id="h4">Imagine folding the shape in half. If both halves match perfectly like a mirror, it has symmetry! A circle has MANY lines of symmetry. Does a lightning bolt or spiral have any?</div>
+
+    <button class="btn btn-blue btn-next" id="nx4" onclick="goTo(5)">Final Clue →</button>
+  </div>
+</div>
+
+<!-- ══════════ CLUE 5 – SCIENCE LAB – CAPACITY ══════════ -->
+<div class="screen" id="s-5">
+  <div class="clue-card">
+    <div class="location-tag">🔬 THE SCIENCE LAB — CLUE 5 OF 5</div>
+    <span class="clue-icon">🔬</span>
+    <div class="clue-title">Fill It Up!</div>
+    <p class="story-txt">
+      BOLT hid inside the biggest container in the science lab! Maya must order all the containers from <span class="hl">smallest to largest capacity</span> to find BOLT!
+    </p>
+
+    <div class="q-panel">
+      <div class="q">💧 Order the containers from SMALLEST (1st) to LARGEST (4th) by dragging them into the boxes!</div>
+
+      <div class="containers-row" id="container-pool">
+        <div class="container-card" draggable="true" data-ml="250" data-name="Cup" id="c-cup"
+             ondragstart="dragStart(event,'c-cup')" ontouchstart="touchStart(event,'c-cup')">
+          <span class="container-icon">☕</span>
+          <div class="container-name">Cup</div>
+          <div class="container-ml">250 mL</div>
+        </div>
+        <div class="container-card" draggable="true" data-ml="2000" data-name="Bucket" id="c-bucket"
+             ondragstart="dragStart(event,'c-bucket')" ontouchstart="touchStart(event,'c-bucket')">
+          <span class="container-icon">🪣</span>
+          <div class="container-name">Bucket</div>
+          <div class="container-ml">2 L</div>
+        </div>
+        <div class="container-card" draggable="true" data-ml="500" data-name="Bottle" id="c-bottle"
+             ondragstart="dragStart(event,'c-bottle')" ontouchstart="touchStart(event,'c-bottle')">
+          <span class="container-icon">🧴</span>
+          <div class="container-name">Bottle</div>
+          <div class="container-ml">500 mL</div>
+        </div>
+        <div class="container-card" draggable="true" data-ml="1000" data-name="Jug" id="c-jug"
+             ondragstart="dragStart(event,'c-jug')" ontouchstart="touchStart(event,'c-jug')">
+          <span class="container-icon">🫙</span>
+          <div class="container-name">Jug</div>
+          <div class="container-ml">1 L</div>
+        </div>
+      </div>
+
+      <div style="font-family:'Bangers',cursive;font-size:1rem;color:var(--blue);margin:6px 0;">
+        Drag into order (smallest → largest):
+      </div>
+      <div class="order-slots">
+        <div class="order-slot" id="slot-0" ondragover="dragOver(event)" ondrop="drop(event,'slot-0')" ondragleave="dragLeave(event)">
+          1st<div class="slot-label">Smallest</div>
+        </div>
+        <div class="order-slot" id="slot-1" ondragover="dragOver(event)" ondrop="drop(event,'slot-1')" ondragleave="dragLeave(event)">2nd</div>
+        <div class="order-slot" id="slot-2" ondragover="dragOver(event)" ondrop="drop(event,'slot-2')" ondragleave="dragLeave(event)">3rd</div>
+        <div class="order-slot" id="slot-3" ondragover="dragOver(event)" ondrop="drop(event,'slot-3')" ondragleave="dragLeave(event)">
+          4th<div class="slot-label">Largest</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn btn-yellow btn-sm" onclick="checkCapacity()">Check Order!</button>
+        <button class="btn btn-sm" style="background:var(--cream);border:var(--rule);box-shadow:2px 2px 0 var(--ink);" onclick="resetCapacity()">Reset</button>
+      </div>
+      <div class="fb" id="fb-cap"></div>
+    </div>
+
+    <div class="q-panel" id="cap2-panel" style="opacity:.3;pointer-events:none;transition:opacity .4s">
+      <div class="q">💧 BOLT is in the largest container. The jug holds 1 L. The bucket holds 2 L. How much MORE does the bucket hold than the jug?</div>
+      <div class="opts" id="cap2-opts">
+        <button class="opt" onclick="checkCap2(this,'500 mL')">500 mL</button>
+        <button class="opt" onclick="checkCap2(this,'1 L')">1 L</button>
+        <button class="opt" onclick="checkCap2(this,'1.5 L')">1.5 L</button>
+        <button class="opt" onclick="checkCap2(this,'3 L')">3 L</button>
+      </div>
+      <div class="fb" id="fb-cap2"></div>
+    </div>
+
+    <button class="hint-btn" onclick="tog('h5')">💡 Hint</button>
+    <div class="hint-box" id="h5">Think about how much each container can hold. 1 L = 1000 mL. A cup is small, a bucket is huge! For the bonus: 2 L minus 1 L = ?</div>
+
+    <button class="btn btn-red btn-next" id="nx5" onclick="goTo('win')">🤖 Find BOLT!</button>
+  </div>
+</div>
+
+<!-- ══════════ WIN ══════════ -->
+<div class="screen" id="s-win">
+  <div class="comic-burst" style="background:var(--red);">
+    <span style="font-family:'Bangers',cursive;font-size:1rem;letter-spacing:2px;color:#fff;">⚡ CASE CLOSED! ⚡</span>
+  </div>
+  <span class="win-burst">🤖</span>
+  <div class="win-title">BOLT FOUND!</div>
+  <div class="win-panel">
+    Maya followed every clue and found <strong>BOLT hiding in the big bucket</strong> in the science lab! 🪣<br><br>
+    BOLT had just been trying to <strong>learn maths by itself</strong> overnight — it had been practising division in the library, arrays in the canteen, measuring the oval, drawing shapes in the art room, and testing containers in the lab!<br><br>
+    Bolt won <strong>FIRST PLACE</strong> at the science fair. 🥇🎉
+  </div>
+  <div class="skills-strip">
+    <span class="skill-tag">➗ Division</span>
+    <span class="skill-tag">✖️ Arrays</span>
+    <span class="skill-tag">📐 Perimeter</span>
+    <span class="skill-tag">🪞 Symmetry</span>
+    <span class="skill-tag">💧 Capacity</span>
+  </div>
+  <button class="btn btn-red" onclick="location.reload()">🔄 Play Again!</button>
+</div>
+
+<script>
+// ── NAV & PROGRESS ────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var id = (n === 'win') ? 's-win' : 's-' + n;
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  var num = (n === 'win') ? 5 : (typeof n === 'number' ? n - 1 : 0);
+  document.getElementById('prog').style.width = (num / 5 * 100) + '%';
+  updateLocs(num);
+  if (n === 2) buildArrays();
+  if (n === 'win') celebrate();
+}
+
+function updateLocs(done) {
+  for (var i = 0; i < 5; i++) {
+    var d = document.getElementById('ld' + i);
+    d.className = 'loc-dot';
+    if (i < done) d.classList.add('done');
+    else if (i === done) d.classList.add('active');
+  }
+}
+
+function tog(id) {
+  var el = document.getElementById(id);
+  el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+
+function unlock(id) {
+  var el = document.getElementById(id);
+  el.style.opacity = '1';
+  el.style.pointerEvents = '';
+}
+
+function showNext(id) {
+  document.getElementById(id).style.display = 'inline-block';
+}
+
+// ── GENERIC OPT ──────────────────────────────────
+function pickOpt(el, picked, correct, fbId, okMsg, badMsg, nextId, unlockId) {
+  var opts = el.parentNode.querySelectorAll('.opt');
+  opts.forEach(function(b) { b.disabled = true; });
+  var fb = document.getElementById(fbId);
+  if (picked === correct) {
+    el.className = 'opt opt-ok';
+    fb.textContent = okMsg;
+    fb.className = 'fb ok';
+    if (nextId) showNext(nextId);
+    if (unlockId) setTimeout(function() { unlock(unlockId); }, 500);
+    spawnConf(5);
+  } else {
+    el.className = 'opt opt-bad';
+    fb.textContent = badMsg;
+    fb.className = 'fb bad';
+    setTimeout(function() {
+      el.className = 'opt';
+      opts.forEach(function(b) { b.disabled = false; });
+    }, 900);
+  }
+}
+
+// ── CLUE 1: DIVISION ─────────────────────────────
+function checkDiv() {
+  var val = parseInt(document.getElementById('div-ans').value, 10);
+  var fb = document.getElementById('fb-div1');
+  if (isNaN(val)) { fb.textContent = 'Enter a number!'; fb.className = 'fb bad'; return; }
+  if (val === 5) {
+    fb.textContent = 'POW! 20 ÷ 4 = 5 books per shelf!';
+    fb.className = 'fb ok';
+    document.getElementById('div-ans').disabled = true;
+    spawnConf(4);
+    setTimeout(function() { unlock('div2-panel'); }, 500);
+  } else {
+    fb.textContent = 'Not quite! Try thinking: 4 × ? = 20';
+    fb.className = 'fb bad';
+  }
+}
+
+function checkDiv2() {
+  var val = parseInt(document.getElementById('div-ans2').value, 10);
+  var fb = document.getElementById('fb-div2');
+  if (isNaN(val)) { fb.textContent = 'Enter a number!'; fb.className = 'fb bad'; return; }
+  if (val === 6) {
+    fb.textContent = 'ZAP! 30 ÷ 5 = 6 pencils per cup!';
+    fb.className = 'fb ok';
+    document.getElementById('div-ans2').disabled = true;
+    spawnConf(4);
+    setTimeout(function() { unlock('div3-panel'); }, 500);
+  } else {
+    fb.textContent = 'Not quite! 5 × ? = 30?';
+    fb.className = 'fb bad';
+  }
+}
+
+function checkDiv3(el, picked) {
+  pickOpt(el, picked, '6', 'fb-div3',
+    'BOOM! 18 ÷ 3 = 6 sticky notes each!',
+    'Nope! Try: 3 × ? = 18',
+    'nx1', null);
+}
+
+// ── CLUE 2: ARRAYS ───────────────────────────────
+function buildArrays() {
+  buildArr('arr1', 3, 7, '🍱');
+  buildArr('arr2', 4, 6, '🧃');
+}
+
+function buildArr(id, rows, cols, icon) {
+  var grid = document.getElementById(id);
+  if (!grid) return;
+  grid.innerHTML = '';
+  var delay = 0;
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < cols; c++) {
+      (function(d) {
+        var cell = document.createElement('div');
+        cell.className = 'arr-cell';
+        cell.textContent = icon;
+        grid.appendChild(cell);
+        setTimeout(function() { cell.classList.add('show'); }, d);
+      })(delay);
+      delay += 55;
+    }
+  }
+}
+
+function checkArr1() {
+  var val = parseInt(document.getElementById('arr-ans1').value, 10);
+  var fb = document.getElementById('fb-arr1');
+  if (isNaN(val)) { fb.textContent = 'Enter a number!'; fb.className = 'fb bad'; return; }
+  if (val === 21) {
+    fb.textContent = 'WHAM! 3 x 7 = 21 trays!';
+    fb.className = 'fb ok';
+    document.getElementById('arr-ans1').disabled = true;
+    spawnConf(5);
+    setTimeout(function() { unlock('arr2-panel'); }, 500);
+  } else {
+    fb.textContent = 'Count the trays again! 3 rows of 7...';
+    fb.className = 'fb bad';
+  }
+}
+
+function checkArr2(el, picked) {
+  pickOpt(el, picked, '24', 'fb-arr2',
+    'KAPOW! 4 x 6 = 24 bottles!',
+    'Look at the array again! Count the rows.',
+    'nx2', null);
+}
+
+// ── CLUE 3: PERIMETER ────────────────────────────
+function checkPer1() {
+  var val = parseInt(document.getElementById('per-ans1').value, 10);
+  var fb = document.getElementById('fb-per1');
+  if (isNaN(val)) { fb.textContent = 'Enter a number!'; fb.className = 'fb bad'; return; }
+  if (val === 26) {
+    fb.textContent = 'ZING! 8+8+5+5 = 26 metres!';
+    fb.className = 'fb ok';
+    document.getElementById('per-ans1').disabled = true;
+    spawnConf(4);
+    setTimeout(function() { unlock('per2-panel'); }, 500);
+  } else {
+    fb.textContent = 'Add all 4 sides: 8 + 8 + 5 + 5 = ?';
+    fb.className = 'fb bad';
+  }
+}
+
+function checkPer2(el, picked) {
+  pickOpt(el, picked, '20', 'fb-per2',
+    'BIFF! 7+7+6 = 20 metres!',
+    'Add all 3 sides! 7 + 7 + 6 = ?',
+    'nx3', null);
+}
+
+// ── CLUE 4: SYMMETRY ─────────────────────────────
+var symCorrect = 0;
+var symTotal   = 4; // circle, square, triangle, rectangle
+var symDone    = false;
+
+function pickSym(card) {
+  if (symDone || card.classList.contains('sym-ok') || card.classList.contains('sym-rev')) return;
+  var hasSym = card.getAttribute('data-sym') === 'yes';
+  var fb = document.getElementById('fb-sym');
+  var scoreEl = document.getElementById('sym-score');
+
+  if (hasSym) {
+    card.classList.add('sym-ok');
+    symCorrect++;
+    scoreEl.textContent = symCorrect + ' of ' + symTotal + ' correct shapes found!';
+    spawnConf(3);
+    if (symCorrect === symTotal) {
+      // auto-mark the wrong ones
+      document.querySelectorAll('.sym-card').forEach(function(c) {
+        if (c.getAttribute('data-sym') === 'no') c.classList.add('sym-rev');
+      });
+      fb.textContent = 'POW! All 4 symmetrical shapes found!';
+      fb.className = 'fb ok';
+      symDone = true;
+      showNext('nx4');
+      spawnConf(8);
+    } else {
+      fb.textContent = 'Yes! That one has symmetry. Keep going!';
+      fb.className = 'fb ok';
+    }
+  } else {
+    card.classList.add('sym-bad');
+    fb.textContent = 'That shape has no line of symmetry. Try again!';
+    fb.className = 'fb bad';
+    setTimeout(function() { card.classList.remove('sym-bad'); }, 900);
+  }
+}
+
+// ── CLUE 5: CAPACITY DRAG ────────────────────────
+var dragSrc = null;
+var CORRECT_ORDER = ['c-cup', 'c-bottle', 'c-jug', 'c-bucket']; // 250,500,1000,2000 mL
+var slotContents  = [null, null, null, null];
+
+function dragStart(e, id) {
+  dragSrc = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text', id);
+  document.getElementById(id).classList.add('dragging');
+}
+
+function dragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function dragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function drop(e, slotId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!dragSrc) return;
+  var slotIdx = parseInt(slotId.replace('slot-', ''), 10);
+  // If slot already has something, swap back to pool
+  if (slotContents[slotIdx]) {
+    var prev = slotContents[slotIdx];
+    document.getElementById('container-pool').appendChild(document.getElementById(prev));
+    document.getElementById(prev).classList.remove('dragging');
+  }
+  // Move card into slot
+  var card = document.getElementById(dragSrc);
+  card.classList.remove('dragging');
+  // Remove from any slot it was in
+  slotContents.forEach(function(s, i) {
+    if (s === dragSrc) slotContents[i] = null;
+  });
+  slotContents[slotIdx] = dragSrc;
+  var slot = document.getElementById(slotId);
+  slot.innerHTML = '';
+  slot.appendChild(card);
+  // Re-add slot labels
+  if (slotIdx === 0) { var lb = document.createElement('div'); lb.className = 'slot-label'; lb.textContent = 'Smallest'; slot.appendChild(lb); }
+  if (slotIdx === 3) { var lb2 = document.createElement('div'); lb2.className = 'slot-label'; lb2.textContent = 'Largest'; slot.appendChild(lb2); }
+  dragSrc = null;
+}
+
+// Touch support
+var touchCard = null;
+var touchClone = null;
+
+function touchStart(e, id) {
+  touchCard = id;
+  var el = document.getElementById(id);
+  var rect = el.getBoundingClientRect();
+  touchClone = el.cloneNode(true);
+  touchClone.style.cssText = 'position:fixed;top:' + rect.top + 'px;left:' + rect.left + 'px;width:' + rect.width + 'px;opacity:.8;z-index:999;pointer-events:none;';
+  document.body.appendChild(touchClone);
+  document.addEventListener('touchmove', touchMove, { passive: false });
+  document.addEventListener('touchend', touchEnd);
+}
+
+function touchMove(e) {
+  e.preventDefault();
+  var t = e.touches[0];
+  if (touchClone) {
+    touchClone.style.top = (t.clientY - 55) + 'px';
+    touchClone.style.left = (t.clientX - 50) + 'px';
+  }
+}
+
+function touchEnd(e) {
+  document.removeEventListener('touchmove', touchMove);
+  document.removeEventListener('touchend', touchEnd);
+  if (!touchClone) return;
+  var t = e.changedTouches[0];
+  if (touchClone && touchClone.parentNode) touchClone.parentNode.removeChild(touchClone);
+  touchClone = null;
+  // find which slot is under touch
+  var slots = document.querySelectorAll('.order-slot');
+  for (var i = 0; i < slots.length; i++) {
+    var rect = slots[i].getBoundingClientRect();
+    if (t.clientX >= rect.left && t.clientX <= rect.right &&
+        t.clientY >= rect.top  && t.clientY <= rect.bottom) {
+      // Simulate drop
+      dragSrc = touchCard;
+      drop({ preventDefault: function(){}, currentTarget: slots[i] }, 'slot-' + i);
+      break;
+    }
+  }
+  touchCard = null;
+}
+
+function checkCapacity() {
+  var allFilled = slotContents.every(function(s) { return s !== null; });
+  var fb = document.getElementById('fb-cap');
+  if (!allFilled) {
+    fb.textContent = 'Fill all 4 slots first!';
+    fb.className = 'fb bad';
+    return;
+  }
+  var correct = true;
+  for (var i = 0; i < 4; i++) {
+    if (slotContents[i] !== CORRECT_ORDER[i]) { correct = false; break; }
+  }
+  if (correct) {
+    fb.textContent = 'SMASH! Cup, Bottle, Jug, Bucket — perfectly ordered!';
+    fb.className = 'fb ok';
+    spawnConf(8);
+    setTimeout(function() { unlock('cap2-panel'); }, 600);
+  } else {
+    fb.textContent = 'Not quite! Think about which holds the most water.';
+    fb.className = 'fb bad';
+  }
+}
+
+function resetCapacity() {
+  var pool = document.getElementById('container-pool');
+  ['c-cup','c-bottle','c-jug','c-bucket'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.classList.remove('dragging');
+    pool.appendChild(el);
+  });
+  for (var i = 0; i < 4; i++) {
+    var slot = document.getElementById('slot-' + i);
+    slot.innerHTML = i === 0 ? '1st<div class="slot-label">Smallest</div>' :
+                     i === 3 ? '4th<div class="slot-label">Largest</div>' :
+                     (i + 1) + 'nd';
+    // Fix ordinals
+    if (i === 1) slot.textContent = '2nd';
+    if (i === 2) slot.textContent = '3rd';
+    slotContents[i] = null;
+  }
+  // Re-add slot labels properly
+  var s0 = document.getElementById('slot-0');
+  s0.innerHTML = '1st';
+  var lb = document.createElement('div'); lb.className = 'slot-label'; lb.textContent = 'Smallest';
+  s0.appendChild(lb);
+  var s3 = document.getElementById('slot-3');
+  s3.innerHTML = '4th';
+  var lb2 = document.createElement('div'); lb2.className = 'slot-label'; lb2.textContent = 'Largest';
+  s3.appendChild(lb2);
+  document.getElementById('fb-cap').textContent = '';
+  document.getElementById('fb-cap').className = 'fb';
+}
+
+function checkCap2(el, picked) {
+  pickOpt(el, picked, '1 L', 'fb-cap2',
+    'KAPOW! 2L - 1L = 1 litre more! BOLT is found!',
+    'Try again: 2 L minus 1 L = ?',
+    'nx5', null);
+}
+
+// ── CONFETTI ──────────────────────────────────────
+function spawnConf(n) {
+  var cols = ['#ffe135','#e63329','#1a5fa8','#2a9d3f','#f4831f','#fff','#ff69b4'];
+  for (var i = 0; i < n; i++) {
+    (function() {
+      var p = document.createElement('div');
+      p.className = 'conf';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.width  = (8 + Math.random() * 8) + 'px';
+      p.style.height = (8 + Math.random() * 12) + 'px';
+      p.style.background = cols[Math.floor(Math.random() * cols.length)];
+      p.style.setProperty('--cd', (1.3 + Math.random() * 1.2) + 's');
+      p.style.setProperty('--cdel', (Math.random() * 0.6) + 's');
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      p.style.border = '2px solid var(--ink)';
+      document.body.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 2800);
+    })();
+  }
+}
+
+function celebrate() {
+  for (var i = 0; i < 7; i++) {
+    (function(d) { setTimeout(function() { spawnConf(16); }, d); })(i * 220);
+  }
+}
+
+// ── INIT ──────────────────────────────────────────
+updateLocs(0);
+</script>
+</body>
+</html>
